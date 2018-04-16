@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jgit.annotations.NonNull;
@@ -152,15 +153,15 @@ public class RefDirectory extends RefDatabase {
 
 	private final FileRepository parent;
 
-	private final File gitDir;
+	private final Path gitDir;
 
-	final File refsDir;
+	final Path refsDir;
 
-	final File packedRefsFile;
+	final Path packedRefsFile;
 
-	final File logsDir;
+	final Path logsDir;
 
-	final File logsRefsDir;
+	final Path logsRefsDir;
 
 	/**
 	 * Immutable sorted list of loose references.
@@ -212,11 +213,11 @@ public class RefDirectory extends RefDatabase {
 	RefDirectory(final FileRepository db) {
 		final FS fs = db.getFS();
 		parent = db;
-		gitDir = db.getDirectory();
-		refsDir = fs.resolve(gitDir.toPath(), R_REFS).toFile();
-		logsDir = fs.resolve(gitDir.toPath(), LOGS).toFile();
-		logsRefsDir = fs.resolve(gitDir.toPath(), LOGS + '/' + R_REFS).toFile();
-		packedRefsFile = fs.resolve(gitDir.toPath(), PACKED_REFS).toFile();
+		gitDir = db.getDirectory().toPath();
+		refsDir = fs.resolve(gitDir, R_REFS);
+		logsDir = fs.resolve(gitDir, LOGS);
+		logsRefsDir = fs.resolve(gitDir, LOGS + '/' + R_REFS);
+		packedRefsFile = fs.resolve(gitDir, PACKED_REFS);
 
 		looseRefs.set(RefList.<LooseRef> emptyList());
 		packedRefs.set(NO_PACKED_REFS);
@@ -238,20 +239,20 @@ public class RefDirectory extends RefDatabase {
 	 *            directory (so typically starts with refs/).
 	 * @return the log file location.
 	 */
-	public File logFor(String name) {
+	public Path logFor(String name) {
 		if (name.startsWith(R_REFS)) {
 			name = name.substring(R_REFS.length());
-			return new File(logsRefsDir, name);
+			return logsRefsDir.resolve(name);
 		}
-		return new File(logsDir, name);
+		return logsDir.resolve(name);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void create() throws IOException {
-		FileUtils.mkdir(refsDir);
-		FileUtils.mkdir(new File(refsDir, R_HEADS.substring(R_REFS.length())));
-		FileUtils.mkdir(new File(refsDir, R_TAGS.substring(R_REFS.length())));
+		Files.createDirectory(refsDir);
+		Files.createDirectory(refsDir.resolve(R_HEADS.substring(R_REFS.length())));
+		Files.createDirectory(refsDir.resolve(R_TAGS.substring(R_REFS.length())));
 		newLogWriter(false).create();
 	}
 
@@ -450,7 +451,7 @@ public class RefDirectory extends RefDatabase {
 
 			} else if (prefix.startsWith(R_REFS) && prefix.endsWith("/")) { //$NON-NLS-1$
 				curIdx = -(curLoose.find(prefix) + 1);
-				File dir = new File(refsDir, prefix.substring(R_REFS.length()));
+				Path dir = refsDir.resolve(prefix.substring(R_REFS.length()));
 				scanTree(prefix, dir);
 
 				// Skip over entries still within the prefix; these have
@@ -472,25 +473,36 @@ public class RefDirectory extends RefDatabase {
 			}
 		}
 
-		private boolean scanTree(String prefix, File dir) {
-			final String[] entries = dir.list(LockFile.FILTER);
-			if (entries == null) // not a directory or an I/O error
+		private boolean scanTree(String prefix, Path dir) {
+			String[] entries;
+			try {
+				entries = Files.list(dir)
+						.filter((path) -> LockFile.FILTER.accept(null, path.getFileName().toString()))
+						.map((path) -> path.getFileName().toString())
+						.toArray(String[]::new);
+			} catch (IOException ex) {
 				return false;
-			if (0 < entries.length) {
-				for (int i = 0; i < entries.length; ++i) {
-					String e = entries[i];
-					File f = new File(dir, e);
-					if (f.isDirectory())
-						entries[i] += '/';
-				}
-				Arrays.sort(entries);
-				for (String name : entries) {
-					if (name.charAt(name.length() - 1) == '/')
-						scanTree(prefix + name, new File(dir, name));
-					else
-						scanOne(prefix + name);
-				}
 			}
+
+			if (entries.length == 0) {
+				return true;
+			}
+
+			for (int i = 0; i < entries.length; ++i) {
+				String e = entries[i];
+				Path f = dir.resolve(e);
+				if (Files.isDirectory(f))
+					entries[i] += '/';
+			}
+
+			Arrays.sort(entries);
+			for (String name : entries) {
+				if (name.charAt(name.length() - 1) == '/')
+					scanTree(prefix + name, dir.resolve(name));
+				else
+					scanOne(prefix + name);
+			}
+
 			return true;
 		}
 
@@ -778,15 +790,15 @@ public class RefDirectory extends RefDatabase {
 				// Now delete the loose refs which are now packed
 				for (String refName : refs) {
 					// Lock the loose ref
-					File refFile = fileFor(refName);
-					if (!fs.exists(refFile.toPath())) {
+					Path refFile = fileFor(refName);
+					if (!fs.exists(refFile)) {
 						continue;
 					}
 
 					LockFile rLck = heldLocks.get(refName);
 					boolean shouldUnlock;
 					if (rLck == null) {
-						rLck = new LockFile(refFile);
+						rLck = new LockFile(refFile.toFile());
 						if (!rLck.lock()) {
 							continue;
 						}
@@ -835,7 +847,7 @@ public class RefDirectory extends RefDatabase {
 
 	@Nullable
 	LockFile lockPackedRefs() throws IOException {
-		LockFile lck = new LockFile(packedRefsFile);
+		LockFile lck = new LockFile(packedRefsFile.toFile());
 		for (int ms : getRetrySleepMs()) {
 			sleep(ms);
 			if (lck.lock()) {
@@ -848,7 +860,7 @@ public class RefDirectory extends RefDatabase {
 	private LockFile lockPackedRefsOrThrow() throws IOException {
 		LockFile lck = lockPackedRefs();
 		if (lck == null) {
-			throw new LockFailedException(packedRefsFile);
+			throw new LockFailedException(packedRefsFile.toFile());
 		}
 		return lck;
 	}
@@ -924,7 +936,7 @@ public class RefDirectory extends RefDatabase {
 				ConfigConstants.CONFIG_KEY_TRUSTFOLDERSTAT, true);
 
 		final PackedRefList curList = packedRefs.get();
-		if (trustFolderStat && !curList.snapshot.isModified(packedRefsFile.toPath())) {
+		if (trustFolderStat && !curList.snapshot.isModified(packedRefsFile)) {
 			return curList;
 		}
 
@@ -940,10 +952,10 @@ public class RefDirectory extends RefDatabase {
 		int maxStaleRetries = 5;
 		int retries = 0;
 		while (true) {
-			final FileSnapshot snapshot = FileSnapshot.save(packedRefsFile.toPath());
+			final FileSnapshot snapshot = FileSnapshot.save(packedRefsFile);
 			final MessageDigest digest = Constants.newMessageDigest();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(
-					new DigestInputStream(new FileInputStream(packedRefsFile),
+					new DigestInputStream(Files.newInputStream(packedRefsFile),
 							digest),
 					CHARSET))) {
 				try {
@@ -962,8 +974,8 @@ public class RefDirectory extends RefDatabase {
 					}
 					throw e;
 				}
-			} catch (FileNotFoundException noPackedRefs) {
-				if (packedRefsFile.exists()) {
+			} catch (NoSuchFileException noPackedRefs) {
+				if (Files.exists(packedRefsFile)) {
 					throw noPackedRefs;
 				}
 				// Ignore it and leave the new list empty.
@@ -1004,7 +1016,7 @@ public class RefDirectory extends RefDatabase {
 			if (sp < 0) {
 				throw new IOException(MessageFormat.format(
 						JGitText.get().packedRefsCorruptionDetected,
-						packedRefsFile.getAbsolutePath()));
+						packedRefsFile.toAbsolutePath()));
 			}
 			ObjectId id = ObjectId.fromString(p.substring(0, sp));
 			String name = copy(p, sp + 1, p.length());
@@ -1119,25 +1131,25 @@ public class RefDirectory extends RefDatabase {
 	}
 
 	LooseRef scanRef(LooseRef ref, String name) throws IOException {
-		final File path = fileFor(name);
+		final Path path = fileFor(name);
 		FileSnapshot currentSnapshot = null;
 
 		if (ref != null) {
 			currentSnapshot = ref.getSnapShot();
-			if (!currentSnapshot.isModified(path.toPath()))
+			if (!currentSnapshot.isModified(path))
 				return ref;
 			name = ref.getName();
 		}
 
 		final int limit = 4096;
 		final byte[] buf;
-		FileSnapshot otherSnapshot = FileSnapshot.save(path.toPath());
+		FileSnapshot otherSnapshot = FileSnapshot.save(path);
 		try {
-			buf = IO.readSome(path.toPath(), limit);
+			buf = IO.readSome(path, limit);
 		} catch (NoSuchFileException noFile) {
 			return null; // doesn't exist; not a reference.
 		} catch (IOException ex) {
-			if (path.exists() && path.isFile()) {
+			if (Files.exists(path) && Files.isRegularFile(path)) {
 				throw ex;
 			}
 			return null; // not a file file; not a reference.
@@ -1209,7 +1221,7 @@ public class RefDirectory extends RefDatabase {
 	 * @throws IOException
 	 */
 	boolean isInClone() throws IOException {
-		return hasDanglingHead() && !packedRefsFile.exists() && !hasLooseRef();
+		return hasDanglingHead() && !Files.exists(packedRefsFile) && !hasLooseRef();
 	}
 
 	private boolean hasDanglingHead() throws IOException {
@@ -1222,7 +1234,7 @@ public class RefDirectory extends RefDatabase {
 	}
 
 	private boolean hasLooseRef() throws IOException {
-		try (Stream<Path> stream = Files.walk(refsDir.toPath())) {
+		try (Stream<Path> stream = Files.walk(refsDir)) {
 			return stream.anyMatch(Files::isRegularFile);
 		}
 	}
@@ -1243,8 +1255,8 @@ public class RefDirectory extends RefDatabase {
 	 *             a temporary name cannot be allocated.
 	 */
 	RefDirectoryUpdate newTemporaryUpdate() throws IOException {
-		File tmp = File.createTempFile("renamed_", "_ref", refsDir); //$NON-NLS-1$ //$NON-NLS-2$
-		String name = Constants.R_REFS + tmp.getName();
+		Path tmp = Files.createTempFile(refsDir, "renamed_", "_ref"); //$NON-NLS-1$ //$NON-NLS-2$
+		String name = Constants.R_REFS + tmp.getFileName().toString();
 		Ref ref = new ObjectIdRef.Unpeeled(NEW, name, null);
 		return new RefDirectoryUpdate(this, ref);
 	}
@@ -1257,12 +1269,12 @@ public class RefDirectory extends RefDatabase {
 	 *            directory (so typically starts with refs/).
 	 * @return the loose file location.
 	 */
-	File fileFor(String name) {
+	Path fileFor(String name) {
 		if (name.startsWith(R_REFS)) {
 			name = name.substring(R_REFS.length());
-			return new File(refsDir, name);
+			return refsDir.resolve(name);
 		}
-		return new File(gitDir, name);
+		return gitDir.resolve(name);
 	}
 
 	static int levelsIn(final String name) {
@@ -1272,26 +1284,33 @@ public class RefDirectory extends RefDatabase {
 		return count;
 	}
 
-	static void delete(final File file, final int depth) throws IOException {
+	static void delete(final Path file, final int depth) throws IOException {
 		delete(file, depth, null);
 	}
 
-	private static void delete(final File file, final int depth, LockFile rLck)
+	private static void delete(final Path file, final int depth, LockFile rLck)
 			throws IOException {
-		if (!file.delete() && file.isFile()) {
-			throw new IOException(MessageFormat.format(
-					JGitText.get().fileCannotBeDeleted, file));
+		try {
+			Files.delete(file);
+		} catch (IOException ex) {
+			if (Files.isRegularFile(file)) {
+				throw new IOException(MessageFormat.format(
+						JGitText.get().fileCannotBeDeleted, file));
+			}
 		}
 
 		if (rLck != null) {
 			rLck.unlock(); // otherwise cannot delete dir below
 		}
-		File dir = file.getParentFile();
+		Path dir = file.getParent();
 		for (int i = 0; i < depth; ++i) {
-			if (!dir.delete()) {
+			try {
+				Files.delete(dir);
+			} catch (IOException ex) {
 				break; // ignore problem here
 			}
-			dir = dir.getParentFile();
+
+			dir = dir.getParent();
 		}
 	}
 

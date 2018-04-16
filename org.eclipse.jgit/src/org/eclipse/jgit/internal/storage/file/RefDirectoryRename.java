@@ -183,14 +183,14 @@ class RefDirectoryRename extends RefRename {
 			try {
 				refdb.delete(tmp);
 			} catch (IOException err) {
-				FileUtils.delete(refdb.fileFor(tmp.getName()).toPath());
+				FileUtils.delete(refdb.fileFor(tmp.getName()));
 			}
 		}
 	}
 
 	private boolean renameLog(RefUpdate src, RefUpdate dst) {
-		File srcLog = refdb.logFor(src.getName());
-		File dstLog = refdb.logFor(dst.getName());
+		File srcLog = refdb.logFor(src.getName()).toFile();
+		File dstLog = refdb.logFor(dst.getName()).toFile();
 
 		if (!srcLog.exists())
 			return true;
@@ -200,7 +200,7 @@ class RefDirectoryRename extends RefRename {
 
 		try {
 			final int levels = RefDirectory.levelsIn(src.getName()) - 2;
-			RefDirectory.delete(srcLog, levels);
+			RefDirectory.delete(srcLog.toPath(), levels);
 			return true;
 		} catch (IOException e) {
 			rename(dstLog, srcLog);

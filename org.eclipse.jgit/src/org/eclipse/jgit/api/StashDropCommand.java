@@ -220,8 +220,8 @@ public class StashDropCommand extends GitCommand<ObjectId> {
 		RefDirectory refdb = (RefDirectory) repo.getRefDatabase();
 		ReflogWriter writer = new ReflogWriter(refdb, true);
 		String stashLockRef = ReflogWriter.refLockFor(R_STASH);
-		File stashLockFile = refdb.logFor(stashLockRef);
-		File stashFile = refdb.logFor(R_STASH);
+		File stashLockFile = refdb.logFor(stashLockRef).toFile();
+		File stashFile = refdb.logFor(R_STASH).toFile();
 		if (stashLockFile.exists())
 			throw new JGitInternalException(JGitText.get().stashDropFailed,
 					new LockFailedException(stashFile));

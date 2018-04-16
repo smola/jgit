@@ -124,10 +124,10 @@ public class ReflogWriter {
 	 * @return this writer.
 	 */
 	public ReflogWriter create() throws IOException {
-		FileUtils.mkdir(refdb.logsDir);
-		FileUtils.mkdir(refdb.logsRefsDir);
+		FileUtils.mkdir(refdb.logsDir.toFile());
+		FileUtils.mkdir(refdb.logsRefsDir.toFile());
 		FileUtils.mkdir(
-				new File(refdb.logsRefsDir, R_HEADS.substring(R_REFS.length())));
+				new File(refdb.logsRefsDir.toFile(), R_HEADS.substring(R_REFS.length())));
 		return this;
 	}
 
@@ -236,7 +236,7 @@ public class ReflogWriter {
 	}
 
 	private ReflogWriter log(String refName, byte[] rec) throws IOException {
-		File log = refdb.logFor(refName);
+		File log = refdb.logFor(refName).toFile();
 		boolean write = forceWrite
 				|| (isLogAllRefUpdates() && shouldAutoCreateLog(refName))
 				|| log.isFile();
