@@ -402,7 +402,7 @@ public class WalkEncryptionTest {
 		 */
 		static void folderDelete(String folder) throws Exception {
 			File path = new File(folder);
-			FileUtils.delete(path,
+			FileUtils.delete(path.toPath(),
 					FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 		}
 
@@ -677,7 +677,7 @@ public class WalkEncryptionTest {
 		 */
 		static void configDelete() throws Exception {
 			File path = new File(JGIT_CONF_FILE);
-			FileUtils.delete(path, FileUtils.SKIP_MISSING);
+			FileUtils.delete(path.toPath(), FileUtils.SKIP_MISSING);
 		}
 
 		/**
@@ -1103,7 +1103,7 @@ public class WalkEncryptionTest {
 
 				File fileDynamic = new File(dirOne, nameDynamic);
 				assertFalse("Not Provided by setup", fileDynamic.exists());
-				FileUtils.createNewFile(fileDynamic);
+				FileUtils.createNewFile(fileDynamic.toPath());
 				textWrite(fileDynamic, nameDynamic);
 				assertTrue("Provided by create", fileDynamic.exists());
 				assertTrue("Need content to encrypt", fileDynamic.length() > 0);

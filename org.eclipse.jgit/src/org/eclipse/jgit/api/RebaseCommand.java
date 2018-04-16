@@ -311,7 +311,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 				if (res != null) {
 					autoStashApply();
 					if (rebaseState.getDir().exists())
-						FileUtils.delete(rebaseState.getDir(),
+						FileUtils.delete(rebaseState.getDir().toPath(),
 								FileUtils.RECURSIVE);
 					return res;
 				}
@@ -338,7 +338,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 				File amendFile = rebaseState.getFile(AMEND);
 				boolean amendExists = amendFile.exists();
 				if (amendExists) {
-					FileUtils.delete(amendFile);
+					FileUtils.delete(amendFile.toPath());
 				}
 				if (newHead == null && !amendExists) {
 					// continueRebase() returns null only if no commit was
@@ -690,7 +690,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 		for (String current : currentCommits.split("\n")) //$NON-NLS-1$
 			RebaseState
 					.createFile(rebaseState.getRewrittenDir(), current, head);
-		FileUtils.delete(currentCommitFile);
+		FileUtils.delete(currentCommitFile.toPath());
 	}
 
 	private RebaseResult finishRebase(RevCommit finalHead,
@@ -699,7 +699,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 		updateHead(headName, finalHead, upstreamCommit);
 		boolean stashConflicts = autoStashApply();
 		getRepository().autoGC(monitor);
-		FileUtils.delete(rebaseState.getDir(), FileUtils.RECURSIVE);
+		FileUtils.delete(rebaseState.getDir().toPath(), FileUtils.RECURSIVE);
 		if (stashConflicts)
 			return RebaseResult.STASH_APPLY_CONFLICTS_RESULT;
 		if (lastStepIsForward || finalHead == null)
@@ -938,8 +938,8 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 				List<String> fileList = dco.getToBeDeleted();
 				for (String filePath : fileList) {
 					File fileToDelete = new File(repo.getWorkTree(), filePath);
-					if (repo.getFS().exists(fileToDelete))
-						FileUtils.delete(fileToDelete, FileUtils.RECURSIVE
+					if (repo.getFS().exists(fileToDelete.toPath()))
+						FileUtils.delete(fileToDelete.toPath(), FileUtils.RECURSIVE
 								| FileUtils.RETRY);
 				}
 			}
@@ -1151,7 +1151,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 			checkoutOk = checkoutCommit(headName, upstreamCommit);
 		} finally {
 			if (!checkoutOk)
-				FileUtils.delete(rebaseState.getDir(), FileUtils.RECURSIVE);
+				FileUtils.delete(rebaseState.getDir().toPath(), FileUtils.RECURSIVE);
 		}
 		monitor.endTask();
 
@@ -1389,7 +1389,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 			}
 			boolean stashConflicts = autoStashApply();
 			// cleanup the files
-			FileUtils.delete(rebaseState.getDir(), FileUtils.RECURSIVE);
+			FileUtils.delete(rebaseState.getDir().toPath(), FileUtils.RECURSIVE);
 			repo.writeCherryPickHead(null);
 			repo.writeMergeHeads(null);
 			if (stashConflicts)

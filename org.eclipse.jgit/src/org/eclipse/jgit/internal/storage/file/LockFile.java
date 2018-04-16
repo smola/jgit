@@ -92,7 +92,7 @@ public class LockFile {
 		final File lockFile = getLockFile(file);
 		final int flags = FileUtils.RETRY | FileUtils.SKIP_MISSING;
 		try {
-			FileUtils.delete(lockFile, flags);
+			FileUtils.delete(lockFile.toPath(), flags);
 		} catch (IOException ignored) {
 			// Ignore and return whether lock file still exists
 		}
@@ -153,7 +153,7 @@ public class LockFile {
 	 */
 	public boolean lock() throws IOException {
 		FileUtils.mkdirs(lck.getParentFile(), true);
-		if (FS.DETECTED.createNewFile(lck)) {
+		if (FS.DETECTED.createNewFile(lck.toPath())) {
 			haveLck = true;
 			try {
 				os = new FileOutputStream(lck);
@@ -497,7 +497,7 @@ public class LockFile {
 		if (haveLck) {
 			haveLck = false;
 			try {
-				FileUtils.delete(lck, FileUtils.RETRY);
+				FileUtils.delete(lck.toPath(), FileUtils.RETRY);
 			} catch (IOException e) {
 				// couldn't delete the file even after retry.
 			}

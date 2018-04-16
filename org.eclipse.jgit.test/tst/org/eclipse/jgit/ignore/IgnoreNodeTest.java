@@ -563,7 +563,7 @@ public class IgnoreNodeTest extends RepositoryTestCase {
 		assertEntry(F, tracked, ".gitignore");
 		assertEntry(F, tracked, "out");
 
-		FileUtils.delete(new File(trash, "out"));
+		FileUtils.delete(new File(trash, "out").toPath());
 		writeTrashFile("out/foo", "");
 
 		beginWalk();

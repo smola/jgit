@@ -119,7 +119,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 		try (Git git = new Git(db)) {
 			// create first file
 			File file = new File(db.getWorkTree(), "a.txt");
-			FileUtils.createNewFile(file);
+			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content1");
 			}
@@ -130,7 +130,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 
 			// create second file
 			file = new File(db.getWorkTree(), "b.txt");
-			FileUtils.createNewFile(file);
+			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content2");
 			}
@@ -230,7 +230,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 	public void testAddUnstagedChanges() throws IOException,
 			JGitInternalException, GitAPIException {
 		File file = new File(db.getWorkTree(), "a.txt");
-		FileUtils.createNewFile(file);
+		FileUtils.createNewFile(file.toPath());
 		try (PrintWriter writer = new PrintWriter(file)) {
 			writer.print("content");
 		}
@@ -264,7 +264,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 		try (Git git = new Git(db)) {
 			// create file
 			File file = new File(db.getWorkTree(), "a.txt");
-			FileUtils.createNewFile(file);
+			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content1");
 			}
@@ -275,12 +275,12 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 
 			// pure mode change should be committable
 			FS fs = db.getFS();
-			fs.setExecute(file, true);
+			fs.setExecute(file.toPath(), true);
 			git.add().addFilepattern("a.txt").call();
 			git.commit().setMessage("mode change").setCommitter(committer).call();
 
 			// pure mode change should be committable with -o option
-			fs.setExecute(file, false);
+			fs.setExecute(file.toPath(), false);
 			git.add().addFilepattern("a.txt").call();
 			git.commit().setMessage("mode change").setCommitter(committer)
 					.setOnly("a.txt").call();

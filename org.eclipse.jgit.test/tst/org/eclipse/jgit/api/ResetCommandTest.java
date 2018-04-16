@@ -98,7 +98,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		File dir = new File(db.getWorkTree(), "dir");
 		FileUtils.mkdir(dir);
 		File nestedFile = new File(dir, "b.txt");
-		FileUtils.createNewFile(nestedFile);
+		FileUtils.createNewFile(nestedFile.toPath());
 
 		try (PrintWriter nestedFileWriter = new PrintWriter(nestedFile)) {
 			nestedFileWriter.print("content");
@@ -106,7 +106,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 
 			// create file
 			indexFile = new File(db.getWorkTree(), "a.txt");
-			FileUtils.createNewFile(indexFile);
+			FileUtils.createNewFile(indexFile.toPath());
 			try (PrintWriter writer = new PrintWriter(indexFile)) {
 				writer.print("content");
 				writer.flush();
@@ -129,7 +129,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		// create a file not added to the index
 		untrackedFile = new File(db.getWorkTree(),
 				"notAddedToIndex.txt");
-		FileUtils.createNewFile(untrackedFile);
+		FileUtils.createNewFile(untrackedFile.toPath());
 		try (PrintWriter writer2 = new PrintWriter(untrackedFile)) {
 			writer2.print("content");
 		}
@@ -198,7 +198,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		setupRepository();
 		writeTrashFile("d/c.txt", "x");
 		git.add().addFilepattern("d/c.txt").call();
-		FileUtils.delete(new File(db.getWorkTree(), "d"), FileUtils.RECURSIVE);
+		FileUtils.delete(new File(db.getWorkTree(), "d").toPath(), FileUtils.RECURSIVE);
 		writeTrashFile("d", "y");
 
 		git.reset().setMode(ResetType.HARD).setRef(Constants.HEAD)

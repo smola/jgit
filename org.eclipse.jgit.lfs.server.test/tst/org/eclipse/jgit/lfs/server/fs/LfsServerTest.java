@@ -145,7 +145,7 @@ public abstract class LfsServerTest {
 	@After
 	public void tearDown() throws Exception {
 		server.tearDown();
-		FileUtils.delete(tmp.toFile(), FileUtils.RECURSIVE | FileUtils.RETRY);
+		FileUtils.delete(tmp, FileUtils.RECURSIVE | FileUtils.RETRY);
 	}
 
 	protected AnyLongObjectId putContent(String s)

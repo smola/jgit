@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.Constants;
@@ -134,14 +135,14 @@ public class FileUtils {
 	 * Delete file or empty folder
 	 *
 	 * @param f
-	 *            {@code File} to be deleted
+	 *            {@code Path} to be deleted
 	 * @throws java.io.IOException
 	 *             if deletion of {@code f} fails. This may occur if {@code f}
 	 *             didn't exist when the method was called. This can therefore
 	 *             cause java.io.IOExceptions during race conditions when
 	 *             multiple concurrent threads all try to delete the same file.
 	 */
-	public static void delete(final File f) throws IOException {
+	public static void delete(final Path f) throws IOException {
 		delete(f, NONE);
 	}
 
@@ -162,46 +163,51 @@ public class FileUtils {
 	 *             multiple concurrent threads all try to delete the same file.
 	 *             This exception is not thrown when IGNORE_ERRORS is set.
 	 */
-	public static void delete(final File f, int options) throws IOException {
+	public static void delete(final Path f, int options) throws IOException {
 		FS fs = FS.DETECTED;
 		if ((options & SKIP_MISSING) != 0 && !fs.exists(f))
 			return;
 
 		if ((options & RECURSIVE) != 0 && fs.isDirectory(f)) {
-			final File[] items = f.listFiles();
-			if (items != null) {
-				List<File> files = new ArrayList<>();
-				List<File> dirs = new ArrayList<>();
-				for (File c : items)
-					if (c.isFile())
-						files.add(c);
-					else
-						dirs.add(c);
-				// Try to delete files first, otherwise options
-				// EMPTY_DIRECTORIES_ONLY|RECURSIVE will delete empty
-				// directories before aborting, depending on order.
-				for (File file : files)
-					delete(file, options);
-				for (File d : dirs)
-					delete(d, options);
-			}
+			final List<Path> items = Files.list(f).collect(Collectors.toList());
+			List<Path> files = new ArrayList<>();
+			List<Path> dirs = new ArrayList<>();
+			for (Path c : items)
+				if (Files.isRegularFile(c))
+					files.add(c);
+				else
+					dirs.add(c);
+			// Try to delete files first, otherwise options
+			// EMPTY_DIRECTORIES_ONLY|RECURSIVE will delete empty
+			// directories before aborting, depending on order.
+			for (Path file : files)
+				delete(file, options);
+			for (Path d : dirs)
+				delete(d, options);
 		}
 
 		boolean delete = false;
 		if ((options & EMPTY_DIRECTORIES_ONLY) != 0) {
-			if (f.isDirectory()) {
+			if (Files.isDirectory(f)) {
 				delete = true;
 			} else {
 				if ((options & IGNORE_ERRORS) == 0)
 					throw new IOException(MessageFormat.format(
 							JGitText.get().deleteFileFailed,
-							f.getAbsolutePath()));
+							f.toAbsolutePath()));
 			}
 		} else {
 			delete = true;
 		}
 
-		if (delete && !f.delete()) {
+		if (delete) {
+			try {
+				Files.delete(f);
+				return;
+			} catch (IOException ex) {
+
+			}
+
 			if ((options & RETRY) != 0 && fs.exists(f)) {
 				for (int i = 1; i < 10; i++) {
 					try {
@@ -209,13 +215,17 @@ public class FileUtils {
 					} catch (InterruptedException e) {
 						// ignore
 					}
-					if (f.delete())
+					try {
+						Files.delete(f);
 						return;
+					} catch (IOException ex) {
+
+					}
 				}
 			}
 			if ((options & IGNORE_ERRORS) == 0)
 				throw new IOException(MessageFormat.format(
-						JGitText.get().deleteFileFailed, f.getAbsolutePath()));
+						JGitText.get().deleteFileFailed, f.toAbsolutePath()));
 		}
 	}
 
@@ -287,7 +297,7 @@ public class FileUtils {
 			} catch (IOException e) {
 				try {
 					if (!dst.delete()) {
-						delete(dst, EMPTY_DIRECTORIES_ONLY | RECURSIVE);
+						delete(dst.toPath(), EMPTY_DIRECTORIES_ONLY | RECURSIVE);
 					}
 					// On *nix there is no try, you do or do not
 					Files.move(toPath(src), toPath(dst), options);
@@ -414,10 +424,13 @@ public class FileUtils {
 	 * @throws java.io.IOException
 	 *             if the named file already exists or if an I/O error occurred
 	 */
-	public static void createNewFile(File f) throws IOException {
-		if (!f.createNewFile())
+	public static void createNewFile(Path f) throws IOException {
+		try {
+			Files.createFile(f);
+		} catch (IOException ex) {
 			throw new IOException(MessageFormat.format(
 					JGitText.get().createNewFileFailed, f));
+		}
 	}
 
 	/**
@@ -431,11 +444,10 @@ public class FileUtils {
 	 * @throws java.io.IOException
 	 * @since 4.2
 	 */
-	public static Path createSymLink(File path, String target)
+	public static Path createSymLink(Path path, String target)
 			throws IOException {
-		Path nioPath = toPath(path);
-		if (Files.exists(nioPath, LinkOption.NOFOLLOW_LINKS)) {
-			BasicFileAttributes attrs = Files.readAttributes(nioPath,
+		if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+			BasicFileAttributes attrs = Files.readAttributes(path,
 					BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			if (attrs.isRegularFile() || attrs.isSymbolicLink()) {
 				delete(path);
@@ -447,7 +459,7 @@ public class FileUtils {
 			target = target.replace('/', '\\');
 		}
 		Path nioTarget = toPath(new File(target));
-		return Files.createSymbolicLink(nioPath, nioTarget);
+		return Files.createSymbolicLink(path, nioTarget);
 	}
 
 	/**
@@ -459,9 +471,8 @@ public class FileUtils {
 	 * @throws java.io.IOException
 	 * @since 3.0
 	 */
-	public static String readSymLink(File path) throws IOException {
-		Path nioPath = toPath(path);
-		Path target = Files.readSymbolicLink(nioPath);
+	public static String readSymLink(Path path) throws IOException {
+		Path target = Files.readSymbolicLink(path);
 		String targetString = target.toString();
 		if (SystemReader.getInstance().isWindows()) {
 			targetString = targetString.replace('\\', '/');
@@ -641,29 +652,30 @@ public class FileUtils {
 	/**
 	 * @param file
 	 * @return {@code true} if the passed file is a symbolic link
+	 * @deprecated Use {@link Files#isSymbolicLink(Path)}
 	 */
-	static boolean isSymlink(File file) {
-		return Files.isSymbolicLink(file.toPath());
+	static boolean isSymlink(Path file) {
+		return Files.isSymbolicLink(file);
 	}
 
 	/**
-	 * @param file
+	 * @param path
 	 * @return lastModified attribute for given file, not following symbolic
 	 *         links
 	 * @throws IOException
 	 */
-	static long lastModified(File file) throws IOException {
-		return Files.getLastModifiedTime(toPath(file), LinkOption.NOFOLLOW_LINKS)
+	static long lastModified(Path path) throws IOException {
+		return Files.getLastModifiedTime(path, LinkOption.NOFOLLOW_LINKS)
 				.toMillis();
 	}
 
 	/**
-	 * @param file
+	 * @param path
 	 * @param time
 	 * @throws IOException
 	 */
-	static void setLastModified(File file, long time) throws IOException {
-		Files.setLastModifiedTime(toPath(file), FileTime.fromMillis(time));
+	static void setLastModified(Path path, long time) throws IOException {
+		Files.setLastModifiedTime(path, FileTime.fromMillis(time));
 	}
 
 	/**
@@ -671,31 +683,32 @@ public class FileUtils {
 	 * @return {@code true} if the given file exists, not following symbolic
 	 *         links
 	 */
-	static boolean exists(File file) {
-		return Files.exists(file.toPath(), LinkOption.NOFOLLOW_LINKS);
+	static boolean exists(Path file) {
+		return Files.exists(file, LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
 	 * @param file
 	 * @return {@code true} if the given file is hidden
 	 * @throws IOException
+	 * @deprecated Use {@link Files#isHidden(Path)}
 	 */
-	static boolean isHidden(File file) throws IOException {
-		return Files.isHidden(toPath(file));
+	static boolean isHidden(Path file) throws IOException {
+		return Files.isHidden(file);
 	}
 
 	/**
 	 * Set a file hidden (on Windows)
 	 *
 	 * @param file
-	 *            a {@link java.io.File} object.
+	 *            a {@link Path} object.
 	 * @param hidden
 	 *            a boolean.
 	 * @throws java.io.IOException
 	 * @since 4.1
 	 */
-	public static void setHidden(File file, boolean hidden) throws IOException {
-		Files.setAttribute(toPath(file), "dos:hidden", Boolean.valueOf(hidden), //$NON-NLS-1$
+	public static void setHidden(Path file, boolean hidden) throws IOException {
+		Files.setAttribute(file, "dos:hidden", Boolean.valueOf(hidden), //$NON-NLS-1$
 				LinkOption.NOFOLLOW_LINKS);
 	}
 
@@ -703,17 +716,16 @@ public class FileUtils {
 	 * Get file length
 	 *
 	 * @param file
-	 *            a {@link java.io.File}.
+	 *            a {@link java.nio.file.Path}.
 	 * @return length of the given file
 	 * @throws java.io.IOException
 	 * @since 4.1
 	 */
-	public static long getLength(File file) throws IOException {
-		Path nioPath = toPath(file);
-		if (Files.isSymbolicLink(nioPath))
-			return Files.readSymbolicLink(nioPath).toString()
+	public static long getLength(Path file) throws IOException {
+		if (Files.isSymbolicLink(file))
+			return Files.readSymbolicLink(file).toString()
 					.getBytes(Constants.CHARSET).length;
-		return Files.size(nioPath);
+		return Files.size(file);
 	}
 
 	/**
@@ -721,8 +733,8 @@ public class FileUtils {
 	 * @return {@code true} if the given file is a directory, not following
 	 *         symbolic links
 	 */
-	static boolean isDirectory(File file) {
-		return Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS);
+	static boolean isDirectory(Path file) {
+		return Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -730,8 +742,8 @@ public class FileUtils {
 	 * @return {@code true} if the given file is a file, not following symbolic
 	 *         links
 	 */
-	static boolean isFile(File file) {
-		return Files.isRegularFile(file.toPath(), LinkOption.NOFOLLOW_LINKS);
+	static boolean isFile(Path file) {
+		return Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -741,12 +753,13 @@ public class FileUtils {
 	 *            a {@link java.io.File} object.
 	 * @return {@code true} if the given file can be executed.
 	 * @since 4.1
+	 * @deprecated Use {@link java.nio.file.Files#isExecutable(Path)}
 	 */
-	public static boolean canExecute(File file) {
+	public static boolean canExecute(Path file) {
 		if (!isFile(file)) {
 			return false;
 		}
-		return Files.isExecutable(file.toPath());
+		return Files.isExecutable(file);
 	}
 
 	/**
@@ -772,7 +785,7 @@ public class FileUtils {
 					readAttributes.creationTime().toMillis(), //
 					readAttributes.lastModifiedTime().toMillis(),
 					readAttributes.isSymbolicLink() ? Constants
-							.encode(readSymLink(file)).length
+							.encode(readSymLink(file.toPath())).length
 							: readAttributes.size());
 			return attributes;
 		} catch (IOException e) {
@@ -826,13 +839,13 @@ public class FileUtils {
 	 *         file
 	 * @since 4.1
 	 */
-	public static File normalize(File file) {
+	public static Path normalize(Path file) {
 		if (SystemReader.getInstance().isMacOS()) {
 			// TODO: Would it be faster to check with isNormalized first
 			// assuming normalized paths are much more common
-			String normalized = Normalizer.normalize(file.getPath(),
+			String normalized = Normalizer.normalize(file.toString(),
 					Normalizer.Form.NFC);
-			return new File(normalized);
+			return java.nio.file.Paths.get(normalized); //FIXME: does not use the right FileSystem
 		}
 		return file;
 	}

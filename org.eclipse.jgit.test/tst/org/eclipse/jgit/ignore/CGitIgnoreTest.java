@@ -105,7 +105,7 @@ public class CGitIgnoreTest extends RepositoryTestCase {
 		ProcessBuilder builder = fs.runInShell("git", new String[] { "ls-files",
 				"--ignored", "--exclude-standard", "-o" });
 		builder.directory(db.getWorkTree());
-		builder.environment().put("HOME", fs.userHome().getAbsolutePath());
+		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder,
 				new ByteArrayInputStream(new byte[0]));
 		String errorOut = toString(result.getStderr());
@@ -123,7 +123,7 @@ public class CGitIgnoreTest extends RepositoryTestCase {
 		ProcessBuilder builder = fs.runInShell("git",
 				new String[] { "ls-files", "--exclude-standard", "-o" });
 		builder.directory(db.getWorkTree());
-		builder.environment().put("HOME", fs.userHome().getAbsolutePath());
+		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder,
 				new ByteArrayInputStream(new byte[0]));
 		String errorOut = toString(result.getStderr());

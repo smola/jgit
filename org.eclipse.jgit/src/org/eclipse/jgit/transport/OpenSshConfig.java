@@ -149,7 +149,7 @@ public class OpenSshConfig implements ConfigRepository {
 	 * @return a caching reader of the user's configuration file.
 	 */
 	public static OpenSshConfig get(FS fs) {
-		File home = fs.userHome();
+		File home = fs.userHome().toFile();
 		if (home == null)
 			home = new File(".").getAbsoluteFile(); //$NON-NLS-1$
 

@@ -190,7 +190,7 @@ public class RepoCommand extends GitCommand<RevCommit> {
 					.setURI(uri).call()) {
 				return readFileFromRepo(git.getRepository(), ref, path);
 			} finally {
-				FileUtils.delete(dir, FileUtils.RECURSIVE);
+				FileUtils.delete(dir.toPath(), FileUtils.RECURSIVE);
 			}
 		}
 

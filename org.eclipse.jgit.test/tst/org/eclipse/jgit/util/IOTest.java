@@ -73,7 +73,7 @@ public class IOTest {
 
 	@After
 	public void tearDown() throws Exception {
-		FileUtils.delete(trash, FileUtils.RECURSIVE | FileUtils.RETRY);
+		FileUtils.delete(trash.toPath(), FileUtils.RECURSIVE | FileUtils.RETRY);
 	}
 
 	@Test

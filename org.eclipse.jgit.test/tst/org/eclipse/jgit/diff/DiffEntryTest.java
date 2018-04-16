@@ -159,7 +159,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 			File file = writeTrashFile("a.txt", "content");
 			git.add().addFilepattern("a.txt").call();
 			RevCommit c1 = git.commit().setMessage("initial commit").call();
-			delete(file);
+			delete(file.toPath());
 			RevCommit c2 = git.commit().setAll(true).setMessage("delete a.txt")
 					.call();
 
@@ -188,7 +188,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 			File tree = new File(new File(db.getWorkTree(), "a"), "b");
 			FileUtils.mkdirs(tree);
 			File file = new File(tree, "c.txt");
-			FileUtils.createNewFile(file);
+			FileUtils.createNewFile(file.toPath());
 			write(file, "content");
 			git.add().addFilepattern("a").call();
 			RevCommit c1 = git.commit().setMessage("initial commit").call();
@@ -220,7 +220,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 			File tree = new File(new File(db.getWorkTree(), "a"), "b");
 			FileUtils.mkdirs(tree);
 			File file = new File(tree, "c.txt");
-			FileUtils.createNewFile(file);
+			FileUtils.createNewFile(file.toPath());
 			write(file, "content");
 			git.add().addFilepattern("a").call();
 			RevCommit c1 = git.commit().setMessage("initial commit").call();

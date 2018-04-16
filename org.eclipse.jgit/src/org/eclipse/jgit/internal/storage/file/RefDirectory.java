@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -212,10 +213,10 @@ public class RefDirectory extends RefDatabase {
 		final FS fs = db.getFS();
 		parent = db;
 		gitDir = db.getDirectory();
-		refsDir = fs.resolve(gitDir, R_REFS);
-		logsDir = fs.resolve(gitDir, LOGS);
-		logsRefsDir = fs.resolve(gitDir, LOGS + '/' + R_REFS);
-		packedRefsFile = fs.resolve(gitDir, PACKED_REFS);
+		refsDir = fs.resolve(gitDir.toPath(), R_REFS).toFile();
+		logsDir = fs.resolve(gitDir.toPath(), LOGS).toFile();
+		logsRefsDir = fs.resolve(gitDir.toPath(), LOGS + '/' + R_REFS).toFile();
+		packedRefsFile = fs.resolve(gitDir.toPath(), PACKED_REFS).toFile();
 
 		looseRefs.set(RefList.<LooseRef> emptyList());
 		packedRefs.set(NO_PACKED_REFS);
@@ -778,7 +779,7 @@ public class RefDirectory extends RefDatabase {
 				for (String refName : refs) {
 					// Lock the loose ref
 					File refFile = fileFor(refName);
-					if (!fs.exists(refFile)) {
+					if (!fs.exists(refFile.toPath())) {
 						continue;
 					}
 
@@ -1132,12 +1133,14 @@ public class RefDirectory extends RefDatabase {
 		final byte[] buf;
 		FileSnapshot otherSnapshot = FileSnapshot.save(path);
 		try {
-			buf = IO.readSome(path, limit);
-		} catch (FileNotFoundException noFile) {
+			buf = IO.readSome(path.toPath(), limit);
+		} catch (NoSuchFileException noFile) {
+			return null; // doesn't exist; not a reference.
+		} catch (IOException ex) {
 			if (path.exists() && path.isFile()) {
-				throw noFile;
+				throw ex;
 			}
-			return null; // doesn't exist or no file; not a reference.
+			return null; // not a file file; not a reference.
 		}
 
 		int n = buf.length;

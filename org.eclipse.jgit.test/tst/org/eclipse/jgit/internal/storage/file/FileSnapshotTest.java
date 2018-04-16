@@ -71,7 +71,7 @@ public class FileSnapshotTest {
 	@Before
 	@After
 	public void tearDown() throws Exception {
-		FileUtils.delete(trash, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
+		FileUtils.delete(trash.toPath(), FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 	}
 
 	private static void waitNextSec(File f) {

@@ -130,17 +130,17 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 		Path path = writeLink(LINK, "f");
 		git.add().addFilepattern(LINK).call();
 		git.commit().setMessage("Added link").call();
-		assertEquals("f", FileUtils.readSymLink(path.toFile()));
+		assertEquals("f", FileUtils.readSymLink(path));
 		assertTrue(path.toFile().exists());
 
 		writeLink(LINK, "link_to_nowhere");
 		assertFalse(path.toFile().exists());
-		assertEquals("link_to_nowhere", FileUtils.readSymLink(path.toFile()));
+		assertEquals("link_to_nowhere", FileUtils.readSymLink(path));
 
 		CheckoutCommand co = git.checkout();
 		co.addPath(LINK).call();
 
-		assertEquals("f", FileUtils.readSymLink(path.toFile()));
+		assertEquals("f", FileUtils.readSymLink(path));
 	}
 
 	@Test
@@ -151,11 +151,11 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 		git.add().addFilepattern(LINK).call();
 		git.commit().setMessage("Added link").call();
 		assertEquals("3", read(path.toFile()));
-		assertEquals(FILE1, FileUtils.readSymLink(path.toFile()));
+		assertEquals(FILE1, FileUtils.readSymLink(path));
 
 		writeLink(LINK, "link_to_nowhere");
 		assertFalse(path.toFile().exists());
-		assertEquals("link_to_nowhere", FileUtils.readSymLink(path.toFile()));
+		assertEquals("link_to_nowhere", FileUtils.readSymLink(path));
 
 		CheckoutCommand co = git.checkout();
 		co.addPath(LINK).call();

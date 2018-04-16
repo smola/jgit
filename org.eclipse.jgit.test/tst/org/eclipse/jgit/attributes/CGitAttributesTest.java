@@ -125,7 +125,7 @@ public class CGitAttributesTest extends RepositoryTestCase {
 		ProcessBuilder builder = fs.runInShell("git",
 				new String[] { "check-attr", "--stdin", "--all" });
 		builder.directory(db.getWorkTree());
-		builder.environment().put("HOME", fs.userHome().getAbsolutePath());
+		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder, new ByteArrayInputStream(
 				input.toString().getBytes(Constants.CHARSET)));
 		String errorOut = toString(result.getStderr());

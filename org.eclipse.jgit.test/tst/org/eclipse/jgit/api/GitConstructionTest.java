@@ -137,10 +137,10 @@ public class GitConstructionTest extends RepositoryTestCase {
 		git.checkout().setName(git.getRepository().resolve("HEAD^").getName())
 				.call();
 		try {
-			FileUtils.delete(workTree, FileUtils.RECURSIVE);
+			FileUtils.delete(workTree.toPath(), FileUtils.RECURSIVE);
 		} catch (IOException e) {
 			git.close();
-			FileUtils.delete(workTree, FileUtils.RECURSIVE);
+			FileUtils.delete(workTree.toPath(), FileUtils.RECURSIVE);
 		}
 	}
 }

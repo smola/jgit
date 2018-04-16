@@ -59,7 +59,7 @@ public class TreeWalkJava7Test extends RepositoryTestCase {
 		FS fs = db.getFS();
 		assertTrue(fs.supportsSymlinks());
 		writeTrashFile("target/data", "targetdata");
-		fs.createSymLink(new File(trash, "link"), "target");
+		fs.createSymLink(new File(trash, "link").toPath(), "target");
 		try (TreeWalk tw = new TreeWalk(db)) {
 			tw.setRecursive(true);
 			tw.addTree(new FileTreeIterator(db));

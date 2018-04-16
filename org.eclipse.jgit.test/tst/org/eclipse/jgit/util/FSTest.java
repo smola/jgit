@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
@@ -64,13 +65,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class FSTest {
-	private File trash;
+	private Path trash;
 
 	@Before
 	public void setUp() throws Exception {
-		trash = File.createTempFile("tmp_", "");
-		trash.delete();
-		assertTrue("mkdir " + trash, trash.mkdir());
+		trash = Files.createTempDirectory("tmp_");
 	}
 
 	@After
@@ -92,8 +91,8 @@ public class FSTest {
 	public void testSymlinkAttributes() throws IOException, InterruptedException {
 		Assume.assumeTrue(FS.DETECTED.supportsSymlinks());
 		FS fs = FS.DETECTED;
-		File link = new File(trash, "ä");
-		File target = new File(trash, "å");
+		Path link = trash.resolve("ä");
+		Path target = trash.resolve("å");
 		fs.createSymLink(link, "å");
 		assertTrue(fs.exists(link));
 		String targetName = fs.readSymLink(link);
@@ -127,8 +126,8 @@ public class FSTest {
 		assumeTrue(fs instanceof FS_POSIX);
 		((FS_POSIX) fs).setUmask(0022);
 
-		File f = new File(trash, "bla");
-		assertTrue(f.createNewFile());
+		Path f = trash.resolve("bla");
+		Files.createFile(f);
 		assertFalse(fs.canExecute(f));
 
 		Set<PosixFilePermission> permissions = readPermissions(f);
@@ -160,9 +159,9 @@ public class FSTest {
 				permissions.contains(PosixFilePermission.OTHERS_EXECUTE));
 	}
 
-	private Set<PosixFilePermission> readPermissions(File f) throws IOException {
+	private Set<PosixFilePermission> readPermissions(Path f) throws IOException {
 		return Files
-				.getFileAttributeView(f.toPath(), PosixFileAttributeView.class)
+				.getFileAttributeView(f, PosixFileAttributeView.class)
 				.readAttributes().permissions();
 	}
 

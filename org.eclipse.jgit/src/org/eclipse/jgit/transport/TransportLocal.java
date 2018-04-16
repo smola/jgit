@@ -122,7 +122,7 @@ class TransportLocal extends Transport implements PackTransport {
 		public Transport open(URIish uri, Repository local, String remoteName)
 				throws NoRemoteRepositoryException {
 			File localPath = local.isBare() ? local.getDirectory() : local.getWorkTree();
-			File path = local.getFS().resolve(localPath, uri.getPath());
+			File path = local.getFS().resolve(localPath.toPath(), uri.getPath()).toFile();
 			// If the reference is to a local file, C Git behavior says
 			// assume this is a bundle, since repositories are directories.
 			if (path.isFile())
@@ -137,7 +137,7 @@ class TransportLocal extends Transport implements PackTransport {
 		@Override
 		public Transport open(URIish uri) throws NotSupportedException,
 				TransportException {
-			File path = FS.DETECTED.resolve(new File("."), uri.getPath()); //$NON-NLS-1$
+			File path = FS.DETECTED.resolve(new File(".").toPath(), uri.getPath()).toFile(); //$NON-NLS-1$
 			// If the reference is to a local file, C Git behavior says
 			// assume this is a bundle, since repositories are directories.
 			if (path.isFile())

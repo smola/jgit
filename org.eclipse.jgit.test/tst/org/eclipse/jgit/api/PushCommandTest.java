@@ -156,7 +156,7 @@ public class PushCommandTest extends RepositoryTestCase {
 			throws IOException {
 		File path = new File(db.getWorkTree() + "/.git/hooks/", name);
 		JGitTestUtil.write(path, data);
-		FS.DETECTED.setExecute(path, true);
+		FS.DETECTED.setExecute(path.toPath(), true);
 		return path;
 	}
 

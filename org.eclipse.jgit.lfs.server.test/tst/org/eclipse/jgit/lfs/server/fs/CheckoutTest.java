@@ -105,7 +105,7 @@ public class CheckoutTest extends LfsServerTest {
 	@After
 	public void cleanup() throws Exception {
 		tdb.getRepository().close();
-		FileUtils.delete(tdb.getRepository().getWorkTree(),
+		FileUtils.delete(tdb.getRepository().getWorkTree().toPath(),
 				FileUtils.RECURSIVE);
 	}
 

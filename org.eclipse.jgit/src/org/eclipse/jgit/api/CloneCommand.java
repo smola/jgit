@@ -689,7 +689,7 @@ public class CloneCommand extends TransportCommand<CloneCommand, Git> {
 		try {
 			if (directory != null) {
 				if (!directoryExistsInitially) {
-					FileUtils.delete(directory, FileUtils.RECURSIVE
+					FileUtils.delete(directory.toPath(), FileUtils.RECURSIVE
 							| FileUtils.SKIP_MISSING | FileUtils.IGNORE_ERRORS);
 				} else {
 					deleteChildren(directory);
@@ -697,7 +697,7 @@ public class CloneCommand extends TransportCommand<CloneCommand, Git> {
 			}
 			if (gitDir != null) {
 				if (!gitDirExistsInitially) {
-					FileUtils.delete(gitDir, FileUtils.RECURSIVE
+					FileUtils.delete(gitDir.toPath(), FileUtils.RECURSIVE
 							| FileUtils.SKIP_MISSING | FileUtils.IGNORE_ERRORS);
 				} else {
 					deleteChildren(directory);
@@ -715,7 +715,7 @@ public class CloneCommand extends TransportCommand<CloneCommand, Git> {
 			return;
 		}
 		for (File child : files) {
-			FileUtils.delete(child, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING
+			FileUtils.delete(child.toPath(), FileUtils.RECURSIVE | FileUtils.SKIP_MISSING
 					| FileUtils.IGNORE_ERRORS);
 		}
 	}

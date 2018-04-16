@@ -43,6 +43,7 @@
 
 package org.eclipse.jgit.internal.storage.file;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jgit.internal.storage.file.GC.RepoStatistics;
@@ -149,10 +150,10 @@ public abstract class GcTestCase extends LocalDiskRepositoryTestCase {
 
 	protected long lastModified(AnyObjectId objectId) throws IOException {
 		return repo.getFS().lastModified(
-				repo.getObjectDatabase().fileFor(objectId));
+				repo.getObjectDatabase().fileFor(objectId).toPath());
 	}
 
 	protected static void fsTick() throws InterruptedException, IOException {
-		RepositoryTestCase.fsTick(null);
+		RepositoryTestCase.fsTick((File)null);
 	}
 }

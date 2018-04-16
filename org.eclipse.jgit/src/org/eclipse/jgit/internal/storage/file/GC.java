@@ -387,7 +387,7 @@ public class GC {
 
 			if (!oldPack.shouldBeKept()
 					&& repo.getFS().lastModified(
-							oldPack.getPackFile()) < packExpireDate) {
+							oldPack.getPackFile().toPath()) < packExpireDate) {
 				oldPack.close();
 				if (shouldLoosen) {
 					loosen(inserter, reader, oldPack, ids);
@@ -421,7 +421,7 @@ public class GC {
 			File oldPackFile = new File(oldPackDir, oldPackName);
 			FileUtils.rename(packFile, oldPackFile);
 		} else {
-			FileUtils.delete(packFile, deleteOptions);
+			FileUtils.delete(packFile.toPath(), deleteOptions);
 		}
 	}
 
@@ -431,7 +431,7 @@ public class GC {
 	private void prunePreserved() {
 		if (pconfig != null && pconfig.isPrunePreserved()) {
 			try {
-				FileUtils.delete(repo.getObjectDatabase().getPreservedDirectory(),
+				FileUtils.delete(repo.getObjectDatabase().getPreservedDirectory().toPath(),
 						FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 			} catch (IOException e) {
 				// Deletion of the preserved pack files failed. Silently return.
@@ -520,7 +520,7 @@ public class GC {
 							}
 						}
 						if (found)
-							FileUtils.delete(objdb.fileFor(id), FileUtils.RETRY
+							FileUtils.delete(objdb.fileFor(id).toPath(), FileUtils.RETRY
 									| FileUtils.SKIP_MISSING
 									| FileUtils.IGNORE_ERRORS);
 					}
@@ -572,7 +572,7 @@ public class GC {
 					String fName = f.getName();
 					if (fName.length() != Constants.OBJECT_ID_STRING_LENGTH - 2)
 						continue;
-					if (repo.getFS().lastModified(f) >= expireDate)
+					if (repo.getFS().lastModified(f.toPath()) >= expireDate)
 						continue;
 					try {
 						ObjectId id = ObjectId.fromString(d + fName);
@@ -685,7 +685,7 @@ public class GC {
 		}
 
 		for (File f : touchedFanout) {
-			FileUtils.delete(f,
+			FileUtils.delete(f.toPath(),
 					FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.IGNORE_ERRORS);
 		}
 

@@ -1057,7 +1057,7 @@ public class MergerTest extends RepositoryTestCase {
 
 		// Create initial content and remember when the last file was written.
 		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig");
-		lastTs4 = FS.DETECTED.lastModified(f);
+		lastTs4 = FS.DETECTED.lastModified(f.toPath());
 
 		// add all files, commit and check this doesn't update any working tree
 		// files and that the index is in a new file system timer tick. Make
@@ -1070,8 +1070,8 @@ public class MergerTest extends RepositoryTestCase {
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("1", "2", "3", "4", "<.git/index");
 		assertEquals("Commit should not touch working tree file 4", lastTs4,
-				FS.DETECTED.lastModified(new File(db.getWorkTree(), "4")));
-		lastTsIndex = FS.DETECTED.lastModified(indexFile);
+				FS.DETECTED.lastModified(new File(db.getWorkTree(), "4").toPath()));
+		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// Do modifications on the master branch. Then add and commit. This
 		// should touch only "0", "2 and "3"
@@ -1085,7 +1085,7 @@ public class MergerTest extends RepositoryTestCase {
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("1", "4", "*" + lastTs4, "<*"
 				+ lastTsIndex, "<0", "2", "3", "<.git/index");
-		lastTsIndex = FS.DETECTED.lastModified(indexFile);
+		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// Checkout a side branch. This should touch only "0", "2 and "3"
 		fsTick(indexFile);
@@ -1094,7 +1094,7 @@ public class MergerTest extends RepositoryTestCase {
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("1", "4", "*" + lastTs4, "<*"
 				+ lastTsIndex, "<0", "2", "3", ".git/index");
-		lastTsIndex = FS.DETECTED.lastModified(indexFile);
+		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// This checkout may have populated worktree and index so fast that we
 		// may have smudged entries now. Check that we have the right content
@@ -1107,13 +1107,13 @@ public class MergerTest extends RepositoryTestCase {
 				indexState(CONTENT));
 		fsTick(indexFile);
 		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig");
-		lastTs4 = FS.DETECTED.lastModified(f);
+		lastTs4 = FS.DETECTED.lastModified(f.toPath());
 		fsTick(f);
 		git.add().addFilepattern(".").call();
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("*" + lastTsIndex, "<0", "1", "2", "3",
 				"4", "<.git/index");
-		lastTsIndex = FS.DETECTED.lastModified(indexFile);
+		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// Do modifications on the side branch. Touch only "1", "2 and "3"
 		fsTick(indexFile);
@@ -1124,7 +1124,7 @@ public class MergerTest extends RepositoryTestCase {
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("0", "4", "*" + lastTs4, "<*"
 				+ lastTsIndex, "<1", "2", "3", "<.git/index");
-		lastTsIndex = FS.DETECTED.lastModified(indexFile);
+		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// merge master and side. Should only touch "0," "2" and "3"
 		fsTick(indexFile);
@@ -1292,7 +1292,7 @@ public class MergerTest extends RepositoryTestCase {
 					"IndexEntry with path "
 							+ path
 							+ " has lastmodified with is different from the worktree file",
-					FS.DETECTED.lastModified(new File(workTree, path)), dc.getEntry(path)
+					FS.DETECTED.lastModified(new File(workTree, path).toPath()), dc.getEntry(path)
 							.getLastModified());
 	}
 
@@ -1310,7 +1310,7 @@ public class MergerTest extends RepositoryTestCase {
 			boolean fixed = p.charAt(strong ? 1 : 0) == '*';
 			p = p.substring((strong ? 1 : 0) + (fixed ? 1 : 0));
 			long curMod = fixed ? Long.valueOf(p).longValue()
-					: FS.DETECTED.lastModified(new File(db.getWorkTree(), p));
+					: FS.DETECTED.lastModified(new File(db.getWorkTree(), p).toPath());
 			if (strong)
 				assertTrue("path " + p + " is not younger than predecesssor",
 						curMod > lastMod);

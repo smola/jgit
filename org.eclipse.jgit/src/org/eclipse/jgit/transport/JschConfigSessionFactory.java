@@ -358,7 +358,7 @@ public abstract class JschConfigSessionFactory extends SshSessionFactory {
 	}
 
 	private static void knownHosts(final JSch sch, FS fs) throws JSchException {
-		final File home = fs.userHome();
+		final File home = fs.userHome().toFile();
 		if (home == null)
 			return;
 		final File known_hosts = new File(new File(home, ".ssh"), "known_hosts"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -372,7 +372,7 @@ public abstract class JschConfigSessionFactory extends SshSessionFactory {
 	}
 
 	private static void identities(final JSch sch, FS fs) {
-		final File home = fs.userHome();
+		final File home = fs.userHome().toFile();
 		if (home == null)
 			return;
 		final File sshdir = new File(home, ".ssh"); //$NON-NLS-1$

@@ -234,7 +234,7 @@ class ObjectDirectoryInserter extends ObjectInserter {
 			return tmp;
 		} finally {
 			if (delete)
-				FileUtils.delete(tmp, FileUtils.RETRY);
+				FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 		}
 	}
 
@@ -263,7 +263,7 @@ class ObjectDirectoryInserter extends ObjectInserter {
 			return tmp;
 		} finally {
 			if (delete)
-				FileUtils.delete(tmp, FileUtils.RETRY);
+				FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 		}
 	}
 

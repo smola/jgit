@@ -88,9 +88,9 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 				});
 		if (path == null)
 			return false;
-		File found = FS.searchPath(path, "cygpath.exe"); //$NON-NLS-1$
+		Path found = FS.searchPath(path, "cygpath.exe"); //$NON-NLS-1$
 		if (found != null)
-			cygpath = found.getPath();
+			cygpath = found.toString();
 		return cygpath != null;
 	}
 
@@ -119,7 +119,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 
 	/** {@inheritDoc} */
 	@Override
-	public File resolve(final File dir, final String pn) {
+	public Path resolve(final Path dir, final String pn) {
 		String useCygPath = System.getProperty("jgit.usecygpath"); //$NON-NLS-1$
 		if (useCygPath != null && useCygPath.equals("true")) { //$NON-NLS-1$
 			String w;
@@ -132,7 +132,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 				return null;
 			}
 			if (!StringUtils.isEmptyOrNull(w)) {
-				return new File(w);
+				return new File(w).toPath();
 			}
 		}
 		return super.resolve(dir, pn);
@@ -140,7 +140,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 
 	/** {@inheritDoc} */
 	@Override
-	protected File userHomeImpl() {
+	protected Path userHomeImpl() {
 		final String home = AccessController
 				.doPrivileged(new PrivilegedAction<String>() {
 					@Override
@@ -150,7 +150,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 				});
 		if (home == null || home.length() == 0)
 			return super.userHomeImpl();
-		return resolve(new File("."), home); //$NON-NLS-1$
+		return java.nio.file.Paths.get("").resolve(home); //$NON-NLS-1$
 	}
 
 	/** {@inheritDoc} */
@@ -185,7 +185,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 
 	/** {@inheritDoc} */
 	@Override
-	public File findHook(Repository repository, String hookName) {
+	public Path findHook(Repository repository, String hookName) {
 		final File gitdir = repository.getDirectory();
 		if (gitdir == null) {
 			return null;
@@ -193,7 +193,7 @@ public class FS_Win32_Cygwin extends FS_Win32 {
 		final Path hookPath = gitdir.toPath().resolve(Constants.HOOKS)
 				.resolve(hookName);
 		if (Files.isExecutable(hookPath))
-			return hookPath.toFile();
+			return hookPath;
 		return null;
 	}
 }

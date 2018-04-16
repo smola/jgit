@@ -81,7 +81,7 @@ public class LongObjectIdTest {
 
 	@AfterClass
 	public static void tearDown() throws IOException {
-		FileUtils.delete(tmp.toFile(), FileUtils.RECURSIVE | FileUtils.RETRY);
+		FileUtils.delete(tmp, FileUtils.RECURSIVE | FileUtils.RETRY);
 	}
 
 	@Test

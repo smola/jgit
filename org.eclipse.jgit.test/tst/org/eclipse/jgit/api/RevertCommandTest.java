@@ -333,7 +333,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 
 			assertNotNull(git.commit().setMessage("commit3").call());
 
-			db.getFS().setExecute(file, false);
+			db.getFS().setExecute(file.toPath(), false);
 			git.getRepository()
 					.getConfig()
 					.setBoolean(ConfigConstants.CONFIG_CORE_SECTION, null,

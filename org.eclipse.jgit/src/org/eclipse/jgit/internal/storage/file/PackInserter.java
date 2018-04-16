@@ -332,12 +332,12 @@ public class PackInserter extends ObjectInserter {
 			}
 			if (rollback && tmpPack != null) {
 				try {
-					FileUtils.delete(tmpPack);
+					FileUtils.delete(tmpPack.toPath());
 				} catch (IOException e) {
 					// Still delete idx.
 				}
 				try {
-					FileUtils.delete(idxFor(tmpPack));
+					FileUtils.delete(idxFor(tmpPack).toPath());
 				} catch (IOException e) {
 					// Ignore error deleting temp idx.
 				}

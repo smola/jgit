@@ -106,10 +106,10 @@ public class GcReflogTest extends GcTestCase {
 		assertEquals(8, stats.numberOfLooseObjects);
 		assertEquals(0, stats.numberOfPackedObjects);
 
-		FileUtils.delete(new File(repo.getDirectory(), "logs/HEAD"),
+		FileUtils.delete(new File(repo.getDirectory(), "logs/HEAD").toPath(),
 				FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		FileUtils.delete(
-				new File(repo.getDirectory(), "logs/refs/heads/master"),
+				new File(repo.getDirectory(), "logs/refs/heads/master").toPath(),
 				FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		gc.gc();
 
@@ -131,10 +131,10 @@ public class GcReflogTest extends GcTestCase {
 		assertEquals(8, stats.numberOfLooseObjects);
 		assertEquals(0, stats.numberOfPackedObjects);
 
-		FileUtils.delete(new File(repo.getDirectory(), "logs/HEAD"),
+		FileUtils.delete(new File(repo.getDirectory(), "logs/HEAD").toPath(),
 				FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		FileUtils.delete(
-				new File(repo.getDirectory(), "logs/refs/heads/master"),
+				new File(repo.getDirectory(), "logs/refs/heads/master").toPath(),
 				FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		gc.setExpireAgeMillis(0);
 		gc.gc();

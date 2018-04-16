@@ -128,37 +128,37 @@ public class RepoCommandSymlinkTest extends RepositoryTestCase {
 				File linkedhello = new File(localDb.getWorkTree(),
 						"LinkedHello");
 				assertTrue("The LinkedHello file should exist",
-						localDb.getFS().exists(linkedhello));
+						localDb.getFS().exists(linkedhello.toPath()));
 				assertTrue("The LinkedHello file should be a symlink",
-						localDb.getFS().isSymLink(linkedhello));
+						localDb.getFS().isSymLink(linkedhello.toPath()));
 				assertEquals("foo/hello.txt",
-						localDb.getFS().readSymLink(linkedhello));
+						localDb.getFS().readSymLink(linkedhello.toPath()));
 
 				// The foo/LinkedHello file should be skipped.
 				File linkedfoohello = new File(localDb.getWorkTree(),
 						"foo/LinkedHello");
 				assertFalse("The foo/LinkedHello file should be skipped",
-						localDb.getFS().exists(linkedfoohello));
+						localDb.getFS().exists(linkedfoohello.toPath()));
 
 				// The subdir/LinkedHello file should use a relative ../
 				File linkedsubdirhello = new File(localDb.getWorkTree(),
 						"subdir/LinkedHello");
 				assertTrue("The subdir/LinkedHello file should exist",
-						localDb.getFS().exists(linkedsubdirhello));
+						localDb.getFS().exists(linkedsubdirhello.toPath()));
 				assertTrue("The subdir/LinkedHello file should be a symlink",
-						localDb.getFS().isSymLink(linkedsubdirhello));
+						localDb.getFS().isSymLink(linkedsubdirhello.toPath()));
 				assertEquals("../foo/hello.txt",
-						localDb.getFS().readSymLink(linkedsubdirhello));
+						localDb.getFS().readSymLink(linkedsubdirhello.toPath()));
 
 				// The bar/foo/LinkedHello file should use a single relative ../
 				File linkedbarfoohello = new File(localDb.getWorkTree(),
 						"bar/foo/LinkedHello");
 				assertTrue("The bar/foo/LinkedHello file should exist",
-						localDb.getFS().exists(linkedbarfoohello));
+						localDb.getFS().exists(linkedbarfoohello.toPath()));
 				assertTrue("The bar/foo/LinkedHello file should be a symlink",
-						localDb.getFS().isSymLink(linkedbarfoohello));
+						localDb.getFS().isSymLink(linkedbarfoohello.toPath()));
 				assertEquals("../baz/hello.txt",
-						localDb.getFS().readSymLink(linkedbarfoohello));
+						localDb.getFS().readSymLink(linkedbarfoohello.toPath()));
 			}
 		}
 	}

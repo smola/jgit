@@ -88,7 +88,7 @@ public class FileSnapshot {
 	public static final FileSnapshot MISSING_FILE = new FileSnapshot(0, 0) {
 		@Override
 		public boolean isModified(File path) {
-			return FS.DETECTED.exists(path);
+			return FS.DETECTED.exists(path.toPath());
 		}
 	};
 
@@ -106,7 +106,7 @@ public class FileSnapshot {
 		long read = System.currentTimeMillis();
 		long modified;
 		try {
-			modified = FS.DETECTED.lastModified(path);
+			modified = FS.DETECTED.lastModified(path.toPath());
 		} catch (IOException e) {
 			modified = path.lastModified();
 		}
@@ -162,7 +162,7 @@ public class FileSnapshot {
 	public boolean isModified(File path) {
 		long currLastModified;
 		try {
-			currLastModified = FS.DETECTED.lastModified(path);
+			currLastModified = FS.DETECTED.lastModified(path.toPath());
 		} catch (IOException e) {
 			currLastModified = path.lastModified();
 		}

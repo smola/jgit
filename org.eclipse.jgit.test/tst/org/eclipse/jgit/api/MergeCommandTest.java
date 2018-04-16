@@ -1649,12 +1649,12 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 	private static void setExecutable(Git git, String path, boolean executable) {
 		FS.DETECTED.setExecute(
-				new File(git.getRepository().getWorkTree(), path), executable);
+				new File(git.getRepository().getWorkTree(), path).toPath(), executable);
 	}
 
 	private static boolean canExecute(Git git, String path) {
 		return FS.DETECTED.canExecute(new File(git.getRepository()
-				.getWorkTree(), path));
+				.getWorkTree(), path).toPath());
 	}
 
 	private static RevCommit addAllAndCommit(final Git git) throws Exception {

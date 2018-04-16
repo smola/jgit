@@ -186,9 +186,9 @@ public class FS_POSIX extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	protected File discoverGitExe() {
+	protected Path discoverGitExe() {
 		String path = SystemReader.getInstance().getenv("PATH"); //$NON-NLS-1$
-		File gitExe = searchPath(path, "git"); //$NON-NLS-1$
+		Path gitExe = searchPath(path, "git"); //$NON-NLS-1$
 
 		if (gitExe == null) {
 			if (SystemReader.getInstance().isMacOS()) {
@@ -206,7 +206,7 @@ public class FS_POSIX extends FS {
 						return null;
 					}
 					if (!StringUtils.isEmptyOrNull(w)) {
-						gitExe = new File(w);
+						gitExe = java.nio.file.Paths.get(w);
 					}
 				}
 			}
@@ -229,20 +229,19 @@ public class FS_POSIX extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean canExecute(File f) {
+	public boolean canExecute(Path f) {
 		return FileUtils.canExecute(f);
 	}
 
-	/** {@inheritDoc} */
+    /** {@inheritDoc} */
 	@Override
-	public boolean setExecute(File f, boolean canExecute) {
-		if (!isFile(f))
+	public boolean setExecute(Path path, boolean canExecute) {
+		if (!isFile(path))
 			return false;
 		if (!canExecute)
-			return f.setExecutable(false, false);
+			return path.toFile().setExecutable(false, false); //TODO
 
 		try {
-			Path path = FileUtils.toPath(f);
 			Set<PosixFilePermission> pset = Files.getPosixFilePermissions(path);
 
 			// owner (user) is always allowed to execute.
@@ -311,19 +310,19 @@ public class FS_POSIX extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public void setHidden(File path, boolean hidden) throws IOException {
+	public void setHidden(Path path, boolean hidden) throws IOException {
 		// no action on POSIX
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public Attributes getAttributes(File path) {
-		return FileUtils.getFileAttributesPosix(this, path);
+	public Attributes getAttributes(Path path) {
+		return FileUtils.getFileAttributesPosix(this, path.toFile());
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public File normalize(File file) {
+	public Path normalize(Path file) {
 		return FileUtils.normalize(file);
 	}
 
@@ -335,7 +334,7 @@ public class FS_POSIX extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public File findHook(Repository repository, String hookName) {
+	public Path findHook(Repository repository, String hookName) {
 		final File gitdir = repository.getDirectory();
 		if (gitdir == null) {
 			return null;
@@ -343,7 +342,7 @@ public class FS_POSIX extends FS {
 		final Path hookPath = gitdir.toPath().resolve(Constants.HOOKS)
 				.resolve(hookName);
 		if (Files.isExecutable(hookPath))
-			return hookPath.toFile();
+			return hookPath;
 		return null;
 	}
 
@@ -375,22 +374,23 @@ public class FS_POSIX extends FS {
 	 * @see https://www.time-travellers.org/shane/papers/NFS_considered_harmful.html
 	 * @since 4.5
 	 */
-	public boolean createNewFile(File lock) throws IOException {
-		if (!lock.createNewFile()) {
+	public boolean createNewFile(Path lock) throws IOException {
+		try {
+			Files.createFile(lock);
+		} catch (IOException ex) {
 			return false;
 		}
 		if (supportsAtomicCreateNewFile() || !supportsUnixNLink) {
 			return true;
 		}
-		Path lockPath = lock.toPath();
-		Path link = Files.createLink(Paths.get(lock.getAbsolutePath() + ".lnk"), //$NON-NLS-1$
-				lockPath);
+		Path link = Files.createLink(Paths.get(lock.toAbsolutePath().toString() + ".lnk"), //$NON-NLS-1$
+				lock);
 		try {
-			Integer nlink = (Integer) (Files.getAttribute(lockPath,
+			Integer nlink = (Integer) (Files.getAttribute(lock,
 					"unix:nlink")); //$NON-NLS-1$
 			if (nlink != 2) {
 				LOG.warn("nlink of link to lock file {0} was not 2 but {1}", //$NON-NLS-1$
-						lock.getPath(), nlink);
+						lock.toString(), nlink);
 				return false;
 			}
 			return true;

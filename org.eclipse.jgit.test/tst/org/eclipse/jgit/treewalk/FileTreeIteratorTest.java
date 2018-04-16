@@ -102,7 +102,7 @@ public class FileTreeIteratorTest extends RepositoryTestCase {
 		for (int i = paths.length - 1; i >= 0; i--) {
 			final String s = paths[i];
 			writeTrashFile(s, s);
-			mtime[i] = FS.DETECTED.lastModified(new File(trash, s));
+			mtime[i] = FS.DETECTED.lastModified(new File(trash, s).toPath());
 		}
 	}
 
@@ -255,7 +255,7 @@ public class FileTreeIteratorTest extends RepositoryTestCase {
 
 		// Verify it was cached by removing the file and getting it again.
 		//
-		FileUtils.delete(new File(trash, paths[0]));
+		FileUtils.delete(new File(trash, paths[0]).toPath());
 		assertEquals(expect, top.getEntryObjectId());
 	}
 
@@ -297,7 +297,7 @@ public class FileTreeIteratorTest extends RepositoryTestCase {
 					.addFilepattern("a0b").call();
 			assertEquals("[a/b, mode:100644][b/c, mode:100644][z, mode:160000]",
 					indexState(0));
-			FileUtils.delete(new File(db.getWorkTree(), "b"),
+			FileUtils.delete(new File(db.getWorkTree(), "b").toPath(),
 					FileUtils.RECURSIVE);
 
 			tw.addTree(new DirCacheIterator(db.readDirCache()));
@@ -667,7 +667,7 @@ public class FileTreeIteratorTest extends RepositoryTestCase {
 		FS fs = db.getFS();
 		// mål = target in swedish, just to get som unicode in here
 		writeTrashFile("mål/data", "targetdata");
-		fs.createSymLink(new File(trash, "länk"), "mål");
+		fs.createSymLink(new File(trash, "länk").toPath(), "mål");
 		FileTreeIterator fti = new FileTreeIterator(db);
 		assertFalse(fti.eof());
 		while (!fti.getEntryPathString().equals("länk")) {
@@ -795,8 +795,8 @@ public class FileTreeIteratorTest extends RepositoryTestCase {
 			git.commit().setMessage("Adding link").call();
 			git.reset().setMode(ResetType.HARD).call();
 
-			FileUtils.delete(new File(trash, "link"), FileUtils.NONE);
-			FS.DETECTED.createSymLink(new File(trash, "link"), "newtarget");
+			FileUtils.delete(new File(trash, "link").toPath(), FileUtils.NONE);
+			FS.DETECTED.createSymLink(new File(trash, "link").toPath(), "newtarget");
 			DirCacheIterator dci = new DirCacheIterator(db.readDirCache());
 			FileTreeIterator fti = new FileTreeIterator(db);
 

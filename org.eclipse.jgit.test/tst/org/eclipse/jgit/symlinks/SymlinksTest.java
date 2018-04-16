@@ -82,7 +82,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			git.commit().setMessage("add files a & b").call();
 			Ref branch_1 = git.branchCreate().setName("branch_1").call();
 			git.rm().addFilepattern("a").call();
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "b");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "b");
 			git.add().addFilepattern("a").call();
 			git.commit().setMessage("add symlink a").call();
 
@@ -111,7 +111,7 @@ public class SymlinksTest extends RepositoryTestCase {
 	public void fileModeTestSymlinkThenFile() throws Exception {
 		try (Git git = new Git(db)) {
 			writeTrashFile("b", "Hello world b");
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "b");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "b");
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("add file b & symlink a").call();
 			Ref branch_1 = git.branchCreate().setName("branch_1").call();
@@ -151,7 +151,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			git.commit().setMessage("add folder a").call();
 			Ref branch_1 = git.branchCreate().setName("branch_1").call();
 			git.rm().addFilepattern("a").call();
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "c");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "c");
 			git.add().addFilepattern("a").call();
 			git.commit().setMessage("add symlink a").call();
 
@@ -180,7 +180,7 @@ public class SymlinksTest extends RepositoryTestCase {
 	public void fileModeTestSymlinkThenFolder() throws Exception {
 		try (Git git = new Git(db)) {
 			writeTrashFile("c", "Hello world c");
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "c");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "c");
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("add symlink a").call();
 			Ref branch_1 = git.branchCreate().setName("branch_1").call();
@@ -219,7 +219,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			git.add().addFilepattern(".").call();
 			RevCommit commit1 = git.commit().setMessage("add file b").call();
 			Ref branch_1 = git.branchCreate().setName("branch_1").call();
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "b");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "b");
 			git.add().addFilepattern("a").call();
 			RevCommit commit2 = git.commit().setMessage("add symlink a").call();
 
@@ -248,7 +248,7 @@ public class SymlinksTest extends RepositoryTestCase {
 		try (Git git = new Git(db);
 				TreeWalk tw = new TreeWalk(db);) {
 			writeTrashFile("b", "Hello world b");
-			FileUtils.createSymLink(new File(db.getWorkTree(), "a"), "b");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "a").toPath(), "b");
 			git.add().addFilepattern(".").call();
 			RevCommit commit1 = git.commit().setMessage("add file b & symlink a")
 					.call();
@@ -274,7 +274,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").call();
 			RevCommit base = git.commit().setMessage("init").call();
 			writeTrashFile("target", "someData");
-			FileUtils.createSymLink(new File(db.getWorkTree(), "link"), "target");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "link").toPath(), "target");
 			git.add().addFilepattern("target").addFilepattern("link").call();
 			git.commit().setMessage("add target").call();
 			assertEquals(4, db.getWorkTree().list().length); // self-check
@@ -287,7 +287,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			assertEquals("someData", data);
 			data = read(new File(db.getWorkTree(), "link"));
 			assertEquals("target",
-					FileUtils.readSymLink(new File(db.getWorkTree(), "link")));
+					FileUtils.readSymLink(new File(db.getWorkTree(), "link").toPath()));
 			assertEquals("someData", data);
 		}
 	}
@@ -299,7 +299,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").call();
 			RevCommit base = git.commit().setMessage("init").call();
 			writeTrashFile("target", "someData");
-			FileUtils.createSymLink(new File(db.getWorkTree(), "tlink"), "target");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "tlink").toPath(), "target");
 			git.add().addFilepattern("target").addFilepattern("tlink").call();
 			git.commit().setMessage("add target").call();
 			assertEquals(4, db.getWorkTree().list().length); // self-check
@@ -312,7 +312,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			assertEquals("someData", data);
 			data = read(new File(db.getWorkTree(), "tlink"));
 			assertEquals("target",
-					FileUtils.readSymLink(new File(db.getWorkTree(), "tlink")));
+					FileUtils.readSymLink(new File(db.getWorkTree(), "tlink").toPath()));
 			assertEquals("someData", data);
 		}
 	}
@@ -323,7 +323,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			writeTrashFile("a", "start");
 			git.add().addFilepattern("a").call();
 			RevCommit base = git.commit().setMessage("init").call();
-			FileUtils.createSymLink(new File(db.getWorkTree(), "link"), "target");
+			FileUtils.createSymLink(new File(db.getWorkTree(), "link").toPath(), "target");
 			FileUtils.mkdir(new File(db.getWorkTree(), "target"));
 			writeTrashFile("target/file", "someData");
 			git.add().addFilepattern("target").addFilepattern("link").call();
@@ -338,7 +338,7 @@ public class SymlinksTest extends RepositoryTestCase {
 			assertEquals("someData", data);
 			data = read(new File(db.getWorkTree(), "link/file"));
 			assertEquals("target",
-					FileUtils.readSymLink(new File(db.getWorkTree(), "link")));
+					FileUtils.readSymLink(new File(db.getWorkTree(), "link").toPath()));
 			assertEquals("someData", data);
 		}
 	}

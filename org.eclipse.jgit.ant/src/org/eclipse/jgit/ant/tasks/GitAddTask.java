@@ -114,7 +114,7 @@ public class GitAddTask extends Task {
 		if (src == null) {
 			throw new BuildException("Repository path not specified.");
 		}
-		if (!RepositoryCache.FileKey.isGitRepository(new File(src, ".git"),
+		if (!RepositoryCache.FileKey.isGitRepository(new File(src, ".git").toPath(),
 				FS.DETECTED)) {
 			throw new BuildException("Specified path (" + src
 					+ ") is not a git repository.");

@@ -254,7 +254,7 @@ public class ConcurrentRepackTest extends RepositoryTestCase {
 	private static void delete(final File[] list) throws IOException {
 		final long begin = list[0].getParentFile().lastModified();
 		for (final File f : list) {
-			FileUtils.delete(f);
+			FileUtils.delete(f.toPath());
 			assertFalse(f + " was removed", f.exists());
 		}
 		touch(begin, list[0].getParentFile());

@@ -110,9 +110,9 @@ public class CleanCommand extends GitCommand<Set<String>> {
 			FS fs = getRepository().getFS();
 			for (String p : status.getIgnoredNotInIndex()) {
 				File f = new File(repo.getWorkTree(), p);
-				if (fs.isFile(f) || fs.isSymLink(f)) {
+				if (fs.isFile(f.toPath()) || fs.isSymLink(f.toPath())) {
 					untrackedFiles.add(p);
-				} else if (fs.isDirectory(f)) {
+				} else if (fs.isDirectory(f.toPath())) {
 					untrackedDirs.add(p);
 				}
 			}
@@ -172,14 +172,14 @@ public class CleanCommand extends GitCommand<Set<String>> {
 				if (new File(curFile, DOT_GIT).exists()) {
 					if (force) {
 						if (!dryRun) {
-							FileUtils.delete(curFile, FileUtils.RECURSIVE
+							FileUtils.delete(curFile.toPath(), FileUtils.RECURSIVE
 									| FileUtils.SKIP_MISSING);
 						}
 						inFiles.add(path + "/"); //$NON-NLS-1$
 					}
 				} else {
 					if (!dryRun) {
-						FileUtils.delete(curFile,
+						FileUtils.delete(curFile.toPath(),
 								FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 					}
 					inFiles.add(path + "/"); //$NON-NLS-1$
@@ -187,7 +187,7 @@ public class CleanCommand extends GitCommand<Set<String>> {
 			}
 		} else {
 			if (!dryRun) {
-				FileUtils.delete(curFile, FileUtils.SKIP_MISSING);
+				FileUtils.delete(curFile.toPath(), FileUtils.SKIP_MISSING);
 			}
 			inFiles.add(path);
 		}
