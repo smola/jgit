@@ -118,7 +118,7 @@ public class Git implements AutoCloseable {
 		RepositoryCache.FileKey key;
 
 		key = RepositoryCache.FileKey.lenient(dir.toPath(), fs);
-		Repository db = new RepositoryBuilder().setFS(fs).setGitDir(key.getPath().toFile())
+		Repository db = new RepositoryBuilder().setFS(fs).setGitDir(key.getPath())
 				.setMustExist(true).build();
 		return new Git(db, true);
 	}

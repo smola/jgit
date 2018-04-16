@@ -45,6 +45,7 @@ package org.eclipse.jgit.storage.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
@@ -101,9 +102,26 @@ public class FileRepositoryBuilder extends
 	 * @throws java.io.IOException
 	 *             the repository could not be accessed to configure the rest of
 	 *             the builder's parameters.
+	 * @see #create(Path)
 	 * @since 3.0
 	 */
 	public static Repository create(File gitDir) throws IOException {
+		return create(gitDir.toPath());
+	}
+
+	/**
+	 * Convenience factory method to construct a
+	 * {@link org.eclipse.jgit.internal.storage.file.FileRepository}.
+	 *
+	 * @param gitDir
+	 *            {@code GIT_DIR}, the repository meta directory.
+	 * @return a repository matching this configuration.
+	 * @throws java.io.IOException
+	 *             the repository could not be accessed to configure the rest of
+	 *             the builder's parameters.
+	 * @since 4.10
+	 */
+	public static Repository create(Path gitDir) throws IOException {
 		return new FileRepositoryBuilder().setGitDir(gitDir).readEnvironment()
 				.build();
 	}

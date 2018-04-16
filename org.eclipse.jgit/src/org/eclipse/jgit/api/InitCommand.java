@@ -44,6 +44,7 @@ package org.eclipse.jgit.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
@@ -63,9 +64,9 @@ import org.eclipse.jgit.util.SystemReader;
  *      >Git documentation about init</a>
  */
 public class InitCommand implements Callable<Git> {
-	private File directory;
+	private Path directory;
 
-	private File gitDir;
+	private Path gitDir;
 
 	private boolean bare;
 
@@ -99,7 +100,7 @@ public class InitCommand implements Callable<Git> {
 				else {
 					builder.setWorkTree(directory);
 					if (gitDir == null)
-						builder.setGitDir(new File(directory, Constants.DOT_GIT));
+						builder.setGitDir(directory.resolve(Constants.DOT_GIT));
 				}
 			} else if (builder.getGitDir() == null) {
 				String dStr = SystemReader.getInstance()
@@ -142,7 +143,7 @@ public class InitCommand implements Callable<Git> {
 	 *             to the same directory of if for a bare repository both
 	 *             directory and gitDir are specified
 	 */
-	public InitCommand setDirectory(File directory)
+	public InitCommand setDirectory(Path directory)
 			throws IllegalStateException {
 		validateDirs(directory, gitDir, bare);
 		this.directory = directory;
@@ -162,14 +163,14 @@ public class InitCommand implements Callable<Git> {
 	 *             directory and gitDir are specified
 	 * @since 3.6
 	 */
-	public InitCommand setGitDir(File gitDir)
+	public InitCommand setGitDir(Path gitDir)
 			throws IllegalStateException {
 		validateDirs(directory, gitDir, bare);
 		this.gitDir = gitDir;
 		return this;
 	}
 
-	private static void validateDirs(File directory, File gitDir, boolean bare)
+	private static void validateDirs(Path directory, Path gitDir, boolean bare)
 			throws IllegalStateException {
 		if (directory != null) {
 			if (bare) {

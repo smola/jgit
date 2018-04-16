@@ -55,6 +55,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -143,7 +145,7 @@ public abstract class Repository implements AutoCloseable {
 	final AtomicLong closedAt = new AtomicLong();
 
 	/** Metadata directory holding the repository's critical files. */
-	private final File gitDir;
+	private final Path gitDir;
 
 	/** File abstraction used to resolve paths. */
 	private final FS fs;
@@ -151,10 +153,10 @@ public abstract class Repository implements AutoCloseable {
 	private final ListenerList myListeners = new ListenerList();
 
 	/** If not bare, the top level directory of the working files. */
-	private final File workTree;
+	private final Path workTree;
 
 	/** If not bare, the index file caching the working file states. */
-	private final File indexFile;
+	private final Path indexFile;
 
 	/**
 	 * Initialize a new repository instance.
@@ -231,7 +233,7 @@ public abstract class Repository implements AutoCloseable {
 	 * annotation would only cause compiler errors at places where the actual
 	 * directory can never be null.
 	 */
-	public File getDirectory() {
+	public Path getDirectory() {
 		return gitDir;
 	}
 
