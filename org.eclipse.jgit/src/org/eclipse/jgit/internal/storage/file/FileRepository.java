@@ -241,7 +241,7 @@ public class FileRepository extends Repository {
 		}
 
 		if (!isBare())
-			snapshot = FileSnapshot.save(getIndexFile());
+			snapshot = FileSnapshot.save(getIndexFile().toPath());
 	}
 
 	private void loadSystemConfig() throws IOException {
@@ -549,15 +549,15 @@ public class FileRepository extends Repository {
 
 		File indexFile = getIndexFile();
 		if (snapshot == null)
-			snapshot = FileSnapshot.save(indexFile);
-		else if (snapshot.isModified(indexFile))
+			snapshot = FileSnapshot.save(indexFile.toPath());
+		else if (snapshot.isModified(indexFile.toPath()))
 			notifyIndexChanged();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void notifyIndexChanged() {
-		snapshot = FileSnapshot.save(getIndexFile());
+		snapshot = FileSnapshot.save(getIndexFile().toPath());
 		fireEvent(new IndexChangedEvent());
 	}
 

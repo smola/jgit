@@ -90,10 +90,10 @@ public class FileSnapshotTest {
 	public void testActuallyIsModifiedTrivial() throws Exception {
 		File f1 = createFile("simple");
 		waitNextSec(f1);
-		FileSnapshot save = FileSnapshot.save(f1);
+		FileSnapshot save = FileSnapshot.save(f1.toPath());
 		append(f1, (byte) 'x');
 		waitNextSec(f1);
-		assertTrue(save.isModified(f1));
+		assertTrue(save.isModified(f1.toPath()));
 	}
 
 	/**
@@ -108,9 +108,9 @@ public class FileSnapshotTest {
 	public void testNewFileWithWait() throws Exception {
 		File f1 = createFile("newfile");
 		waitNextSec(f1);
-		FileSnapshot save = FileSnapshot.save(f1);
+		FileSnapshot save = FileSnapshot.save(f1.toPath());
 		Thread.sleep(1500);
-		assertTrue(save.isModified(f1));
+		assertTrue(save.isModified(f1.toPath()));
 	}
 
 	/**
@@ -122,9 +122,9 @@ public class FileSnapshotTest {
 	public void testNewFileNoWait() throws Exception {
 		File f1 = createFile("newfile");
 		waitNextSec(f1);
-		FileSnapshot save = FileSnapshot.save(f1);
+		FileSnapshot save = FileSnapshot.save(f1.toPath());
 		Thread.sleep(1500);
-		assertTrue(save.isModified(f1));
+		assertTrue(save.isModified(f1.toPath()));
 	}
 
 	private File createFile(String string) throws IOException {

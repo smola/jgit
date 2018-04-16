@@ -773,7 +773,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 				ConfigConstants.CONFIG_CORE_SECTION,
 				ConfigConstants.CONFIG_KEY_TRUSTFOLDERSTAT, true);
 
-		return ((!trustFolderStat) || old.snapshot.isModified(packDirectory))
+		return ((!trustFolderStat) || old.snapshot.isModified(packDirectory.toPath()))
 				&& old != scanPacks(old);
 	}
 
@@ -793,7 +793,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 			return Collections.emptySet();
 
 		if (shallowFileSnapshot == null
-				|| shallowFileSnapshot.isModified(shallowFile)) {
+				|| shallowFileSnapshot.isModified(shallowFile.toPath())) {
 			shallowCommitsIds = new HashSet<>();
 
 			try (BufferedReader reader = open(shallowFile)) {
@@ -808,7 +808,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 				}
 			}
 
-			shallowFileSnapshot = FileSnapshot.save(shallowFile);
+			shallowFileSnapshot = FileSnapshot.save(shallowFile.toPath());
 		}
 
 		return shallowCommitsIds;
@@ -884,7 +884,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 
 	private PackList scanPacksImpl(final PackList old) {
 		final Map<String, PackFile> forReuse = reuseMap(old);
-		final FileSnapshot snapshot = FileSnapshot.save(packDirectory);
+		final FileSnapshot snapshot = FileSnapshot.save(packDirectory.toPath());
 		final Set<String> names = listPackDirectory();
 		final List<PackFile> list = new ArrayList<>(names.size() >> 2);
 		boolean foundNew = false;

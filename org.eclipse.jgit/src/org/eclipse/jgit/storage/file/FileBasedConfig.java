@@ -144,7 +144,7 @@ public class FileBasedConfig extends StoredConfig {
 	@Override
 	public void load() throws IOException, ConfigInvalidException {
 		final FileSnapshot oldSnapshot = snapshot;
-		final FileSnapshot newSnapshot = FileSnapshot.save(getFile());
+		final FileSnapshot newSnapshot = FileSnapshot.save(getFile().toPath());
 		try {
 			final byte[] in = IO.readFully(getFile());
 			final ObjectId newHash = hash(in);
@@ -248,7 +248,7 @@ public class FileBasedConfig extends StoredConfig {
 	 *         than the file on disk
 	 */
 	public boolean isOutdated() {
-		return snapshot.isModified(getFile());
+		return snapshot.isModified(getFile().toPath());
 	}
 
 	/**

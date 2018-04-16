@@ -409,12 +409,12 @@ public class LockFile {
 	 *             the target file.
 	 */
 	public void waitForStatChange() throws InterruptedException {
-		FileSnapshot o = FileSnapshot.save(ref);
-		FileSnapshot n = FileSnapshot.save(lck);
+		FileSnapshot o = FileSnapshot.save(ref.toPath());
+		FileSnapshot n = FileSnapshot.save(lck.toPath());
 		while (o.equals(n)) {
 			Thread.sleep(25 /* milliseconds */);
 			lck.setLastModified(System.currentTimeMillis());
-			n = FileSnapshot.save(lck);
+			n = FileSnapshot.save(lck.toPath());
 		}
 	}
 
@@ -448,7 +448,7 @@ public class LockFile {
 
 	private void saveStatInformation() {
 		if (needSnapshot)
-			commitSnapshot = FileSnapshot.save(lck);
+			commitSnapshot = FileSnapshot.save(lck.toPath());
 	}
 
 	/**

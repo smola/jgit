@@ -43,8 +43,8 @@
 
 package org.eclipse.jgit.internal.storage.file;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,12 +56,12 @@ import org.eclipse.jgit.util.FS;
  * Caches when a file was last read, making it possible to detect future edits.
  * <p>
  * This object tracks the last modified time of a file. Later during an
- * invocation of {@link #isModified(File)} the object will return true if the
+ * invocation of {@link #isModified(Path)} the object will return true if the
  * file may have been modified and should be re-read from disk.
  * <p>
  * A snapshot does not "live update" when the underlying filesystem changes.
  * Callers must poll for updates by periodically invoking
- * {@link #isModified(File)}.
+ * {@link #isModified(Path)}.
  * <p>
  * To work around the "racy git" problem (where a file may be modified multiple
  * times within the granularity of the filesystem modification clock) this class
@@ -73,7 +73,7 @@ public class FileSnapshot {
 	 * A FileSnapshot that is considered to always be modified.
 	 * <p>
 	 * This instance is useful for application code that wants to lazily read a
-	 * file, but only after {@link #isModified(File)} gets invoked. The returned
+	 * file, but only after {@link #isModified(Path)} gets invoked. The returned
 	 * snapshot contains only invalid status information.
 	 */
 	public static final FileSnapshot DIRTY = new FileSnapshot(-1, -1);
@@ -82,13 +82,13 @@ public class FileSnapshot {
 	 * A FileSnapshot that is clean if the file does not exist.
 	 * <p>
 	 * This instance is useful if the application wants to consider a missing
-	 * file to be clean. {@link #isModified(File)} will return false if the file
+	 * file to be clean. {@link #isModified(Path)} will return false if the file
 	 * path does not exist.
 	 */
 	public static final FileSnapshot MISSING_FILE = new FileSnapshot(0, 0) {
 		@Override
-		public boolean isModified(File path) {
-			return FS.DETECTED.exists(path.toPath());
+		public boolean isModified(Path path) {
+			return FS.DETECTED.exists(path);
 		}
 	};
 
@@ -102,13 +102,13 @@ public class FileSnapshot {
 	 *            information is saved.
 	 * @return the snapshot.
 	 */
-	public static FileSnapshot save(File path) {
+	public static FileSnapshot save(Path path) {
 		long read = System.currentTimeMillis();
 		long modified;
 		try {
-			modified = FS.DETECTED.lastModified(path.toPath());
+			modified = FS.DETECTED.lastModified(path);
 		} catch (IOException e) {
-			modified = path.lastModified();
+			modified = 0L;
 		}
 		return new FileSnapshot(read, modified);
 	}
@@ -159,12 +159,12 @@ public class FileSnapshot {
 	 *            the path the snapshot describes.
 	 * @return true if the path needs to be read again.
 	 */
-	public boolean isModified(File path) {
+	public boolean isModified(Path path) {
 		long currLastModified;
 		try {
-			currLastModified = FS.DETECTED.lastModified(path.toPath());
+			currLastModified = FS.DETECTED.lastModified(path);
 		} catch (IOException e) {
-			currLastModified = path.lastModified();
+			currLastModified = 0L;
 		}
 		return isModified(currLastModified);
 	}
@@ -172,11 +172,11 @@ public class FileSnapshot {
 	/**
 	 * Update this snapshot when the content hasn't changed.
 	 * <p>
-	 * If the caller gets true from {@link #isModified(File)}, re-reads the
+	 * If the caller gets true from {@link #isModified(Path)}, re-reads the
 	 * content, discovers the content is identical, and
 	 * {@link #equals(FileSnapshot)} is true, it can use
 	 * {@link #setClean(FileSnapshot)} to make a future
-	 * {@link #isModified(File)} return false. The logic goes something like
+	 * {@link #isModified(Path)} return false. The logic goes something like
 	 * this:
 	 *
 	 * <pre>

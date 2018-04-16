@@ -429,7 +429,7 @@ public class DirCache {
 			throw new IOException(JGitText.get().dirCacheDoesNotHaveABackingFile);
 		if (!liveFile.exists())
 			clear();
-		else if (snapshot == null || snapshot.isModified(liveFile)) {
+		else if (snapshot == null || snapshot.isModified(liveFile.toPath())) {
 			try (SilentFileInputStream inStream = new SilentFileInputStream(
 					liveFile)) {
 				clear();
@@ -446,7 +446,7 @@ public class DirCache {
 				//
 				clear();
 			}
-			snapshot = FileSnapshot.save(liveFile);
+			snapshot = FileSnapshot.save(liveFile.toPath());
 		}
 	}
 
@@ -459,7 +459,7 @@ public class DirCache {
 	public boolean isOutdated() throws IOException {
 		if (liveFile == null || !liveFile.exists())
 			return false;
-		return snapshot == null || snapshot.isModified(liveFile);
+		return snapshot == null || snapshot.isModified(liveFile.toPath());
 	}
 
 	/**
@@ -496,7 +496,7 @@ public class DirCache {
 		if (entryCnt < 0)
 			throw new CorruptObjectException(JGitText.get().DIRCHasTooManyEntries);
 
-		snapshot = FileSnapshot.save(liveFile);
+		snapshot = FileSnapshot.save(liveFile.toPath());
 		int smudge_s = (int) (snapshot.lastModified() / 1000);
 		int smudge_ns = ((int) (snapshot.lastModified() % 1000)) * 1000000;
 

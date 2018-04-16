@@ -924,7 +924,7 @@ public class RefDirectory extends RefDatabase {
 				ConfigConstants.CONFIG_KEY_TRUSTFOLDERSTAT, true);
 
 		final PackedRefList curList = packedRefs.get();
-		if (trustFolderStat && !curList.snapshot.isModified(packedRefsFile)) {
+		if (trustFolderStat && !curList.snapshot.isModified(packedRefsFile.toPath())) {
 			return curList;
 		}
 
@@ -940,7 +940,7 @@ public class RefDirectory extends RefDatabase {
 		int maxStaleRetries = 5;
 		int retries = 0;
 		while (true) {
-			final FileSnapshot snapshot = FileSnapshot.save(packedRefsFile);
+			final FileSnapshot snapshot = FileSnapshot.save(packedRefsFile.toPath());
 			final MessageDigest digest = Constants.newMessageDigest();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(
 					new DigestInputStream(new FileInputStream(packedRefsFile),
@@ -1124,14 +1124,14 @@ public class RefDirectory extends RefDatabase {
 
 		if (ref != null) {
 			currentSnapshot = ref.getSnapShot();
-			if (!currentSnapshot.isModified(path))
+			if (!currentSnapshot.isModified(path.toPath()))
 				return ref;
 			name = ref.getName();
 		}
 
 		final int limit = 4096;
 		final byte[] buf;
-		FileSnapshot otherSnapshot = FileSnapshot.save(path);
+		FileSnapshot otherSnapshot = FileSnapshot.save(path.toPath());
 		try {
 			buf = IO.readSome(path.toPath(), limit);
 		} catch (NoSuchFileException noFile) {
