@@ -1257,7 +1257,7 @@ public class MergerTest extends RepositoryTestCase {
 		config.save();
 
 		FileBasedConfig modulesConfig = new FileBasedConfig(
-				new File(db.getWorkTree(), Constants.DOT_GIT_MODULES),
+				new File(db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(),
 				db.getFS());
 		modulesConfig.load();
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,

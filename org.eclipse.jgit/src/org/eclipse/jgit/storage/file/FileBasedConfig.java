@@ -53,8 +53,10 @@ import static org.eclipse.jgit.lib.Constants.CHARSET;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.jgit.annotations.Nullable;
@@ -75,7 +77,7 @@ import org.eclipse.jgit.util.RawParseUtils;
  * The configuration file that is stored in the file of the file system.
  */
 public class FileBasedConfig extends StoredConfig {
-	private final File configFile;
+	private final Path configFile;
 
 	private final FS fs;
 
@@ -94,7 +96,7 @@ public class FileBasedConfig extends StoredConfig {
 	 *            the file system abstraction which will be necessary to perform
 	 *            certain file system operations.
 	 */
-	public FileBasedConfig(File cfgLocation, FS fs) {
+	public FileBasedConfig(Path cfgLocation, FS fs) {
 		this(null, cfgLocation, fs);
 	}
 
@@ -109,7 +111,7 @@ public class FileBasedConfig extends StoredConfig {
 	 *            the file system abstraction which will be necessary to perform
 	 *            certain file system operations.
 	 */
-	public FileBasedConfig(Config base, File cfgLocation, FS fs) {
+	public FileBasedConfig(Config base, Path cfgLocation, FS fs) {
 		super(base);
 		configFile = cfgLocation;
 		this.fs = fs;
@@ -129,7 +131,7 @@ public class FileBasedConfig extends StoredConfig {
 	 *
 	 * @return location of the configuration file on disk
 	 */
-	public final File getFile() {
+	public final Path getFile() {
 		return configFile;
 	}
 
@@ -144,9 +146,9 @@ public class FileBasedConfig extends StoredConfig {
 	@Override
 	public void load() throws IOException, ConfigInvalidException {
 		final FileSnapshot oldSnapshot = snapshot;
-		final FileSnapshot newSnapshot = FileSnapshot.save(getFile().toPath());
+		final FileSnapshot newSnapshot = FileSnapshot.save(getFile());
 		try {
-			final byte[] in = IO.readFully(getFile());
+			final byte[] in = Files.readAllBytes(getFile());
 			final ObjectId newHash = hash(in);
 			if (hash.equals(newHash)) {
 				if (oldSnapshot.equals(newSnapshot))
@@ -166,8 +168,8 @@ public class FileBasedConfig extends StoredConfig {
 				snapshot = newSnapshot;
 				hash = newHash;
 			}
-		} catch (FileNotFoundException noFile) {
-			if (configFile.exists()) {
+		} catch (NoSuchFileException noFile) {
+			if (Files.exists(configFile)) {
 				throw noFile;
 			}
 			clear();
@@ -206,9 +208,9 @@ public class FileBasedConfig extends StoredConfig {
 			out = Constants.encode(text);
 		}
 
-		final LockFile lf = new LockFile(getFile());
+		final LockFile lf = new LockFile(getFile().toFile());
 		if (!lf.lock())
-			throw new LockFailedException(getFile());
+			throw new LockFailedException(getFile().toFile());
 		try {
 			lf.setNeedSnapshot(true);
 			lf.write(out);
@@ -238,7 +240,7 @@ public class FileBasedConfig extends StoredConfig {
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[" + getFile().getPath() + "]";
+		return getClass().getSimpleName() + "[" + getFile() + "]";
 	}
 
 	/**
@@ -248,7 +250,7 @@ public class FileBasedConfig extends StoredConfig {
 	 *         than the file on disk
 	 */
 	public boolean isOutdated() {
-		return snapshot.isModified(getFile().toPath());
+		return snapshot.isModified(getFile());
 	}
 
 	/**
@@ -264,7 +266,7 @@ public class FileBasedConfig extends StoredConfig {
 		if (relPath.startsWith("~/")) { //$NON-NLS-1$
 			file = fs.resolve(fs.userHome(), relPath.substring(2)).toFile();
 		} else {
-			file = fs.resolve(configFile.getParentFile().toPath(), relPath).toFile();
+			file = fs.resolve(configFile.getParent(), relPath).toFile();
 		}
 
 		if (!file.exists()) {

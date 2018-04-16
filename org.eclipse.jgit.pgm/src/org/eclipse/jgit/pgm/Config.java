@@ -81,7 +81,7 @@ class Config extends TextBuiltin {
 	private void list() throws IOException, ConfigInvalidException {
 		final FS fs = getRepository().getFS();
 		if (configFile != null) {
-			list(new FileBasedConfig(configFile, fs));
+			list(new FileBasedConfig(configFile.toPath(), fs));
 			return;
 		}
 		if (system
@@ -93,7 +93,7 @@ class Config extends TextBuiltin {
 			list(SystemReader.getInstance().openUserConfig(null, fs));
 		if (local || isListAll())
 			list(new FileBasedConfig(fs.resolve(getRepository().getDirectory().toPath(),
-					Constants.CONFIG).toFile(), fs));
+					Constants.CONFIG), fs));
 	}
 
 	private boolean isListAll() {

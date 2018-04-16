@@ -710,7 +710,7 @@ public class TransportHttp extends HttpTransport implements WalkTransport,
 		} catch (IOException | ConfigInvalidException e) {
 			// Log it, but otherwise ignore here.
 			LOG.error(MessageFormat.format(JGitText.get().userConfigFileInvalid,
-					userConfig.getFile().getAbsolutePath(), e));
+					userConfig.getFile().toAbsolutePath(), e));
 		}
 	}
 

@@ -45,9 +45,9 @@
 
 package org.eclipse.jgit.junit;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -71,7 +71,7 @@ import org.eclipse.jgit.util.time.ProposedTimestamp;
  */
 public class MockSystemReader extends SystemReader {
 	private final class MockConfig extends FileBasedConfig {
-		private MockConfig(File cfgLocation, FS fs) {
+		private MockConfig(Path cfgLocation, FS fs) {
 			super(cfgLocation, fs);
 		}
 

@@ -802,7 +802,7 @@ public class ConfigTest {
 		File config = tmp.newFile("config");
 		String include = "[include]\npath=" + pathToString(config) + "\n";
 		Files.write(config.toPath(), include.getBytes());
-		FileBasedConfig fbConfig = new FileBasedConfig(null, config,
+		FileBasedConfig fbConfig = new FileBasedConfig(null, config.toPath(),
 				FS.DETECTED);
 		try {
 			fbConfig.load();
@@ -841,7 +841,7 @@ public class ConfigTest {
 		content = "[Include]\npath=" + pathToString(included) + "\n";
 		Files.write(config.toPath(), content.getBytes());
 
-		FileBasedConfig fbConfig = new FileBasedConfig(null, config,
+		FileBasedConfig fbConfig = new FileBasedConfig(null, config.toPath(),
 				FS.DETECTED);
 		fbConfig.load();
 		assertTrue(fbConfig.getBoolean("foo", "bar", false));
@@ -858,7 +858,7 @@ public class ConfigTest {
 		content = "[include]\nPath=" + pathToString(included) + "\n";
 		Files.write(config.toPath(), content.getBytes());
 
-		FileBasedConfig fbConfig = new FileBasedConfig(null, config,
+		FileBasedConfig fbConfig = new FileBasedConfig(null, config.toPath(),
 				FS.DETECTED);
 		fbConfig.load();
 		assertTrue(fbConfig.getBoolean("foo", "bar", false));
@@ -886,7 +886,7 @@ public class ConfigTest {
 		File config = tmp.newFile("config");
 		String include = "[include]\npath=" + includedPath + "\n";
 		Files.write(config.toPath(), include.getBytes());
-		FileBasedConfig fbConfig = new FileBasedConfig(null, config,
+		FileBasedConfig fbConfig = new FileBasedConfig(null, config.toPath(),
 				FS.DETECTED);
 		try {
 			fbConfig.load();

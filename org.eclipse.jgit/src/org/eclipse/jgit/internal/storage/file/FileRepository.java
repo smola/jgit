@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.HashSet;
@@ -197,7 +198,7 @@ public class FileRepository extends Repository {
 		userConfig = SystemReader.getInstance().openUserConfig(systemConfig,
 				getFS());
 		repoConfig = new FileBasedConfig(userConfig, getFS().resolve(
-				getDirectory().toPath(), Constants.CONFIG).toFile(),
+				getDirectory().toPath(), Constants.CONFIG),
 				getFS());
 
 		loadSystemConfig();
@@ -250,7 +251,7 @@ public class FileRepository extends Repository {
 		} catch (ConfigInvalidException e) {
 			throw new IOException(MessageFormat.format(JGitText
 					.get().systemConfigFileInvalid, systemConfig.getFile()
-							.getAbsolutePath(),
+							.toAbsolutePath().toString(),
 					e), e);
 		}
 	}
@@ -261,7 +262,7 @@ public class FileRepository extends Repository {
 		} catch (ConfigInvalidException e) {
 			throw new IOException(MessageFormat.format(JGitText
 					.get().userConfigFileInvalid, userConfig.getFile()
-							.getAbsolutePath(),
+							.toAbsolutePath().toString(),
 					e), e);
 		}
 	}
@@ -283,7 +284,7 @@ public class FileRepository extends Repository {
 	@Override
 	public void create(boolean bare) throws IOException {
 		final FileBasedConfig cfg = getConfig();
-		if (cfg.getFile().exists()) {
+		if (Files.exists(cfg.getFile())) {
 			throw new IllegalStateException(MessageFormat.format(
 					JGitText.get().repositoryAlreadyExists, getDirectory()));
 		}

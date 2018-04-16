@@ -217,7 +217,7 @@ public class HttpConfig {
 		} catch (IOException | ConfigInvalidException e) {
 			// Log it and then work with default values.
 			LOG.error(MessageFormat.format(JGitText.get().userConfigFileInvalid,
-					userConfig.getFile().getAbsolutePath(), e));
+					userConfig.getFile().toAbsolutePath().toString(), e));
 			init(new Config(), uri);
 			return;
 		}

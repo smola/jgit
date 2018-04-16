@@ -285,7 +285,7 @@ class LfsStore extends TextBuiltin {
 	private void readAWSKeys() throws IOException, ConfigInvalidException {
 		String credentialsPath = System.getProperty("user.home") //$NON-NLS-1$
 				+ "/.aws/credentials"; //$NON-NLS-1$
-		FileBasedConfig c = new FileBasedConfig(new File(credentialsPath),
+		FileBasedConfig c = new FileBasedConfig(new File(credentialsPath).toPath(),
 				FS.DETECTED);
 		c.load();
 		accessKey = c.getString("default", null, "accessKey"); //$NON-NLS-1$//$NON-NLS-2$

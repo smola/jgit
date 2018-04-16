@@ -1028,7 +1028,7 @@ public class RepoCommandTest extends RepositoryTestCase {
 			File gitmodules = new File(localDb.getWorkTree(), ".gitmodules");
 			assertTrue("The .gitmodules file should exist",
 					gitmodules.exists());
-			FileBasedConfig c = new FileBasedConfig(gitmodules, FS.DETECTED);
+			FileBasedConfig c = new FileBasedConfig(gitmodules.toPath(), FS.DETECTED);
 			c.load();
 			assertEquals(
 					"Recording remote branches should work for short branch descriptions",
@@ -1112,7 +1112,7 @@ public class RepoCommandTest extends RepositoryTestCase {
 			File gitmodules = new File(localDb.getWorkTree(), ".gitmodules");
 			assertTrue("The .gitmodules file should exist",
 					gitmodules.exists());
-			FileBasedConfig c = new FileBasedConfig(gitmodules, FS.DETECTED);
+			FileBasedConfig c = new FileBasedConfig(gitmodules.toPath(), FS.DETECTED);
 			c.load();
 			assertEquals("Recording shallow configuration should work", "true",
 					c.getString("submodule", "shallow-please", "shallow"));

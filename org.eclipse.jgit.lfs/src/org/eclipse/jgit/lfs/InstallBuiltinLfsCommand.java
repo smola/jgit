@@ -124,7 +124,7 @@ public class InstallBuiltinLfsCommand implements LfsInstallCommand {
 		} catch (ConfigInvalidException e1) {
 			throw new IOException(MessageFormat
 					.format(LfsText.get().userConfigInvalid, c.getFile()
-							.getAbsolutePath(), e1),
+							.toAbsolutePath(), e1),
 					e1);
 		}
 

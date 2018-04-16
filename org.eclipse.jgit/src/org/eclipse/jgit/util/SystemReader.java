@@ -115,13 +115,13 @@ public abstract class SystemReader {
 					}
 				};
 			}
-			return new FileBasedConfig(parent, configFile.toFile(), fs);
+			return new FileBasedConfig(parent, configFile, fs);
 		}
 
 		@Override
 		public FileBasedConfig openUserConfig(Config parent, FS fs) {
-			final File home = fs.userHome().toFile();
-			return new FileBasedConfig(parent, new File(home, ".gitconfig"), fs); //$NON-NLS-1$
+			final Path home = fs.userHome();
+			return new FileBasedConfig(parent, home.resolve(".gitconfig"), fs); //$NON-NLS-1$
 		}
 
 		@Override

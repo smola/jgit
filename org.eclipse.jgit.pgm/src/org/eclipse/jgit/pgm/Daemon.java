@@ -129,7 +129,7 @@ class Daemon extends TextBuiltin {
 						configFile.getAbsolutePath()));
 			}
 
-			FileBasedConfig cfg = new FileBasedConfig(configFile, FS.DETECTED);
+			FileBasedConfig cfg = new FileBasedConfig(configFile.toPath(), FS.DETECTED);
 			cfg.load();
 			new WindowCacheConfig().fromConfig(cfg).install();
 			packConfig.fromConfig(cfg);
