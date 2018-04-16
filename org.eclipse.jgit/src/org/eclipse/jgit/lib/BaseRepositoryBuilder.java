@@ -544,7 +544,7 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 			FS tryFS = safeFS();
 			while (current != null) {
 				File dir = new File(current, DOT_GIT);
-				if (FileKey.isGitRepository(dir, tryFS)) {
+				if (FileKey.isGitRepository(dir.toPath(), tryFS)) {
 					setGitDir(dir);
 					break;
 				} else if (dir.isFile()) {
@@ -554,7 +554,7 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 					} catch (IOException ignored) {
 						// Continue searching if gitdir ref isn't found
 					}
-				} else if (FileKey.isGitRepository(current, tryFS)) {
+				} else if (FileKey.isGitRepository(current.toPath(), tryFS)) {
 					setGitDir(current);
 					break;
 				}

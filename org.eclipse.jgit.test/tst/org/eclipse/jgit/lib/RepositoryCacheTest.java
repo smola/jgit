@@ -55,6 +55,8 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
@@ -64,43 +66,41 @@ import org.junit.Test;
 public class RepositoryCacheTest extends RepositoryTestCase {
 	@Test
 	public void testNonBareFileKey() throws IOException {
-		File gitdir = db.getDirectory();
-		File parent = gitdir.getParentFile();
-		File other = new File(parent, "notagit");
-		assertEqualsFile(gitdir, FileKey.exact(gitdir, db.getFS()).getFile());
-		assertEqualsFile(parent, FileKey.exact(parent, db.getFS()).getFile());
-		assertEqualsFile(other, FileKey.exact(other, db.getFS()).getFile());
+		Path gitdir = db.getDirectory().toPath();
+		Path parent = gitdir.getParent();
+		Path other = parent.resolve("notagit");
+		assertTrue(Files.isSameFile(gitdir, FileKey.exact(gitdir, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(parent, FileKey.exact(parent, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(other, FileKey.exact(other, db.getFS()).getPath()));
 
-		assertEqualsFile(gitdir, FileKey.lenient(gitdir, db.getFS()).getFile());
-		assertEqualsFile(gitdir, FileKey.lenient(parent, db.getFS()).getFile());
-		assertEqualsFile(other, FileKey.lenient(other, db.getFS()).getFile());
+		assertTrue(Files.isSameFile(gitdir, FileKey.lenient(gitdir, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(gitdir, FileKey.lenient(parent, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(other, FileKey.lenient(other, db.getFS()).getPath()));
 	}
 
 	@Test
 	public void testBareFileKey() throws IOException {
 		Repository bare = createBareRepository();
-		File gitdir = bare.getDirectory();
-		File parent = gitdir.getParentFile();
-		String name = gitdir.getName();
+		Path gitdir = bare.getDirectory().toPath();
+		Path parent = gitdir.getParent();
+		String name = gitdir.getFileName().toString();
 		assertTrue(name.endsWith(".git"));
 		name = name.substring(0, name.length() - 4);
 
-		assertEqualsFile(gitdir, FileKey.exact(gitdir, db.getFS()).getFile());
-
-		assertEqualsFile(gitdir, FileKey.lenient(gitdir, db.getFS()).getFile());
-		assertEqualsFile(gitdir,
-				FileKey.lenient(new File(parent, name), db.getFS()).getFile());
+		assertTrue(Files.isSameFile(gitdir, FileKey.exact(gitdir, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(gitdir, FileKey.lenient(gitdir, db.getFS()).getPath()));
+		assertTrue(Files.isSameFile(gitdir, FileKey.lenient(parent.resolve(name), db.getFS()).getPath()));
 	}
 
 	@Test
 	public void testFileKeyOpenExisting() throws IOException {
-		try (Repository r = new FileKey(db.getDirectory(), db.getFS())
+		try (Repository r = new FileKey(db.getDirectory().toPath(), db.getFS())
 				.open(true)) {
 			assertNotNull(r);
 			assertEqualsFile(db.getDirectory(), r.getDirectory());
 		}
 
-		try (Repository r = new FileKey(db.getDirectory(), db.getFS())
+		try (Repository r = new FileKey(db.getDirectory().toPath(), db.getFS())
 				.open(false)) {
 			assertNotNull(r);
 			assertEqualsFile(db.getDirectory(), r.getDirectory());
@@ -117,14 +117,14 @@ public class RepositoryCacheTest extends RepositoryTestCase {
 		assertFalse(gitdir.exists());
 
 		try {
-			new FileKey(gitdir, db.getFS()).open(true);
+			new FileKey(gitdir.toPath(), db.getFS()).open(true);
 			fail("incorrectly opened a non existant repository");
 		} catch (RepositoryNotFoundException e) {
 			assertEquals("repository not found: " + gitdir.getCanonicalPath(),
 					e.getMessage());
 		}
 
-		final Repository o = new FileKey(gitdir, db.getFS()).open(false);
+		final Repository o = new FileKey(gitdir.toPath(), db.getFS()).open(false);
 		assertNotNull(o);
 		assertEqualsFile(gitdir, o.getDirectory());
 		assertFalse(gitdir.exists());
@@ -134,20 +134,20 @@ public class RepositoryCacheTest extends RepositoryTestCase {
 	public void testCacheRegisterOpen() throws Exception {
 		final File dir = db.getDirectory();
 		RepositoryCache.register(db);
-		assertSame(db, RepositoryCache.open(FileKey.exact(dir, db.getFS())));
+		assertSame(db, RepositoryCache.open(FileKey.exact(dir.toPath(), db.getFS())));
 
 		assertEquals(".git", dir.getName());
 		final File parent = dir.getParentFile();
-		assertSame(db, RepositoryCache.open(FileKey.lenient(parent, db.getFS())));
+		assertSame(db, RepositoryCache.open(FileKey.lenient(parent.toPath(), db.getFS())));
 	}
 
 	@Test
 	public void testCacheOpen() throws Exception {
-		final FileKey loc = FileKey.exact(db.getDirectory(), db.getFS());
+		final FileKey loc = FileKey.exact(db.getDirectory().toPath(), db.getFS());
 		@SuppressWarnings("resource") // We are testing the close() method
 		final Repository d2 = RepositoryCache.open(loc);
 		assertNotSame(db, d2);
-		assertSame(d2, RepositoryCache.open(FileKey.exact(loc.getFile(), db.getFS())));
+		assertSame(d2, RepositoryCache.open(FileKey.exact(loc.getPath(), db.getFS())));
 		d2.close();
 		d2.close();
 	}
@@ -162,7 +162,7 @@ public class RepositoryCacheTest extends RepositoryTestCase {
 		RepositoryCache.register(db);
 
 		assertThat(RepositoryCache.getRegisteredKeys(),
-				hasItem(FileKey.exact(db.getDirectory(), db.getFS())));
+				hasItem(FileKey.exact(db.getDirectory().toPath(), db.getFS())));
 		assertEquals(1, RepositoryCache.getRegisteredKeys().size());
 	}
 
@@ -170,18 +170,18 @@ public class RepositoryCacheTest extends RepositoryTestCase {
 	public void testUnregister() {
 		RepositoryCache.register(db);
 		RepositoryCache
-				.unregister(FileKey.exact(db.getDirectory(), db.getFS()));
+				.unregister(FileKey.exact(db.getDirectory().toPath(), db.getFS()));
 
 		assertEquals(0, RepositoryCache.getRegisteredKeys().size());
 	}
 
 	@Test
 	public void testRepositoryUsageCount() throws Exception {
-		FileKey loc = FileKey.exact(db.getDirectory(), db.getFS());
+		FileKey loc = FileKey.exact(db.getDirectory().toPath(), db.getFS());
 		@SuppressWarnings("resource") // We are testing the close() method
 		Repository d2 = RepositoryCache.open(loc);
 		assertEquals(1, d2.useCnt.get());
-		RepositoryCache.open(FileKey.exact(loc.getFile(), db.getFS()));
+		RepositoryCache.open(FileKey.exact(loc.getPath(), db.getFS()));
 		assertEquals(2, d2.useCnt.get());
 		d2.close();
 		assertEquals(1, d2.useCnt.get());
@@ -203,12 +203,12 @@ public class RepositoryCacheTest extends RepositoryTestCase {
 
 	@Test
 	public void testRepositoryNotUnregisteringWhenClosing() throws Exception {
-		FileKey loc = FileKey.exact(db.getDirectory(), db.getFS());
+		FileKey loc = FileKey.exact(db.getDirectory().toPath(), db.getFS());
 		@SuppressWarnings("resource") // We are testing the close() method
 		Repository d2 = RepositoryCache.open(loc);
 		assertEquals(1, d2.useCnt.get());
 		assertThat(RepositoryCache.getRegisteredKeys(),
-				hasItem(FileKey.exact(db.getDirectory(), db.getFS())));
+				hasItem(FileKey.exact(db.getDirectory().toPath(), db.getFS())));
 		assertEquals(1, RepositoryCache.getRegisteredKeys().size());
 		d2.close();
 		assertEquals(0, d2.useCnt.get());

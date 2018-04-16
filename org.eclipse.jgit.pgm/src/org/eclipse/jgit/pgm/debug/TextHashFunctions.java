@@ -283,7 +283,7 @@ class TextHashFunctions extends TextBuiltin {
 
 		for (File dir : gitDirs) {
 			RepositoryBuilder rb = new RepositoryBuilder();
-			if (RepositoryCache.FileKey.isGitRepository(dir, FS.DETECTED))
+			if (RepositoryCache.FileKey.isGitRepository(dir.toPath(), FS.DETECTED))
 				rb.setGitDir(dir);
 			else
 				rb.findGitDir(dir);

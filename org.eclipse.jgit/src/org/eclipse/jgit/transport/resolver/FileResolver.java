@@ -45,6 +45,7 @@ package org.eclipse.jgit.transport.resolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,7 +108,7 @@ public class FileResolver<C> implements RepositoryResolver<C> {
 		}
 
 		for (File base : exportBase) {
-			File dir = FileKey.resolve(new File(base, name), FS.DETECTED);
+			Path dir = FileKey.resolve(new File(base, name).toPath(), FS.DETECTED);
 			if (dir == null)
 				continue;
 

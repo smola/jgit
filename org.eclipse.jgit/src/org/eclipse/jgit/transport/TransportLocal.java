@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -127,10 +128,10 @@ class TransportLocal extends Transport implements PackTransport {
 			if (path.isFile())
 				return new TransportBundleFile(local, uri, path);
 
-			File gitDir = RepositoryCache.FileKey.resolve(path, local.getFS());
+			Path gitDir = RepositoryCache.FileKey.resolve(path.toPath(), local.getFS());
 			if (gitDir == null)
 				throw new NoRemoteRepositoryException(uri, JGitText.get().notFound);
-			return new TransportLocal(local, uri, gitDir);
+			return new TransportLocal(local, uri, gitDir.toFile());
 		}
 
 		@Override
@@ -142,11 +143,11 @@ class TransportLocal extends Transport implements PackTransport {
 			if (path.isFile())
 				return new TransportBundleFile(uri, path);
 
-			File gitDir = RepositoryCache.FileKey.resolve(path, FS.DETECTED);
+			Path gitDir = RepositoryCache.FileKey.resolve(path.toPath(), FS.DETECTED);
 			if (gitDir == null)
 				throw new NoRemoteRepositoryException(uri,
 						JGitText.get().notFound);
-			return new TransportLocal(uri, gitDir);
+			return new TransportLocal(uri, gitDir.toFile());
 		}
 	};
 

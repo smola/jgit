@@ -70,7 +70,7 @@ class ReceivePack extends TextBuiltin {
 		final org.eclipse.jgit.transport.ReceivePack rp;
 
 		try {
-			FileKey key = FileKey.lenient(dstGitdir, FS.DETECTED);
+			FileKey key = FileKey.lenient(dstGitdir.toPath(), FS.DETECTED);
 			db = key.open(true /* must exist */);
 		} catch (RepositoryNotFoundException notFound) {
 			throw die(MessageFormat.format(CLIText.get().notAGitRepository,

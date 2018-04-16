@@ -74,7 +74,7 @@ class UploadPack extends TextBuiltin {
 		final org.eclipse.jgit.transport.UploadPack up;
 
 		try {
-			FileKey key = FileKey.lenient(srcGitdir, FS.DETECTED);
+			FileKey key = FileKey.lenient(srcGitdir.toPath(), FS.DETECTED);
 			db = key.open(true /* must exist */);
 		} catch (RepositoryNotFoundException notFound) {
 			throw die(MessageFormat.format(CLIText.get().notAGitRepository,

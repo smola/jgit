@@ -45,6 +45,8 @@ package org.eclipse.jgit.lib;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -137,7 +139,7 @@ public class RepositoryCache {
 	 */
 	public static void register(final Repository db) {
 		if (db.getDirectory() != null) {
-			FileKey key = FileKey.exact(db.getDirectory(), db.getFS());
+			FileKey key = FileKey.exact(db.getDirectory().toPath(), db.getFS());
 			cache.registerRepository(key, db);
 		}
 	}
@@ -153,7 +155,7 @@ public class RepositoryCache {
 	 */
 	public static void close(@NonNull final Repository db) {
 		if (db.getDirectory() != null) {
-			FileKey key = FileKey.exact(db.getDirectory(), db.getFS());
+			FileKey key = FileKey.exact(db.getDirectory().toPath(), db.getFS());
 			cache.unregisterAndCloseRepository(key);
 		}
 	}
@@ -172,7 +174,7 @@ public class RepositoryCache {
 	 */
 	public static void unregister(final Repository db) {
 		if (db.getDirectory() != null) {
-			unregister(FileKey.exact(db.getDirectory(), db.getFS()));
+			unregister(FileKey.exact(db.getDirectory().toPath(), db.getFS()));
 		}
 	}
 
@@ -207,7 +209,7 @@ public class RepositoryCache {
 		if (gitDir == null) {
 			return false;
 		}
-		FileKey key = new FileKey(gitDir, repo.getFS());
+		FileKey key = new FileKey(gitDir.toPath(), repo.getFS());
 		return cache.cacheMap.get(key) == repo;
 	}
 
@@ -367,7 +369,8 @@ public class RepositoryCache {
 				RepositoryNotFoundException;
 	}
 
-	/** Location of a Repository, using the standard java.io.File API. */
+	//TODO: Rename to PathKey?
+	/** Location of a Repository, using the standard {@link java.nio.file.Path} API. */
 	public static class FileKey implements Key {
 		/**
 		 * Obtain a pointer to an exact location on disk.
@@ -381,9 +384,9 @@ public class RepositoryCache {
 		 *            the file system abstraction which will be necessary to
 		 *            perform certain file system operations.
 		 * @return a key for the given directory.
-		 * @see #lenient(File, FS)
+		 * @see #lenient(Path, FS)
 		 */
-		public static FileKey exact(final File directory, FS fs) {
+		public static FileKey exact(final Path directory, FS fs) {
 			return new FileKey(directory, fs);
 		}
 
@@ -404,14 +407,14 @@ public class RepositoryCache {
 		 *            the file system abstraction which will be necessary to
 		 *            perform certain file system operations.
 		 * @return a key for the given directory.
-		 * @see #exact(File, FS)
+		 * @see #exact(Path, FS)
 		 */
-		public static FileKey lenient(final File directory, FS fs) {
-			final File gitdir = resolve(directory, fs);
+		public static FileKey lenient(final Path directory, FS fs) {
+			final Path gitdir = resolve(directory, fs);
 			return new FileKey(gitdir != null ? gitdir : directory, fs);
 		}
 
-		private final File path;
+		private final Path path;
 		private final FS fs;
 
 		/**
@@ -421,29 +424,29 @@ public class RepositoryCache {
 		 *            the file system abstraction which will be necessary to
 		 *            perform certain file system operations.
 		 */
-		protected FileKey(final File directory, FS fs) {
+		protected FileKey(final Path directory, FS fs) {
 			path = canonical(directory);
 			this.fs = fs;
 		}
 
-		private static File canonical(final File path) {
+		private static Path canonical(final Path path) {
 			try {
-				return path.getCanonicalFile();
+				return path.toRealPath();
 			} catch (IOException e) {
-				return path.getAbsoluteFile();
+				return path.toAbsolutePath();
 			}
 		}
 
 		/** @return location supplied to the constructor. */
-		public final File getFile() {
+		public final Path getPath() {
 			return path;
 		}
 
 		@Override
 		public Repository open(final boolean mustExist) throws IOException {
 			if (mustExist && !isGitRepository(path, fs))
-				throw new RepositoryNotFoundException(path);
-			return new FileRepository(path);
+				throw new RepositoryNotFoundException(path.toFile());
+			return new FileRepository(path.toFile());
 		}
 
 		@Override
@@ -476,19 +479,19 @@ public class RepositoryCache {
 		 *         it doesn't look enough like a Git directory to really be a
 		 *         Git directory.
 		 */
-		public static boolean isGitRepository(final File dir, FS fs) {
-			return fs.resolve(dir, "objects").exists() //$NON-NLS-1$
-					&& fs.resolve(dir, "refs").exists() //$NON-NLS-1$
-					&& isValidHead(new File(dir, Constants.HEAD));
+		public static boolean isGitRepository(final Path dir, FS fs) {
+			return Files.exists(dir.resolve("objects")) //$NON-NLS-1$
+					&& Files.exists(dir.resolve("refs")) //$NON-NLS-1$
+					&& isValidHead(dir.resolve(Constants.HEAD));
 		}
 
-		private static boolean isValidHead(final File head) {
+		private static boolean isValidHead(final Path head) {
 			final String ref = readFirstLine(head);
 			return ref != null
 					&& (ref.startsWith("ref: refs/") || ObjectId.isId(ref)); //$NON-NLS-1$
 		}
 
-		private static String readFirstLine(final File head) {
+		private static String readFirstLine(final Path head) {
 			try {
 				final byte[] buf = IO.readFully(head, 4096);
 				int n = buf.length;
@@ -521,16 +524,16 @@ public class RepositoryCache {
 		 * @return the actual directory location if a better match is found;
 		 *         null if there is no suitable match.
 		 */
-		public static File resolve(final File directory, FS fs) {
+		public static Path resolve(final Path directory, FS fs) {
 			if (isGitRepository(directory, fs))
 				return directory;
-			if (isGitRepository(new File(directory, Constants.DOT_GIT), fs))
-				return new File(directory, Constants.DOT_GIT);
+			if (isGitRepository(directory.resolve(Constants.DOT_GIT), fs))
+				return directory.resolve(Constants.DOT_GIT);
 
-			final String name = directory.getName();
-			final File parent = directory.getParentFile();
-			if (isGitRepository(new File(parent, name + Constants.DOT_GIT_EXT), fs))
-				return new File(parent, name + Constants.DOT_GIT_EXT);
+			final String name = directory.getFileName().toString();
+			final Path parent = directory.getParent();
+			if (isGitRepository(parent.resolve(name + Constants.DOT_GIT_EXT), fs))
+				return parent.resolve(name + Constants.DOT_GIT_EXT);
 			return null;
 		}
 	}
