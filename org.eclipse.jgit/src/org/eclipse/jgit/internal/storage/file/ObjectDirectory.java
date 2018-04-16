@@ -216,7 +216,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 	/** {@inheritDoc} */
 	@Override
 	public boolean exists() {
-		return fs.exists(objects);
+		return fs.exists(objects.toPath());
 	}
 
 	/** {@inheritDoc} */
@@ -702,11 +702,11 @@ public class ObjectDirectory extends FileObjectDatabase {
 		// If the object is already in the repository, remove temporary file.
 		//
 		if (unpackedObjectCache.isUnpacked(id)) {
-			FileUtils.delete(tmp, FileUtils.RETRY);
+			FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 			return InsertLooseObjectResult.EXISTS_LOOSE;
 		}
 		if (!createDuplicate && has(id)) {
-			FileUtils.delete(tmp, FileUtils.RETRY);
+			FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 			return InsertLooseObjectResult.EXISTS_PACKED;
 		}
 
@@ -716,7 +716,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 			// that already exists. We can't be sure renameTo() would
 			// fail on all platforms if dst exists, so we check first.
 			//
-			FileUtils.delete(tmp, FileUtils.RETRY);
+			FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 			return InsertLooseObjectResult.EXISTS_LOOSE;
 		}
 		try {
@@ -749,7 +749,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 		}
 
 		if (!createDuplicate && has(id)) {
-			FileUtils.delete(tmp, FileUtils.RETRY);
+			FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 			return InsertLooseObjectResult.EXISTS_PACKED;
 		}
 
@@ -758,7 +758,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 		// either. We really don't know what went wrong, so
 		// fail.
 		//
-		FileUtils.delete(tmp, FileUtils.RETRY);
+		FileUtils.delete(tmp.toPath(), FileUtils.RETRY);
 		return InsertLooseObjectResult.FAILURE;
 	}
 
@@ -1040,7 +1040,7 @@ public class ObjectDirectory extends FileObjectDatabase {
 
 	private AlternateHandle openAlternate(final String location)
 			throws IOException {
-		final File objdir = fs.resolve(objects, location);
+		final File objdir = fs.resolve(objects.toPath(), location).toFile();
 		return openAlternate(objdir);
 	}
 

@@ -211,7 +211,7 @@ public class FileTreeIterator extends WorkingTreeIterator {
 	}
 
 	private Entry[] entries() {
-		return fs.list(directory, fileModeStrategy);
+		return fs.list(directory.toPath(), fileModeStrategy);
 	}
 
 	/**
@@ -332,8 +332,8 @@ public class FileTreeIterator extends WorkingTreeIterator {
 		 */
 		public FileEntry(File f, FS fs, FileModeStrategy fileModeStrategy) {
 			this.fs = fs;
-			f = fs.normalize(f);
-			attributes = fs.getAttributes(f);
+			f = fs.normalize(f.toPath()).toFile();
+			attributes = fs.getAttributes(f.toPath());
 			mode = fileModeStrategy.getMode(f, attributes);
 		}
 
@@ -356,7 +356,7 @@ public class FileTreeIterator extends WorkingTreeIterator {
 				FileModeStrategy fileModeStrategy) {
 			this.fs = fs;
 			this.attributes = attributes;
-			f = fs.normalize(f);
+			f = fs.normalize(f.toPath()).toFile();
 			mode = fileModeStrategy.getMode(f, attributes);
 		}
 
@@ -383,7 +383,7 @@ public class FileTreeIterator extends WorkingTreeIterator {
 		@Override
 		public InputStream openInputStream() throws IOException {
 			if (attributes.isSymbolicLink()) {
-				return new ByteArrayInputStream(fs.readSymLink(getFile())
+				return new ByteArrayInputStream(fs.readSymLink(getFile().toPath())
 						.getBytes(Constants.CHARACTER_ENCODING));
 			} else {
 				return new FileInputStream(getFile());
@@ -429,6 +429,6 @@ public class FileTreeIterator extends WorkingTreeIterator {
 	/** {@inheritDoc} */
 	@Override
 	protected String readSymlinkTarget(Entry entry) throws IOException {
-		return fs.readSymLink(getEntryFile());
+		return fs.readSymLink(getEntryFile().toPath());
 	}
 }

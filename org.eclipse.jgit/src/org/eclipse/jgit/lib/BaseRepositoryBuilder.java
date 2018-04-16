@@ -56,6 +56,7 @@ import static org.eclipse.jgit.lib.Constants.GIT_WORK_TREE_KEY;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -117,9 +118,9 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 					JGitText.get().invalidGitdirRef, dotGit.getAbsolutePath()));
 
 		String gitdirPath = RawParseUtils.decode(content, pathStart, lineEnd);
-		File gitdirFile = fs.resolve(workTree, gitdirPath);
+		Path gitdirFile = fs.resolve(workTree.toPath(), gitdirPath);
 		if (gitdirFile.isAbsolute())
-			return gitdirFile;
+			return gitdirFile.toFile();
 		else
 			return new File(workTree, gitdirPath).getCanonicalFile();
 	}
@@ -681,7 +682,7 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 	 */
 	protected void setupInternals() throws IOException {
 		if (getObjectDirectory() == null && getGitDir() != null)
-			setObjectDirectory(safeFS().resolve(getGitDir(), "objects")); //$NON-NLS-1$
+			setObjectDirectory(safeFS().resolve(getGitDir().toPath(), "objects").toFile()); //$NON-NLS-1$
 	}
 
 	/**
@@ -713,7 +714,7 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 			// the user file, as these parameters must be unique to this
 			// repository and not inherited from other files.
 			//
-			File path = safeFS().resolve(getGitDir(), Constants.CONFIG);
+			File path = safeFS().resolve(getGitDir().toPath(), Constants.CONFIG).toFile();
 			FileBasedConfig cfg = new FileBasedConfig(path, safeFS());
 			try {
 				cfg.load();
@@ -736,7 +737,7 @@ public class BaseRepositoryBuilder<B extends BaseRepositoryBuilder, R extends Re
 		String path = cfg.getString(CONFIG_CORE_SECTION, null,
 				CONFIG_KEY_WORKTREE);
 		if (path != null)
-			return safeFS().resolve(getGitDir(), path).getCanonicalFile();
+			return safeFS().resolve(getGitDir().toPath(), path).toRealPath().toFile();
 
 		// If core.bare is set, honor its value. Assume workTree is
 		// the parent directory of the repository.

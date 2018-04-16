@@ -386,7 +386,7 @@ public class StashCreateCommand extends GitCommand<RevCommit> {
 						String repoRelativePath = entry.getPathString();
 						File file = new File(repo.getWorkTree(),
 								repoRelativePath);
-						FileUtils.delete(file);
+						FileUtils.delete(file.toPath());
 						deletedFiles.add(repoRelativePath);
 					}
 				}

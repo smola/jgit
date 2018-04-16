@@ -85,7 +85,7 @@ public class DirCacheCheckoutTestWithSymlinks extends RepositoryTestCase {
 		// Create a symlink pointing to the parent folder of the repo and open
 		// the repo with the path containing the symlink
 		File reposSymlink = createTempFile();
-		FileUtils.createSymLink(reposSymlink, repos.getPath());
+		FileUtils.createSymLink(reposSymlink.toPath(), repos.getPath());
 
 		Repository symlinkDB = FileRepositoryBuilder.create(new File(
 				reposSymlink, "repo/.git"));

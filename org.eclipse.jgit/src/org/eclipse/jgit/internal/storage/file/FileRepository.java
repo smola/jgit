@@ -197,7 +197,7 @@ public class FileRepository extends Repository {
 		userConfig = SystemReader.getInstance().openUserConfig(systemConfig,
 				getFS());
 		repoConfig = new FileBasedConfig(userConfig, getFS().resolve(
-				getDirectory(), Constants.CONFIG),
+				getDirectory().toPath(), Constants.CONFIG).toFile(),
 				getFS());
 
 		loadSystemConfig();
@@ -294,7 +294,7 @@ public class FileRepository extends Repository {
 				HideDotFiles.DOTGITONLY);
 		if (hideDotFiles != HideDotFiles.FALSE && !isBare()
 				&& getDirectory().getName().startsWith(".")) //$NON-NLS-1$
-			getFS().setHidden(getDirectory(), true);
+			getFS().setHidden(getDirectory().toPath(), true);
 		refs.create();
 		objectDatabase.create();
 
@@ -309,12 +309,12 @@ public class FileRepository extends Repository {
 		if (getFS().supportsExecute()) {
 			File tmp = File.createTempFile("try", "execute", getDirectory()); //$NON-NLS-1$ //$NON-NLS-2$
 
-			getFS().setExecute(tmp, true);
-			final boolean on = getFS().canExecute(tmp);
+			getFS().setExecute(tmp.toPath(), true);
+			final boolean on = getFS().canExecute(tmp.toPath());
 
-			getFS().setExecute(tmp, false);
-			final boolean off = getFS().canExecute(tmp);
-			FileUtils.delete(tmp);
+			getFS().setExecute(tmp.toPath(), false);
+			final boolean off = getFS().canExecute(tmp.toPath());
+			FileUtils.delete(tmp.toPath());
 
 			fileMode = on && !off;
 		} else {
@@ -325,9 +325,9 @@ public class FileRepository extends Repository {
 		if (getFS().supportsSymlinks()) {
 			File tmp = new File(getDirectory(), "tmplink"); //$NON-NLS-1$
 			try {
-				getFS().createSymLink(tmp, "target"); //$NON-NLS-1$
+				getFS().createSymLink(tmp.toPath(), "target"); //$NON-NLS-1$
 				symLinks = null;
-				FileUtils.delete(tmp);
+				FileUtils.delete(tmp.toPath());
 			} catch (IOException e) {
 				// Normally a java.nio.file.FileSystemException
 			}

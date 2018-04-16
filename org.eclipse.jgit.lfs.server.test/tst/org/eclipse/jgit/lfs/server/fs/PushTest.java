@@ -118,9 +118,9 @@ public class PushTest extends LfsServerTest {
 	public void cleanup() throws Exception {
 		remoteDb.close();
 		localDb.getRepository().close();
-		FileUtils.delete(localDb.getRepository().getWorkTree(),
+		FileUtils.delete(localDb.getRepository().getWorkTree().toPath(),
 				FileUtils.RECURSIVE);
-		FileUtils.delete(remoteDb.getDirectory(), FileUtils.RECURSIVE);
+		FileUtils.delete(remoteDb.getDirectory().toPath(), FileUtils.RECURSIVE);
 	}
 
 	@Test

@@ -262,9 +262,9 @@ public class FileBasedConfig extends StoredConfig {
 			throws ConfigInvalidException {
 		final File file;
 		if (relPath.startsWith("~/")) { //$NON-NLS-1$
-			file = fs.resolve(fs.userHome(), relPath.substring(2));
+			file = fs.resolve(fs.userHome(), relPath.substring(2)).toFile();
 		} else {
-			file = fs.resolve(configFile.getParentFile(), relPath);
+			file = fs.resolve(configFile.getParentFile().toPath(), relPath).toFile();
 		}
 
 		if (!file.exists()) {

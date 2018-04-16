@@ -1952,7 +1952,7 @@ public abstract class Repository implements AutoCloseable {
 				fos.write(msg.getBytes(Constants.CHARACTER_ENCODING));
 			}
 		} else {
-			FileUtils.delete(msgFile, FileUtils.SKIP_MISSING);
+			FileUtils.delete(msgFile.toPath(), FileUtils.SKIP_MISSING);
 		}
 	}
 
@@ -2000,7 +2000,7 @@ public abstract class Repository implements AutoCloseable {
 				}
 			}
 		} else {
-			FileUtils.delete(headsFile, FileUtils.SKIP_MISSING);
+			FileUtils.delete(headsFile.toPath(), FileUtils.SKIP_MISSING);
 		}
 	}
 

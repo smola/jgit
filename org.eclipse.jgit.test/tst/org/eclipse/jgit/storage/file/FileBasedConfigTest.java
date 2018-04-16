@@ -88,7 +88,7 @@ public class FileBasedConfigTest {
 
 	@After
 	public void tearDown() throws Exception {
-		FileUtils.delete(trash, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
+		FileUtils.delete(trash.toPath(), FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 	}
 
 	@Test
@@ -226,7 +226,7 @@ public class FileBasedConfigTest {
 
 		final File file = createFile(bos.toByteArray(), "repo");
 		final FS fs = FS.DETECTED.newInstance();
-		fs.setUserHome(includedFile.getParentFile());
+		fs.setUserHome(includedFile.getParentFile().toPath());
 
 		final FileBasedConfig config = new FileBasedConfig(file, fs);
 		config.load();

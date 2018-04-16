@@ -303,7 +303,7 @@ public abstract class JGitTestUtil {
 	public static void deleteTrashFile(final Repository db,
 			final String name) throws IOException {
 		File path = new File(db.getWorkTree(), name);
-		FileUtils.delete(path);
+		FileUtils.delete(path.toPath());
 	}
 
 	/**
@@ -321,7 +321,7 @@ public abstract class JGitTestUtil {
 	 */
 	public static Path writeLink(Repository db, String link,
 			String target) throws Exception {
-		return FileUtils.createSymLink(new File(db.getWorkTree(), link),
+		return FileUtils.createSymLink(new File(db.getWorkTree(), link).toPath(),
 				target);
 	}
 

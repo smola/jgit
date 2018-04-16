@@ -180,7 +180,7 @@ public class ApplyCommand extends GitCommand<ApplyResult> {
 			try {
 				File parent = f.getParentFile();
 				FileUtils.mkdirs(parent, true);
-				FileUtils.createNewFile(f);
+				FileUtils.createNewFile(f.toPath());
 			} catch (IOException e) {
 				throw new PatchApplyException(MessageFormat.format(
 						JGitText.get().createNewFileFailed, f), e);
@@ -262,7 +262,7 @@ public class ApplyCommand extends GitCommand<ApplyResult> {
 			fw.write(sb.toString());
 		}
 
-		getRepository().getFS().setExecute(f, fh.getNewMode() == FileMode.EXECUTABLE_FILE);
+		getRepository().getFS().setExecute(f.toPath(), fh.getNewMode() == FileMode.EXECUTABLE_FILE);
 	}
 
 	private static boolean isChanged(List<String> ol, List<String> nl) {

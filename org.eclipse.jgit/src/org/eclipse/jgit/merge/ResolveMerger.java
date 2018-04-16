@@ -885,7 +885,7 @@ public class ResolveMerger extends ThreeWayMerger {
 					? FileMode.REGULAR_FILE : FileMode.fromBits(newMode));
 			if (mergedFile != null) {
 				dce.setLastModified(
-						nonNullRepo().getFS().lastModified(mergedFile));
+						nonNullRepo().getFS().lastModified(mergedFile.toPath()));
 				dce.setLength((int) mergedFile.length());
 			}
 			dce.setObjectId(insertMergeResult(rawMerged, attributes));
@@ -915,7 +915,7 @@ public class ResolveMerger extends ThreeWayMerger {
 		FS fs = nonNullRepo().getFS();
 		File of = new File(workTree, tw.getPathString());
 		File parentFolder = of.getParentFile();
-		if (!fs.exists(parentFolder)) {
+		if (!fs.exists(parentFolder.toPath())) {
 			parentFolder.mkdirs();
 		}
 		EolStreamType streamType = EolStreamTypeUtil.detectStreamType(

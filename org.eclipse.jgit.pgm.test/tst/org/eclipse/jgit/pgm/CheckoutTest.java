@@ -218,7 +218,7 @@ public class CheckoutTest extends CLIRepositoryTestCase {
 					db.getWorkTree(), "a"), db.getFS());
 			assertEquals(FileMode.REGULAR_FILE, entry.getMode());
 
-			FileUtils.delete(fileA);
+			FileUtils.delete(fileA.toPath());
 
 			git.checkout().setName(branch_1.getName()).call();
 
@@ -278,7 +278,7 @@ public class CheckoutTest extends CLIRepositoryTestCase {
 					db.getWorkTree(), "a"), db.getFS());
 			assertEquals(FileMode.TREE, entry.getMode());
 
-			FileUtils.delete(folderA, FileUtils.RECURSIVE);
+			FileUtils.delete(folderA.toPath(), FileUtils.RECURSIVE);
 			writeTrashFile("a", "b");
 
 			entry = new FileTreeIterator.FileEntry(new File(db.getWorkTree(), "a"),
@@ -333,7 +333,7 @@ public class CheckoutTest extends CLIRepositoryTestCase {
 					db.getWorkTree(), "a"), db.getFS());
 			assertEquals(FileMode.TREE, entry.getMode());
 
-			FileUtils.delete(folderA, FileUtils.RECURSIVE);
+			FileUtils.delete(folderA.toPath(), FileUtils.RECURSIVE);
 
 			git.checkout().setName(branch_1.getName()).call();
 
@@ -484,7 +484,7 @@ public class CheckoutTest extends CLIRepositoryTestCase {
 					db.getWorkTree(), "a"), db.getFS());
 			assertEquals(FileMode.REGULAR_FILE, entry.getMode());
 
-			FileUtils.delete(fileA);
+			FileUtils.delete(fileA.toPath());
 
 			git.checkout().setName(branch_1.getName()).call();
 

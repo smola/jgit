@@ -1309,14 +1309,14 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 			if (path != null) {
 				File excludesfile;
 				if (path.startsWith("~/")) //$NON-NLS-1$
-					excludesfile = fs.resolve(fs.userHome(), path.substring(2));
+					excludesfile = fs.resolve(fs.userHome(), path.substring(2)).toFile();
 				else
-					excludesfile = fs.resolve(null, path);
+					excludesfile = fs.resolve(null, path).toFile();
 				loadRulesFromFile(r, excludesfile);
 			}
 
-			File exclude = fs.resolve(repository.getDirectory(),
-					Constants.INFO_EXCLUDE);
+			File exclude = fs.resolve(repository.getDirectory().toPath(),
+					Constants.INFO_EXCLUDE).toFile();
 			loadRulesFromFile(r, exclude);
 
 			return r.getRules().isEmpty() ? null : r;
@@ -1324,7 +1324,7 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 
 		private static void loadRulesFromFile(IgnoreNode r, File exclude)
 				throws FileNotFoundException, IOException {
-			if (FS.DETECTED.exists(exclude)) {
+			if (FS.DETECTED.exists(exclude.toPath())) {
 				try (FileInputStream in = new FileInputStream(exclude)) {
 					r.parse(in);
 				}

@@ -565,7 +565,7 @@ class WalkFetchConnection extends BaseFetchConnection {
 				//
 				try {
 					if (pack.tmpIdx != null)
-						FileUtils.delete(pack.tmpIdx);
+						FileUtils.delete(pack.tmpIdx.toPath());
 				} catch (IOException e) {
 					throw new TransportException(e.getMessage(), e);
 				}
@@ -861,7 +861,7 @@ class WalkFetchConnection extends BaseFetchConnection {
 					pm.update(cnt / 1024);
 				}
 			} catch (IOException err) {
-				FileUtils.delete(tmpIdx);
+				FileUtils.delete(tmpIdx.toPath());
 				throw err;
 			} finally {
 				s.in.close();
@@ -869,14 +869,14 @@ class WalkFetchConnection extends BaseFetchConnection {
 			pm.endTask();
 
 			if (pm.isCancelled()) {
-				FileUtils.delete(tmpIdx);
+				FileUtils.delete(tmpIdx.toPath());
 				return;
 			}
 
 			try {
 				index = PackIndex.open(tmpIdx);
 			} catch (IOException e) {
-				FileUtils.delete(tmpIdx);
+				FileUtils.delete(tmpIdx.toPath());
 				throw e;
 			}
 		}

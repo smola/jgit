@@ -139,7 +139,7 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 			// wait until filesystem timer ticks. This raises probability that
 			// the next statements are executed in the same tick as the
 			// filesystem timer
-			fsTick(null);
+			fsTick((File)null);
 
 			// create a Temp file in the packs folder and trigger a rescan of
 			// the packs folder. This lets receivingDB think it has scanned the

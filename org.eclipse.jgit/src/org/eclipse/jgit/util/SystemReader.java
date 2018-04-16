@@ -49,6 +49,7 @@ package org.eclipse.jgit.util;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.DateFormat;
@@ -99,7 +100,7 @@ public abstract class SystemReader {
 
 		@Override
 		public FileBasedConfig openSystemConfig(Config parent, FS fs) {
-			File configFile = fs.getGitSystemConfig();
+			Path configFile = fs.getGitSystemConfig();
 			if (configFile == null) {
 				return new FileBasedConfig(null, fs) {
 					@Override
@@ -114,12 +115,12 @@ public abstract class SystemReader {
 					}
 				};
 			}
-			return new FileBasedConfig(parent, configFile, fs);
+			return new FileBasedConfig(parent, configFile.toFile(), fs);
 		}
 
 		@Override
 		public FileBasedConfig openUserConfig(Config parent, FS fs) {
-			final File home = fs.userHome();
+			final File home = fs.userHome().toFile();
 			return new FileBasedConfig(parent, new File(home, ".gitconfig"), fs); //$NON-NLS-1$
 		}
 

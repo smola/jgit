@@ -171,18 +171,18 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 	public void testCheckoutWithNonDeletedFiles() throws Exception {
 		File testFile = writeTrashFile("temp", "");
 		try (FileInputStream fis = new FileInputStream(testFile)) {
-			FileUtils.delete(testFile);
+			FileUtils.delete(testFile.toPath());
 			return;
 		} catch (IOException e) {
 			// the test makes only sense if deletion of
 			// a file with open stream fails
 		}
-		FileUtils.delete(testFile);
+		FileUtils.delete(testFile.toPath());
 		CheckoutCommand co = git.checkout();
 		// delete Test.txt in branch test
 		testFile = new File(db.getWorkTree(), "Test.txt");
 		assertTrue(testFile.exists());
-		FileUtils.delete(testFile);
+		FileUtils.delete(testFile.toPath());
 		assertFalse(testFile.exists());
 		git.add().addFilepattern("Test.txt");
 		git.commit().setMessage("Delete Test.txt").setAll(true).call();
@@ -270,7 +270,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		git.commit().setMessage("Added dir").call();
 
 		File dir = new File(db.getWorkTree(), "dir");
-		FileUtils.delete(dir, FileUtils.RECURSIVE);
+		FileUtils.delete(dir.toPath(), FileUtils.RECURSIVE);
 
 		git.checkout().addPath("dir/a.txt").call();
 		assertTrue(a.exists());
@@ -525,7 +525,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 					+ " world\nX\nYU\nJK\n");
 			add.addFilepattern("Test_" + i + ".txt");
 		}
-		fsTick(null);
+		fsTick((File)null);
 		add.call();
 		RevCommit c1 = git.commit().setMessage("add some lines").call();
 
@@ -535,7 +535,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 					+ " world\nX\nY\n");
 			add.addFilepattern("Test_" + i + ".txt");
 		}
-		fsTick(null);
+		fsTick((File)null);
 		add.call();
 		git.commit().setMessage("add more").call();
 

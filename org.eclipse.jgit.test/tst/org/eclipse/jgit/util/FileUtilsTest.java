@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
 import java.util.regex.Matcher;
@@ -87,25 +88,25 @@ public class FileUtilsTest {
 
 	@After
 	public void tearDown() throws Exception {
-		FileUtils.delete(trash, FileUtils.RECURSIVE | FileUtils.RETRY);
+		FileUtils.delete(trash.toPath(), FileUtils.RECURSIVE | FileUtils.RETRY);
 	}
 
 	@Test
 	public void testDeleteFile() throws IOException {
 		File f = new File(trash, "test");
-		FileUtils.createNewFile(f);
-		FileUtils.delete(f);
+		FileUtils.createNewFile(f.toPath());
+		FileUtils.delete(f.toPath());
 		assertFalse(f.exists());
 
 		try {
-			FileUtils.delete(f);
+			FileUtils.delete(f.toPath());
 			fail("deletion of non-existing file must fail");
 		} catch (IOException e) {
 			// expected
 		}
 
 		try {
-			FileUtils.delete(f, FileUtils.SKIP_MISSING);
+			FileUtils.delete(f.toPath(), FileUtils.SKIP_MISSING);
 		} catch (IOException e) {
 			fail("deletion of non-existing file must not fail with option SKIP_MISSING");
 		}
@@ -115,22 +116,22 @@ public class FileUtilsTest {
 	public void testDeleteRecursive() throws IOException {
 		File f1 = new File(trash, "test/test/a");
 		FileUtils.mkdirs(f1.getParentFile());
-		FileUtils.createNewFile(f1);
+		FileUtils.createNewFile(f1.toPath());
 		File f2 = new File(trash, "test/test/b");
-		FileUtils.createNewFile(f2);
+		FileUtils.createNewFile(f2.toPath());
 		File d = new File(trash, "test");
-		FileUtils.delete(d, FileUtils.RECURSIVE);
+		FileUtils.delete(d.toPath(), FileUtils.RECURSIVE);
 		assertFalse(d.exists());
 
 		try {
-			FileUtils.delete(d, FileUtils.RECURSIVE);
+			FileUtils.delete(d.toPath(), FileUtils.RECURSIVE);
 			fail("recursive deletion of non-existing directory must fail");
 		} catch (IOException e) {
 			// expected
 		}
 
 		try {
-			FileUtils.delete(d, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
+			FileUtils.delete(d.toPath(), FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 		} catch (IOException e) {
 			fail("recursive deletion of non-existing directory must not fail with option SKIP_MISSING");
 		}
@@ -145,17 +146,17 @@ public class FileUtilsTest {
 		File d2 = new File(trash, "test/test");
 		File d3 = new File(trash, "test/b");
 		FileUtils.mkdirs(f1.getParentFile());
-		FileUtils.createNewFile(f2);
-		FileUtils.createNewFile(f1);
+		FileUtils.createNewFile(f2.toPath());
+		FileUtils.createNewFile(f1.toPath());
 		FileUtils.mkdirs(d3);
 
 		// Cannot delete hierarchy since files exist
 		try {
-			FileUtils.delete(d1, FileUtils.EMPTY_DIRECTORIES_ONLY);
+			FileUtils.delete(d1.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY);
 			fail("delete should fail");
 		} catch (IOException e1) {
 			try {
-				FileUtils.delete(d1, FileUtils.EMPTY_DIRECTORIES_ONLY|FileUtils.RECURSIVE);
+				FileUtils.delete(d1.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY|FileUtils.RECURSIVE);
 				fail("delete should fail");
 			} catch (IOException e2) {
 				// Everything still there
@@ -173,7 +174,7 @@ public class FileUtilsTest {
 
 		// Shall not delete hierarchy without recursive
 		try {
-			FileUtils.delete(d1, FileUtils.EMPTY_DIRECTORIES_ONLY);
+			FileUtils.delete(d1.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY);
 			fail("delete should fail");
 		} catch (IOException e2) {
 			// Everything still there
@@ -183,28 +184,28 @@ public class FileUtilsTest {
 		}
 
 		// Now delete the empty hierarchy
-		FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY
+		FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 				| FileUtils.RECURSIVE);
 		assertFalse(d2.exists());
 
 		// Will fail to delete non-existing without SKIP_MISSING
 		try {
-			FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY);
+			FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY);
 			fail("Cannot delete non-existent entity");
 		} catch (IOException e) {
 			// ok
 		}
 
 		// ..with SKIP_MISSING there is no exception
-		FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY
+		FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 				| FileUtils.SKIP_MISSING);
-		FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY
+		FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 				| FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 
 		// essentially the same, using IGNORE_ERRORS
-		FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY
+		FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 				| FileUtils.IGNORE_ERRORS);
-		FileUtils.delete(d2, FileUtils.EMPTY_DIRECTORIES_ONLY
+		FileUtils.delete(d2.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 				| FileUtils.RECURSIVE | FileUtils.IGNORE_ERRORS);
 	}
 
@@ -220,11 +221,11 @@ public class FileUtilsTest {
 		FileUtils.mkdirs(d2);
 		FileUtils.mkdirs(d3);
 		FileUtils.mkdirs(d4);
-		FileUtils.createNewFile(f1);
+		FileUtils.createNewFile(f1.toPath());
 
 		// Cannot delete hierarchy since file exists
 		try {
-			FileUtils.delete(d1, FileUtils.EMPTY_DIRECTORIES_ONLY
+			FileUtils.delete(d1.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY
 					| FileUtils.RECURSIVE);
 			fail("delete should fail");
 		} catch (IOException e) {
@@ -242,9 +243,9 @@ public class FileUtilsTest {
 			throws IOException {
 		File f1 = new File(trash, "test/test/a");
 		FileUtils.mkdirs(f1.getParentFile());
-		FileUtils.createNewFile(f1);
+		FileUtils.createNewFile(f1.toPath());
 		try {
-			FileUtils.delete(f1, FileUtils.EMPTY_DIRECTORIES_ONLY);
+			FileUtils.delete(f1.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY);
 			fail("delete should fail");
 		} catch (IOException e) {
 			assertTrue(f1.exists());
@@ -269,7 +270,7 @@ public class FileUtilsTest {
 
 		assertTrue(d.delete());
 		File f = new File(trash, "test");
-		FileUtils.createNewFile(f);
+		FileUtils.createNewFile(f.toPath());
 		try {
 			FileUtils.mkdir(d);
 			fail("creation of directory having same path as existing file must"
@@ -299,9 +300,9 @@ public class FileUtilsTest {
 		FileUtils.mkdirs(d, true);
 		assertTrue(d.exists() && d.isDirectory());
 
-		FileUtils.delete(root, FileUtils.RECURSIVE);
+		FileUtils.delete(root.toPath(), FileUtils.RECURSIVE);
 		File f = new File(trash, "test");
-		FileUtils.createNewFile(f);
+		FileUtils.createNewFile(f.toPath());
 		try {
 			FileUtils.mkdirs(d);
 			fail("creation of directory having path conflicting with existing"
@@ -315,17 +316,17 @@ public class FileUtilsTest {
 	@Test
 	public void testCreateNewFile() throws IOException {
 		File f = new File(trash, "x");
-		FileUtils.createNewFile(f);
+		FileUtils.createNewFile(f.toPath());
 		assertTrue(f.exists());
 
 		try {
-			FileUtils.createNewFile(f);
+			FileUtils.createNewFile(f.toPath());
 			fail("creation of already existing file must fail");
 		} catch (IOException e) {
 			// expected
 		}
 
-		FileUtils.delete(f);
+		FileUtils.delete(f.toPath());
 	}
 
 	@Test
@@ -334,7 +335,7 @@ public class FileUtilsTest {
 		FileUtils.mkdir(t);
 		FileUtils.mkdir(new File(t, "d"));
 		FileUtils.mkdir(new File(new File(t, "d"), "e"));
-		FileUtils.delete(t, FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE);
+		FileUtils.delete(t.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE);
 		assertFalse(t.exists());
 	}
 
@@ -344,10 +345,10 @@ public class FileUtilsTest {
 		FileUtils.mkdir(t);
 		FileUtils.mkdir(new File(t, "d"));
 		File f = new File(new File(t, "d"), "f");
-		FileUtils.createNewFile(f);
+		FileUtils.createNewFile(f.toPath());
 		FileUtils.mkdir(new File(new File(t, "d"), "e"));
 		try {
-			FileUtils.delete(t, FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE);
+			FileUtils.delete(t.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE);
 			fail("expected failure to delete f");
 		} catch (IOException e) {
 			assertTrue(e.getMessage().endsWith(f.getAbsolutePath()));
@@ -361,10 +362,10 @@ public class FileUtilsTest {
 		FileUtils.mkdir(t);
 		FileUtils.mkdir(new File(t, "d"));
 		File f = new File(new File(t, "d"), "f");
-		FileUtils.createNewFile(f);
+		FileUtils.createNewFile(f.toPath());
 		File e = new File(new File(t, "d"), "e");
 		FileUtils.mkdir(e);
-		FileUtils.delete(t, FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE
+		FileUtils.delete(t.toPath(), FileUtils.EMPTY_DIRECTORIES_ONLY | FileUtils.RECURSIVE
 				| FileUtils.IGNORE_ERRORS);
 		// Should have deleted as much as possible, but not all
 		assertTrue(t.exists());
@@ -444,8 +445,8 @@ public class FileUtilsTest {
 		FS fs = FS.DETECTED;
 		// show test as ignored if the FS doesn't support symlinks
 		Assume.assumeTrue(fs.supportsSymlinks());
-		fs.createSymLink(new File(trash, "x"), "y");
-		String target = fs.readSymLink(new File(trash, "x"));
+		fs.createSymLink(new File(trash, "x").toPath(), "y");
+		String target = fs.readSymLink(new File(trash, "x").toPath());
 		assertEquals("y", target);
 	}
 
@@ -454,7 +455,7 @@ public class FileUtilsTest {
 		FS fs = FS.DETECTED;
 		// show test as ignored if the FS doesn't support symlinks
 		Assume.assumeTrue(fs.supportsSymlinks());
-		File file = new File(trash, "x");
+		Path file = new File(trash, "x").toPath();
 		fs.createSymLink(file, "y");
 		String target = fs.readSymLink(file);
 		assertEquals("y", target);
@@ -534,9 +535,9 @@ public class FileUtilsTest {
 		File file = new File(dir, "file");
 		File link = new File(trash, "link");
 		FileUtils.mkdirs(dir);
-		FileUtils.createNewFile(file);
-		fs.createSymLink(link, "dir");
-		FileUtils.delete(link, FileUtils.RECURSIVE);
+		FileUtils.createNewFile(file.toPath());
+		fs.createSymLink(link.toPath(), "dir");
+		FileUtils.delete(link.toPath(), FileUtils.RECURSIVE);
 		assertFalse(link.exists());
 		assertTrue(dir.exists());
 		assertTrue(file.exists());

@@ -50,6 +50,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -99,7 +100,7 @@ public class CommitCommandTest extends RepositoryTestCase {
 			}
 
 			@Override
-			public boolean setExecute(File f, boolean canExec) {
+			public boolean setExecute(Path f, boolean canExec) {
 				return true;
 			}
 
@@ -119,12 +120,12 @@ public class CommitCommandTest extends RepositoryTestCase {
 			}
 
 			@Override
-			protected File discoverGitExe() {
+			protected Path discoverGitExe() {
 				return null;
 			}
 
 			@Override
-			public boolean canExecute(File f) {
+			public boolean canExecute(Path f) {
 				return true;
 			}
 
@@ -151,7 +152,7 @@ public class CommitCommandTest extends RepositoryTestCase {
 			}
 
 			@Override
-			public boolean setExecute(File f, boolean canExec) {
+			public boolean setExecute(Path f, boolean canExec) {
 				return false;
 			}
 
@@ -171,12 +172,12 @@ public class CommitCommandTest extends RepositoryTestCase {
 			}
 
 			@Override
-			protected File discoverGitExe() {
+			protected Path discoverGitExe() {
 				return null;
 			}
 
 			@Override
-			public boolean canExecute(File f) {
+			public boolean canExecute(Path f) {
 				return false;
 			}
 

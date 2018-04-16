@@ -164,7 +164,7 @@ public class NetRC {
 	}
 
 	private static File getDefaultFile() {
-		File home = FS.DETECTED.userHome();
+		File home = FS.DETECTED.userHome().toFile();
 		File netrc = new File(home, ".netrc"); //$NON-NLS-1$
 		if (netrc.exists())
 			return netrc;

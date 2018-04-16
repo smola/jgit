@@ -519,9 +519,9 @@ public class ObjectDirectoryPackParser extends PackParser {
 		} catch (IOException err) {
 			keep.unlock();
 			if (finalPack.exists())
-				FileUtils.delete(finalPack);
+				FileUtils.delete(finalPack.toPath());
 			if (finalIdx.exists())
-				FileUtils.delete(finalIdx);
+				FileUtils.delete(finalIdx.toPath());
 			throw err;
 		}
 

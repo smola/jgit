@@ -535,13 +535,13 @@ public class DirCacheCheckout {
 			for (int i = removed.size() - 1; i >= 0; i--) {
 				String r = removed.get(i);
 				file = new File(repo.getWorkTree(), r);
-				if (!file.delete() && repo.getFS().exists(file)) {
+				if (!file.delete() && repo.getFS().exists(file.toPath())) {
 					// The list of stuff to delete comes from the index
 					// which will only contain a directory if it is
 					// a submodule, in which case we shall not attempt
 					// to delete it. A submodule is not empty, so it
 					// is safe to check this after a failed delete.
-					if (!repo.getFS().isDirectory(file)) {
+					if (!repo.getFS().isDirectory(file.toPath())) {
 						nonDeleted.add(i);
 						toBeDeleted.add(r);
 					}
@@ -611,7 +611,7 @@ public class DirCacheCheckout {
 		File gitlinkDir = new File(repo.getWorkTree(), path);
 		FileUtils.mkdirs(gitlinkDir, true);
 		FS fs = repo.getFS();
-		entry.setLastModified(fs.lastModified(gitlinkDir));
+		entry.setLastModified(fs.lastModified(gitlinkDir.toPath()));
 	}
 
 	private static ArrayList<String> filterOut(ArrayList<String> strings,
@@ -1425,11 +1425,11 @@ public class DirCacheCheckout {
 			byte[] bytes = ol.getBytes();
 			String target = RawParseUtils.decode(bytes);
 			if (deleteRecursive && f.isDirectory()) {
-				FileUtils.delete(f, FileUtils.RECURSIVE);
+				FileUtils.delete(f.toPath(), FileUtils.RECURSIVE);
 			}
-			fs.createSymLink(f, target);
+			fs.createSymLink(f.toPath(), target);
 			entry.setLength(bytes.length);
-			entry.setLastModified(fs.lastModified(f));
+			entry.setLastModified(fs.lastModified(f.toPath()));
 			return;
 		}
 
@@ -1476,16 +1476,16 @@ public class DirCacheCheckout {
 
 		if (opt.isFileMode() && fs.supportsExecute()) {
 			if (FileMode.EXECUTABLE_FILE.equals(entry.getRawMode())) {
-				if (!fs.canExecute(tmpFile))
-					fs.setExecute(tmpFile, true);
+				if (!fs.canExecute(tmpFile.toPath()))
+					fs.setExecute(tmpFile.toPath(), true);
 			} else {
-				if (fs.canExecute(tmpFile))
-					fs.setExecute(tmpFile, false);
+				if (fs.canExecute(tmpFile.toPath()))
+					fs.setExecute(tmpFile.toPath(), false);
 			}
 		}
 		try {
 			if (deleteRecursive && f.isDirectory()) {
-				FileUtils.delete(f, FileUtils.RECURSIVE);
+				FileUtils.delete(f.toPath(), FileUtils.RECURSIVE);
 			}
 			FileUtils.rename(tmpFile, f, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
@@ -1495,10 +1495,10 @@ public class DirCacheCheckout {
 					e);
 		} finally {
 			if (tmpFile.exists()) {
-				FileUtils.delete(tmpFile);
+				FileUtils.delete(tmpFile.toPath());
 			}
 		}
-		entry.setLastModified(fs.lastModified(f));
+		entry.setLastModified(fs.lastModified(f.toPath()));
 	}
 
 	// Run an external filter command

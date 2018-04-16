@@ -71,7 +71,7 @@ public class DownloadTest extends LfsServerTest {
 		Path f = Paths.get(getTempDirectory().toString(), "download");
 		long len = getContent(id, f);
 		assertEquals(TEXT.length(), len);
-		FileUtils.delete(f.toFile(), FileUtils.RETRY);
+		FileUtils.delete(f, FileUtils.RETRY);
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public class DownloadTest extends LfsServerTest {
 				MessageFormat.format("downloaded 10 MiB random data in {0}ms",
 						(System.nanoTime() - start) / 1e6));
 		assertEquals(expectedLen, len);
-		FileUtils.delete(f.toFile(), FileUtils.RETRY);
+		FileUtils.delete(f, FileUtils.RETRY);
 
 	}
 

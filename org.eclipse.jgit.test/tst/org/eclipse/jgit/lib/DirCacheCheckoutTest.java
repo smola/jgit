@@ -992,7 +992,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(linkName, "a", fname, "a"));
 
 			// replace link with empty directory
-			FileUtils.delete(link);
+			FileUtils.delete(link.toPath());
 			FileUtils.mkdir(link);
 			assertTrue("Link must be a directory now", link.isDirectory());
 
@@ -1040,7 +1040,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(linkName, "a", fname, "a"));
 
 			// replace link with directory containing only directories, no files
-			FileUtils.delete(link);
+			FileUtils.delete(link.toPath());
 			FileUtils.mkdirs(new File(link, "dummyDir"));
 			assertTrue("Link must be a directory now", link.isDirectory());
 
@@ -1090,7 +1090,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(linkName, "a", fname, "a"));
 
 			// replace link with directory containing only directories, no files
-			FileUtils.delete(link);
+			FileUtils.delete(link.toPath());
 
 			// create but do not add a file in the new directory to the index
 			writeTrashFile(linkName + "/dir1", "file1", "c");
@@ -1147,7 +1147,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(linkName, "a", fname, "a"));
 
 			// replace link with directory containing only directories, no files
-			FileUtils.delete(link);
+			FileUtils.delete(link.toPath());
 
 			// create and add a file in the new directory to the index
 			writeTrashFile(linkName + "/dir1", "file1", "c");
@@ -1196,7 +1196,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			git.commit().setMessage("Added file").call();
 
 			// replace file with empty directory
-			FileUtils.delete(file);
+			FileUtils.delete(file.toPath());
 			FileUtils.mkdir(file);
 			assertTrue("File must be a directory now", file.isDirectory());
 			assertWorkDir(mkmap(fname, "/"));
@@ -1230,7 +1230,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			git.commit().setMessage("Added file").call();
 
 			// replace file with directory containing only directories, no files
-			FileUtils.delete(file);
+			FileUtils.delete(file.toPath());
 			FileUtils.mkdirs(new File(file, "dummyDir"));
 			assertTrue("File must be a directory now", file.isDirectory());
 			assertFalse("Must not delete non empty directory", file.delete());
@@ -1268,7 +1268,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(fname, "a"));
 
 			// replace file with directory containing only directories, no files
-			FileUtils.delete(file);
+			FileUtils.delete(file.toPath());
 
 			// create but do not add a file in the new directory to the index
 			writeTrashFile(fname + "/dir1", "file1", "c");
@@ -1317,7 +1317,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			assertWorkDir(mkmap(fname, "a"));
 
 			// replace file with directory containing only directories, no files
-			FileUtils.delete(file);
+			FileUtils.delete(file.toPath());
 
 			// create and add a file in the new directory to the index
 			writeTrashFile(fname + "/dir", "file1", "c");
@@ -1484,7 +1484,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			recorder.assertNoEvent();
 
 			// replace file with directory containing files
-			FileUtils.delete(file);
+			FileUtils.delete(file.toPath());
 
 			// create and add a file in the new directory to the index
 			writeTrashFile(fname + "/dir1", "file1", "c");
@@ -1546,7 +1546,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			recorder.assertNoEvent();
 
 			// replace link with directory containing files
-			FileUtils.delete(link);
+			FileUtils.delete(link.toPath());
 
 			// create and add a file in the new directory to the index
 			writeTrashFile(linkName + "/dir1", "file1", "c");
@@ -1592,13 +1592,13 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			File file = writeTrashFile("file.txt", "a");
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit1").call();
-			assertFalse(db.getFS().canExecute(file));
+			assertFalse(db.getFS().canExecute(file.toPath()));
 
 			// Create branch
 			git.branchCreate().setName("b1").call();
 
 			// Make file executable
-			db.getFS().setExecute(file, true);
+			db.getFS().setExecute(file.toPath(), true);
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit2").call();
 			recorder.assertNoEvent();
@@ -1607,7 +1607,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			Status status = git.status().call();
 			assertTrue(status.getModified().isEmpty());
 			assertTrue(status.getChanged().isEmpty());
-			assertTrue(db.getFS().canExecute(file));
+			assertTrue(db.getFS().canExecute(file.toPath()));
 
 			// Switch branches
 			git.checkout().setName("b1").call();
@@ -1616,7 +1616,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			status = git.status().call();
 			assertTrue(status.getModified().isEmpty());
 			assertTrue(status.getChanged().isEmpty());
-			assertFalse(db.getFS().canExecute(file));
+			assertFalse(db.getFS().canExecute(file.toPath()));
 			recorder.assertEvent(new String[] { "file.txt" },
 					ChangeRecorder.EMPTY);
 		} finally {
@@ -1640,13 +1640,13 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			File file = writeTrashFile("file.txt", "a");
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit1").call();
-			assertFalse(db.getFS().canExecute(file));
+			assertFalse(db.getFS().canExecute(file.toPath()));
 
 			// Create branch
 			git.branchCreate().setName("b1").call();
 
 			// Make file executable
-			db.getFS().setExecute(file, true);
+			db.getFS().setExecute(file.toPath(), true);
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit2").call();
 
@@ -1654,7 +1654,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			Status status = git.status().call();
 			assertTrue(status.getModified().isEmpty());
 			assertTrue(status.getChanged().isEmpty());
-			assertTrue(db.getFS().canExecute(file));
+			assertTrue(db.getFS().canExecute(file.toPath()));
 
 			writeTrashFile("file.txt", "b");
 
@@ -1693,7 +1693,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			File file = writeTrashFile("file.txt", "a");
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit1").call();
-			assertFalse(db.getFS().canExecute(file));
+			assertFalse(db.getFS().canExecute(file.toPath()));
 
 			// Create branch
 			git.branchCreate().setName("b1").call();
@@ -1705,7 +1705,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 
 			// stage a mode change
 			writeTrashFile("file.txt", "a");
-			db.getFS().setExecute(file, true);
+			db.getFS().setExecute(file.toPath(), true);
 			git.add().addFilepattern("file.txt").call();
 
 			// dirty the file
@@ -1747,25 +1747,25 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			File file = writeTrashFile("file.txt", "a");
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit1").call();
-			assertFalse(db.getFS().canExecute(file));
+			assertFalse(db.getFS().canExecute(file.toPath()));
 
 			// Create branch
 			git.branchCreate().setName("b1").call();
 
 			// Create second commit with executable file
 			file = writeTrashFile("file.txt", "b");
-			db.getFS().setExecute(file, true);
+			db.getFS().setExecute(file.toPath(), true);
 			git.add().addFilepattern("file.txt").call();
 			git.commit().setMessage("commit2").call();
 
 			// stage the same content as in the branch we want to switch to
 			writeTrashFile("file.txt", "a");
-			db.getFS().setExecute(file, false);
+			db.getFS().setExecute(file.toPath(), false);
 			git.add().addFilepattern("file.txt").call();
 
 			// dirty the file
 			writeTrashFile("file.txt", "c");
-			db.getFS().setExecute(file, true);
+			db.getFS().setExecute(file.toPath(), true);
 
 			assertEquals("[file.txt, mode:100644, content:a]",
 					indexState(CONTENT));
@@ -1801,13 +1801,13 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 			File file1 = writeTrashFile("file1.txt", "a");
 			git.add().addFilepattern("file1.txt").call();
 			git.commit().setMessage("commit1").call();
-			assertFalse(db.getFS().canExecute(file1));
+			assertFalse(db.getFS().canExecute(file1.toPath()));
 
 			// Add second file
 			File file2 = writeTrashFile("file2.txt", "b");
 			git.add().addFilepattern("file2.txt").call();
 			git.commit().setMessage("commit2").call();
-			assertFalse(db.getFS().canExecute(file2));
+			assertFalse(db.getFS().canExecute(file2.toPath()));
 			recorder.assertNoEvent();
 
 			// Create branch from first commit
@@ -1818,7 +1818,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 
 			// Change content and file mode in working directory and index
 			file1 = writeTrashFile("file1.txt", "c");
-			db.getFS().setExecute(file1, true);
+			db.getFS().setExecute(file1.toPath(), true);
 			git.add().addFilepattern("file1.txt").call();
 
 			// Switch back to 'master'
@@ -1836,7 +1836,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 	public void testFolderFileConflict() throws Exception {
 		RevCommit headCommit = commitFile("f/a", "initial content", "master");
 		RevCommit checkoutCommit = commitFile("f/a", "side content", "side");
-		FileUtils.delete(new File(db.getWorkTree(), "f"), FileUtils.RECURSIVE);
+		FileUtils.delete(new File(db.getWorkTree(), "f").toPath(), FileUtils.RECURSIVE);
 		writeTrashFile("f", "file instead of folder");
 		new DirCacheCheckout(db, headCommit.getTree(), db.lockDirCache(),
 				checkoutCommit.getTree()).checkout();
@@ -1871,7 +1871,7 @@ public class DirCacheCheckoutTest extends RepositoryTestCase {
 		RevCommit headCommit = commitFile("f/a", "initial content", "master");
 		commitFile("b", "side content", "side");
 		RevCommit checkoutCommit = commitFile("f/a", "side content", "side");
-		FileUtils.delete(new File(db.getWorkTree(), "f"), FileUtils.RECURSIVE);
+		FileUtils.delete(new File(db.getWorkTree(), "f").toPath(), FileUtils.RECURSIVE);
 		writeTrashFile("f", "file instead of a folder");
 		writeTrashFile("b", "changed content");
 

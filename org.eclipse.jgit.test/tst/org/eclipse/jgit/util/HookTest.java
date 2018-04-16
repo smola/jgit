@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -70,7 +71,7 @@ public class HookTest extends RepositoryTestCase {
 
 		assertNull("no hook should be installed",
 				FS.DETECTED.findHook(db, PreCommitHook.NAME));
-		File hookFile = writeHookFile(PreCommitHook.NAME,
+		Path hookFile = writeHookFile(PreCommitHook.NAME,
 				"#!/bin/bash\necho \"test $1 $2\"");
 		assertEquals("expected to find pre-commit hook", hookFile,
 				FS.DETECTED.findHook(db, PreCommitHook.NAME));
@@ -82,7 +83,7 @@ public class HookTest extends RepositoryTestCase {
 
 		assertNull("no hook should be installed",
 				FS.DETECTED.findHook(db, PostCommitHook.NAME));
-		File hookFile = writeHookFile(PostCommitHook.NAME,
+		Path hookFile = writeHookFile(PostCommitHook.NAME,
 				"#!/bin/bash\necho \"test $1 $2\"");
 		assertEquals("expected to find post-commit hook", hookFile,
 				FS.DETECTED.findHook(db, PostCommitHook.NAME));
@@ -241,12 +242,12 @@ public class HookTest extends RepositoryTestCase {
 		}
 	}
 
-	private File writeHookFile(final String name, final String data)
+	private Path writeHookFile(final String name, final String data)
 			throws IOException {
 		File path = new File(db.getWorkTree() + "/.git/hooks/", name);
 		JGitTestUtil.write(path, data);
-		FS.DETECTED.setExecute(path, true);
-		return path;
+		FS.DETECTED.setExecute(path.toPath(), true);
+		return path.toPath();
 	}
 
 	private void assumeSupportedPlatform() {

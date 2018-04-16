@@ -141,7 +141,7 @@ public class IndexDiffWithSymlinkTest extends LocalDiskRepositoryTestCase {
 		String stdErr;
 		ProcessBuilder builder = new ProcessBuilder(cmd);
 		builder.environment().put("HOME",
-				FS.DETECTED.userHome().getAbsolutePath());
+				FS.DETECTED.userHome().toAbsolutePath().toString());
 		builder.directory(testDir);
 		Process process = builder.start();
 		try (InputStream stdOutStream = process.getInputStream();

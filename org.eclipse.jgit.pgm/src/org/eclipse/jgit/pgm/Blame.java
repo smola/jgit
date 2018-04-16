@@ -183,7 +183,7 @@ class Blame extends TextBuiltin {
 						generator.push(null, dc.getEntry(entry).getObjectId());
 
 					File inTree = new File(db.getWorkTree(), file);
-					if (db.getFS().isFile(inTree))
+					if (db.getFS().isFile(inTree.toPath()))
 						generator.push(null, new RawText(inTree));
 				}
 			}

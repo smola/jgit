@@ -107,13 +107,13 @@ public class FS_Win32 extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean canExecute(final File f) {
+	public boolean canExecute(final Path f) {
 		return false;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean setExecute(final File f, final boolean canExec) {
+	public boolean setExecute(final Path f, final boolean canExec) {
 		return false;
 	}
 
@@ -131,12 +131,12 @@ public class FS_Win32 extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public Entry[] list(File directory, FileModeStrategy fileModeStrategy) {
+	public Entry[] list(Path directory, FileModeStrategy fileModeStrategy) {
 		List<Entry> result = new ArrayList<>();
 		FS fs = this;
 		boolean checkExecutable = fs.supportsExecute();
 		try {
-			Files.walkFileTree(directory.toPath(),
+			Files.walkFileTree(directory,
 					EnumSet.noneOf(FileVisitOption.class), 1,
 					new SimpleFileVisitor<Path>() {
 						@Override
@@ -174,9 +174,9 @@ public class FS_Win32 extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	protected File discoverGitExe() {
+	protected Path discoverGitExe() {
 		String path = SystemReader.getInstance().getenv("PATH"); //$NON-NLS-1$
-		File gitExe = searchPath(path, "git.exe", "git.cmd"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path gitExe = searchPath(path, "git.exe", "git.cmd"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if (gitExe == null) {
 			if (searchPath(path, "bash.exe") != null) { //$NON-NLS-1$
@@ -203,7 +203,7 @@ public class FS_Win32 extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	protected File userHomeImpl() {
+	protected Path userHomeImpl() {
 		String home = SystemReader.getInstance().getenv("HOME"); //$NON-NLS-1$
 		if (home != null)
 			return resolve(null, home);
@@ -211,12 +211,12 @@ public class FS_Win32 extends FS {
 		if (homeDrive != null) {
 			String homePath = SystemReader.getInstance().getenv("HOMEPATH"); //$NON-NLS-1$
 			if (homePath != null)
-				return new File(homeDrive, homePath);
+				return java.nio.file.Paths.get(homeDrive, homePath);
 		}
 
 		String homeShare = SystemReader.getInstance().getenv("HOMESHARE"); //$NON-NLS-1$
 		if (homeShare != null)
-			return new File(homeShare);
+			return java.nio.file.Paths.get(homeShare);
 
 		return super.userHomeImpl();
 	}
@@ -247,7 +247,7 @@ public class FS_Win32 extends FS {
 		try {
 			tempFile = File.createTempFile("tempsymlinktarget", ""); //$NON-NLS-1$ //$NON-NLS-2$
 			File linkName = new File(tempFile.getParentFile(), "tempsymlink"); //$NON-NLS-1$
-			createSymLink(linkName, tempFile.getPath());
+			createSymLink(linkName.toPath(), tempFile.getPath());
 			supportSymlinks = Boolean.TRUE;
 			linkName.delete();
 		} catch (IOException | UnsupportedOperationException
@@ -256,7 +256,7 @@ public class FS_Win32 extends FS {
 		} finally {
 			if (tempFile != null)
 				try {
-					FileUtils.delete(tempFile);
+					FileUtils.delete(tempFile.toPath());
 				} catch (IOException e) {
 					throw new RuntimeException(e); // panic
 				}
@@ -265,7 +265,7 @@ public class FS_Win32 extends FS {
 
 	/** {@inheritDoc} */
 	@Override
-	public Attributes getAttributes(File path) {
-		return FileUtils.getFileAttributesBasic(this, path);
+	public Attributes getAttributes(Path path) {
+		return FileUtils.getFileAttributesBasic(this, path.toFile());
 	}
 }

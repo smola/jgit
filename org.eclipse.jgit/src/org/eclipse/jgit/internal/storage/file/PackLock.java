@@ -99,6 +99,6 @@ public class PackLock {
 	 *             if deletion of .keep file failed
 	 */
 	public void unlock() throws IOException {
-		FileUtils.delete(keepFile);
+		FileUtils.delete(keepFile.toPath());
 	}
 }

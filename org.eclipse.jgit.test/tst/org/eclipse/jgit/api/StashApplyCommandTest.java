@@ -312,7 +312,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 		File added = writeTrashFile(path, "content2");
 		assertTrue(added.exists());
 		git.add().addFilepattern(path).call();
-		FileUtils.delete(added);
+		FileUtils.delete(added.toPath());
 		assertFalse(added.exists());
 
 		RevCommit stashed = git.stashCreate().call();
@@ -341,7 +341,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	public void workingDirectoryDeleteIndexEdit() throws Exception {
 		writeTrashFile(PATH, "content2");
 		git.add().addFilepattern(PATH).call();
-		FileUtils.delete(committedFile);
+		FileUtils.delete(committedFile.toPath());
 		assertFalse(committedFile.exists());
 
 		RevCommit stashed = git.stashCreate().call();
