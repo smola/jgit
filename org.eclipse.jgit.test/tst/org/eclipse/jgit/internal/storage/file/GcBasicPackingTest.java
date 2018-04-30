@@ -49,6 +49,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -295,7 +297,7 @@ public class GcBasicPackingTest extends GcTestCase {
 		configureGc(gc, false).setPrunePreserved(true);
 		gc.gc();
 
-		assertFalse(repo.getObjectDatabase().getPreservedDirectory().exists());
+		assertFalse(Files.exists(repo.getObjectDatabase().getPreservedDirectory()));
 	}
 
 	private void testPreserveOldPacks() throws Exception {
@@ -319,12 +321,12 @@ public class GcBasicPackingTest extends GcTestCase {
 		configureGc(gc, false).setPreserveOldPacks(true);
 		gc.gc();
 
-		File oldPackDir = repo.getObjectDatabase().getPreservedDirectory();
+		Path oldPackDir = repo.getObjectDatabase().getPreservedDirectory();
 		String oldPackFileName = oldPackfile.getName();
 		String oldPackName = oldPackFileName.substring(0,
 				oldPackFileName.lastIndexOf('.')) + ".old-pack";  //$NON-NLS-1$
-		File preservePackFile = new File(oldPackDir, oldPackName);
-		assertTrue(preservePackFile.exists());
+		Path preservePackFile = oldPackDir.resolve(oldPackName);
+		assertTrue(Files.exists(preservePackFile));
 	}
 
 	private PackConfig configureGc(GC myGc, boolean aggressive) {

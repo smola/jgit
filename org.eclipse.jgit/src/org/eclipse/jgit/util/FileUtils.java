@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.Constants;
@@ -169,7 +170,10 @@ public class FileUtils {
 			return;
 
 		if ((options & RECURSIVE) != 0 && fs.isDirectory(f)) {
-			final List<Path> items = Files.list(f).collect(Collectors.toList());
+			final List<Path> items;
+			try (Stream<Path> s = Files.list(f)) {
+				items = s.collect(Collectors.toList());
+			}
 			List<Path> files = new ArrayList<>();
 			List<Path> dirs = new ArrayList<>();
 			for (Path c : items)
@@ -317,6 +321,24 @@ public class FileUtils {
 		throw new IOException(
 				MessageFormat.format(JGitText.get().renameFileFailed,
 						src.getAbsolutePath(), dst.getAbsolutePath()));
+	}
+
+	/**
+	 * Lists a directory.
+	 *
+	 * @param d
+	 *         the directory
+	 * @return array of entries or null if there is an error listing the directory.
+	 * @deprecated Use {@link Files#list(Path)}
+	 */
+	public static String[] list(Path d) {
+		try (Stream<Path> s = Files.list(d)) {
+			return s
+					.map(p -> p.getFileName().toString())
+					.toArray(String[]::new);
+		} catch (IOException ex) {
+			return null;
+		}
 	}
 
 	/**

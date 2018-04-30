@@ -774,7 +774,7 @@ public class TestRepository<R extends Repository> {
 				w.append(p.getPackFile().getName());
 				w.append('\n');
 			}
-			writeFile(new File(new File(fr.getObjectDatabase().getDirectory(),
+			writeFile(new File(new File(fr.getObjectDatabase().getDirectory().toFile(),
 					"info"), "packs"), Constants.encodeASCII(w.toString()));
 		}
 	}
@@ -926,7 +926,7 @@ public class TestRepository<R extends Repository> {
 				idx.setReadOnly();
 			}
 
-			odb.openPack(pack);
+			odb.openPack(pack.toPath());
 			updateServerInfo();
 			prunePacked(odb);
 		}
@@ -935,12 +935,12 @@ public class TestRepository<R extends Repository> {
 	private static void prunePacked(ObjectDirectory odb) throws IOException {
 		for (PackFile p : odb.getPacks()) {
 			for (MutableEntry e : p)
-				FileUtils.delete(odb.fileFor(e.toObjectId()).toPath());
+				FileUtils.delete(odb.fileFor(e.toObjectId()));
 		}
 	}
 
 	private static File nameFor(ObjectDirectory odb, ObjectId name, String t) {
-		File packdir = odb.getPackDirectory();
+		File packdir = odb.getPackDirectory().toFile();
 		return new File(packdir, "pack-" + name.name() + t);
 	}
 

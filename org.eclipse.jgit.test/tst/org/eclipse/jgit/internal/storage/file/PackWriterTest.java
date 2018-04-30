@@ -139,9 +139,9 @@ public class PackWriterTest extends SampleDataRepositoryTestCase {
 		config = new PackConfig(db);
 
 		dst = createBareRepository();
-		File alt = new File(dst.getObjectDatabase().getDirectory(), "info/alternates");
+		File alt = new File(dst.getObjectDatabase().getDirectory().toFile(), "info/alternates");
 		alt.getParentFile().mkdirs();
-		write(alt, db.getObjectDatabase().getDirectory().getAbsolutePath() + "\n");
+		write(alt, db.getObjectDatabase().getDirectory().toFile().getAbsolutePath() + "\n");
 	}
 
 	@Override
@@ -337,7 +337,7 @@ public class PackWriterTest extends SampleDataRepositoryTestCase {
 	 */
 	@Test
 	public void testWritePack2DeltasCRC32Copy() throws IOException {
-		final File packDir = db.getObjectDatabase().getPackDirectory();
+		final File packDir = db.getObjectDatabase().getPackDirectory().toFile();
 		final File crc32Pack = new File(packDir,
 				"pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.pack");
 		final File crc32Idx = new File(packDir,
@@ -710,7 +710,7 @@ public class PackWriterTest extends SampleDataRepositoryTestCase {
 
 			pw.preparePack(NullProgressMonitor.INSTANCE, ow, want, have, NONE);
 			String id = pw.computeName().getName();
-			File packdir = repo.getObjectDatabase().getPackDirectory();
+			File packdir = repo.getObjectDatabase().getPackDirectory().toFile();
 			File packFile = new File(packdir, "pack-" + id + ".pack");
 			try (FileOutputStream packOS = new FileOutputStream(packFile)) {
 				pw.writePack(NullProgressMonitor.INSTANCE,

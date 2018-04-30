@@ -475,8 +475,8 @@ public class RefDirectory extends RefDatabase {
 
 		private boolean scanTree(String prefix, Path dir) {
 			String[] entries;
-			try {
-				entries = Files.list(dir)
+			try (Stream<Path> s = Files.list(dir)) {
+				entries = s
 						.filter((path) -> LockFile.FILTER.accept(null, path.getFileName().toString()))
 						.map((path) -> path.getFileName().toString())
 						.toArray(String[]::new);

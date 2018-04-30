@@ -53,12 +53,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -228,11 +226,16 @@ public class FileRepository extends Repository {
 			refs = new RefDirectory(this);
 		}
 
+		Path[] altDirectories = null;
+		if (options.getAlternateObjectDirectories() != null) {
+            altDirectories = Arrays.stream(options.getAlternateObjectDirectories()).map(File::toPath).toArray(Path[]::new);
+        }
+
 		objectDatabase = new ObjectDirectory(repoConfig, //
-				options.getObjectDirectory(), //
-				options.getAlternateObjectDirectories(), //
+				options.getObjectDirectory().toPath(), //
+				altDirectories, //
 				getFS(), //
-				new File(getDirectory(), Constants.SHALLOW));
+				new File(getDirectory(), Constants.SHALLOW).toPath());
 
 		if (objectDatabase.exists()) {
 			if (repositoryFormatVersion > 1)
@@ -378,7 +381,7 @@ public class FileRepository extends Repository {
 	 * @return the directory containing the objects owned by this repository.
 	 */
 	public File getObjectsDirectory() {
-		return objectDatabase.getDirectory();
+		return objectDatabase.getDirectory().toFile();
 	}
 
 	/** {@inheritDoc} */
@@ -533,7 +536,7 @@ public class FileRepository extends Repository {
 	 *             a Git pack file index.
 	 */
 	public void openPack(final File pack) throws IOException {
-		objectDatabase.openPack(pack);
+		objectDatabase.openPack(pack.toPath());
 	}
 
 	/** {@inheritDoc} */

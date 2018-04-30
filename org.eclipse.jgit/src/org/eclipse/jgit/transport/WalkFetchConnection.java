@@ -829,7 +829,7 @@ class WalkFetchConnection extends BaseFetchConnection {
 
 			if (local.getObjectDatabase() instanceof ObjectDirectory) {
 				tmpIdx = new File(((ObjectDirectory) local.getObjectDatabase())
-								.getDirectory(),
+								.getDirectory().toFile(),
 						"walk-" + tn + ".walkidx"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}

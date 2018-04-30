@@ -54,6 +54,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
@@ -237,7 +238,7 @@ public class ReceivePackAdvertiseRefsHookTest extends LocalDiskRepositoryTestCas
 		//
 		ObjectDirectory od = (ObjectDirectory) src.getObjectDatabase();
 		assertTrue("has b", src.hasObject(b));
-		assertFalse("b not loose", od.fileFor(b).exists());
+		assertFalse("b not loose", Files.exists(od.fileFor(b)));
 
 		// Now use b but in a different commit than what is hidden.
 		//

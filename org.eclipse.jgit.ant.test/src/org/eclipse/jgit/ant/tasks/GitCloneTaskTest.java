@@ -104,7 +104,7 @@ public class GitCloneTaskTest extends LocalDiskRepositoryTestCase {
 		task.setUri("file://" + directory.getAbsolutePath());
 		task.execute();
 
-		assertTrue(RepositoryCache.FileKey.isGitRepository(new File(dest, ".git"), FS.DETECTED));
+		assertTrue(RepositoryCache.FileKey.isGitRepository(dest.toPath().resolve(".git"), FS.DETECTED));
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class GitCloneTaskTest extends LocalDiskRepositoryTestCase {
 		task.setBare(true);
 		task.execute();
 
-		assertTrue(RepositoryCache.FileKey.isGitRepository(dest, FS.DETECTED));
+		assertTrue(RepositoryCache.FileKey.isGitRepository(dest.toPath(), FS.DETECTED));
 	}
 
 	private void enableLogging() {

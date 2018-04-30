@@ -44,8 +44,8 @@
 
 package org.eclipse.jgit.internal.storage.file;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,6 +62,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectIdOwnerMap;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.FileUtils;
 
 /**
  * The cached instance of an {@link ObjectDirectory}.
@@ -93,14 +94,14 @@ class CachedObjectDirectory extends FileObjectDatabase {
 
 	private ObjectIdOwnerMap<UnpackedObjectId> scanLoose() {
 		ObjectIdOwnerMap<UnpackedObjectId> m = new ObjectIdOwnerMap<>();
-		File objects = wrapped.getDirectory();
-		String[] fanout = objects.list();
+		Path objects = wrapped.getDirectory();
+		String[] fanout = FileUtils.list(objects);
 		if (fanout == null)
 			return m;
 		for (String d : fanout) {
 			if (d.length() != 2)
 				continue;
-			String[] entries = new File(objects, d).list();
+			String[] entries = FileUtils.list(objects.resolve(d));
 			if (entries == null)
 				continue;
 			for (String e : entries) {
@@ -130,12 +131,12 @@ class CachedObjectDirectory extends FileObjectDatabase {
 	}
 
 	@Override
-	File getDirectory() {
+	Path getDirectory() {
 		return wrapped.getDirectory();
 	}
 
 	@Override
-	File fileFor(AnyObjectId id) {
+	Path fileFor(AnyObjectId id) {
 		return wrapped.fileFor(id);
 	}
 
@@ -254,7 +255,7 @@ class CachedObjectDirectory extends FileObjectDatabase {
 	}
 
 	@Override
-	InsertLooseObjectResult insertUnpackedObject(File tmp, ObjectId objectId,
+	InsertLooseObjectResult insertUnpackedObject(Path tmp, ObjectId objectId,
 			boolean createDuplicate) throws IOException {
 		InsertLooseObjectResult result = wrapped.insertUnpackedObject(tmp,
 				objectId, createDuplicate);
@@ -272,7 +273,7 @@ class CachedObjectDirectory extends FileObjectDatabase {
 	}
 
 	@Override
-	PackFile openPack(File pack) throws IOException {
+	PackFile openPack(Path pack) throws IOException {
 		return wrapped.openPack(pack);
 	}
 

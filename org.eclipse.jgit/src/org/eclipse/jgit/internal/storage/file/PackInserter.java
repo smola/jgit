@@ -224,7 +224,7 @@ public class PackInserter extends ObjectInserter {
 		objectMap = new ObjectIdOwnerMap<>();
 
 		rollback = true;
-		tmpPack = File.createTempFile("insert_", ".pack", db.getDirectory()); //$NON-NLS-1$ //$NON-NLS-2$
+		tmpPack = File.createTempFile("insert_", ".pack", db.getDirectory().toFile()); //$NON-NLS-1$ //$NON-NLS-2$
 		packOut = new PackStream(tmpPack);
 
 		// Write the header as though it were a single object pack.
@@ -272,7 +272,7 @@ public class PackInserter extends ObjectInserter {
 		File tmpIdx = idxFor(tmpPack);
 		writePackIndex(tmpIdx, packHash, objectList);
 
-		File realPack = new File(db.getPackDirectory(),
+		File realPack = new File(db.getPackDirectory().toFile(),
 				"pack-" + computeName(objectList).name() + ".pack"); //$NON-NLS-1$ //$NON-NLS-2$
 		db.closeAllPackHandles(realPack);
 		tmpPack.setReadOnly();
@@ -296,7 +296,7 @@ public class PackInserter extends ObjectInserter {
 					realIdx), e);
 		}
 
-		db.openPack(realPack);
+		db.openPack(realPack.toPath());
 		rollback = false;
 		clear();
 	}

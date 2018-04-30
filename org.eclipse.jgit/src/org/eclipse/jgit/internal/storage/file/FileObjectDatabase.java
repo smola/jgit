@@ -43,8 +43,8 @@
 
 package org.eclipse.jgit.internal.storage.file;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 
@@ -88,9 +88,9 @@ abstract class FileObjectDatabase extends ObjectDatabase {
 	abstract void selectObjectRepresentation(PackWriter packer,
 			ObjectToPack otp, WindowCursor curs) throws IOException;
 
-	abstract File getDirectory();
+	abstract Path getDirectory();
 
-	abstract File fileFor(AnyObjectId id);
+	abstract Path fileFor(AnyObjectId id);
 
 	abstract ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
 			throws IOException;
@@ -101,10 +101,10 @@ abstract class FileObjectDatabase extends ObjectDatabase {
 	abstract ObjectLoader openLooseObject(WindowCursor curs, AnyObjectId id)
 			throws IOException;
 
-	abstract InsertLooseObjectResult insertUnpackedObject(File tmp,
+	abstract InsertLooseObjectResult insertUnpackedObject(Path tmp,
 			ObjectId id, boolean createDuplicate) throws IOException;
 
-	abstract PackFile openPack(File pack) throws IOException;
+	abstract PackFile openPack(Path pack) throws IOException;
 
 	abstract Collection<PackFile> getPacks();
 }

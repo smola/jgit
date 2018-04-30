@@ -75,11 +75,11 @@ public class AlternatesTest extends SampleDataRepositoryTestCase {
 
 	private void setAlternate(FileRepository from, FileRepository to)
 			throws IOException {
-		File alt = new File(from.getObjectDatabase().getDirectory(),
+		File alt = new File(from.getObjectDatabase().getDirectory().toFile(),
 				"info/alternates");
 		alt.getParentFile().mkdirs();
-		File fromDir = from.getObjectDatabase().getDirectory();
-		File toDir = to.getObjectDatabase().getDirectory();
+		File fromDir = from.getObjectDatabase().getDirectory().toFile();
+		File toDir = to.getObjectDatabase().getDirectory().toFile();
 		Path relative = fromDir.toPath().relativize(toDir.toPath());
 		write(alt, relative.toString() + "\n");
 	}

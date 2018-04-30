@@ -414,7 +414,7 @@ public class GC {
 	private void removeOldPack(File packFile, String packName, PackExt ext,
 			int deleteOptions) throws IOException {
 		if (pconfig != null && pconfig.isPreserveOldPacks()) {
-			File oldPackDir = repo.getObjectDatabase().getPreservedDirectory();
+			File oldPackDir = repo.getObjectDatabase().getPreservedDirectory().toFile();
 			FileUtils.mkdir(oldPackDir, true);
 
 			String oldPackName = "pack-" + packName + ".old-" + ext.getExtension();  //$NON-NLS-1$ //$NON-NLS-2$
@@ -431,7 +431,7 @@ public class GC {
 	private void prunePreserved() {
 		if (pconfig != null && pconfig.isPrunePreserved()) {
 			try {
-				FileUtils.delete(repo.getObjectDatabase().getPreservedDirectory().toPath(),
+				FileUtils.delete(repo.getObjectDatabase().getPreservedDirectory(),
 						FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 			} catch (IOException e) {
 				// Deletion of the preserved pack files failed. Silently return.
@@ -520,7 +520,7 @@ public class GC {
 							}
 						}
 						if (found)
-							FileUtils.delete(objdb.fileFor(id).toPath(), FileUtils.RETRY
+							FileUtils.delete(objdb.fileFor(id), FileUtils.RETRY
 									| FileUtils.SKIP_MISSING
 									| FileUtils.IGNORE_ERRORS);
 					}
@@ -971,7 +971,7 @@ public class GC {
 	 * </p>
 	 */
 	private void deleteOrphans() {
-		Path packDir = repo.getObjectDatabase().getPackDirectory().toPath();
+		Path packDir = repo.getObjectDatabase().getPackDirectory();
 		List<String> fileNames = null;
 		try (Stream<Path> files = Files.list(packDir)) {
 			fileNames = files.map(path -> path.getFileName().toString())
@@ -1004,7 +1004,7 @@ public class GC {
 	}
 
 	private void deleteTempPacksIdx() {
-		Path packDir = repo.getObjectDatabase().getPackDirectory().toPath();
+		Path packDir = repo.getObjectDatabase().getPackDirectory();
 		Instant threshold = Instant.now().minus(1, ChronoUnit.DAYS);
 		try (DirectoryStream<Path> stream =
 				Files.newDirectoryStream(packDir, "gc_*_tmp")) { //$NON-NLS-1$
@@ -1177,7 +1177,7 @@ public class GC {
 
 			// create temporary files
 			String id = pw.computeName().getName();
-			File packdir = repo.getObjectDatabase().getPackDirectory();
+			File packdir = repo.getObjectDatabase().getPackDirectory().toFile();
 			tmpPack = File.createTempFile("gc_", ".pack_tmp", packdir); //$NON-NLS-1$ //$NON-NLS-2$
 			final String tmpBase = tmpPack.getName()
 					.substring(0, tmpPack.getName().lastIndexOf('.'));
@@ -1256,7 +1256,7 @@ public class GC {
 				}
 			}
 
-			return repo.getObjectDatabase().openPack(realPack);
+			return repo.getObjectDatabase().openPack(realPack.toPath());
 		} finally {
 			if (tmpPack != null && tmpPack.exists())
 				tmpPack.delete();
@@ -1268,7 +1268,7 @@ public class GC {
 	}
 
 	private File nameFor(String name, String ext) {
-		File packdir = repo.getObjectDatabase().getPackDirectory();
+		File packdir = repo.getObjectDatabase().getPackDirectory().toFile();
 		return new File(packdir, "pack-" + name + ext); //$NON-NLS-1$
 	}
 

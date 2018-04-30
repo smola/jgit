@@ -680,7 +680,7 @@ public class CheckoutTest extends CLIRepositoryTestCase {
 			writeTrashFile("a", "Hello world a");
 			assertFalse(Files.isSymbolicLink(path));
 			assertEquals("[]", Arrays.toString(execute("git checkout -- a")));
-			assertEquals("link_a", FileUtils.readSymLink(path.toFile()));
+			assertEquals("link_a", FileUtils.readSymLink(path));
 			assertTrue(Files.isSymbolicLink(path));
 		}
 	}
