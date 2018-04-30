@@ -109,7 +109,7 @@ public class SubmoduleDeinitTest extends RepositoryTestCase {
 		File submoduleDir = assertSubmoduleIsInitialized();
 		SubmoduleWalk generator;
 
-		write(new File(submoduleDir, "untracked"), "untracked");
+		write(new File(submoduleDir, "untracked").toPath(), "untracked");
 
 		SubmoduleDeinitResult result = runDeinit(new SubmoduleDeinitCommand(db).addPath("sub"));
 		assertEquals(path, result.getPath());
@@ -153,7 +153,7 @@ public class SubmoduleDeinitTest extends RepositoryTestCase {
 	private File assertSubmoduleIsInitialized() throws IOException {
 		SubmoduleWalk generator = SubmoduleWalk.forIndex(db);
 		assertTrue(generator.next());
-		File submoduleDir = new File(db.getWorkTree(), generator.getPath());
+		File submoduleDir = new File(db.getWorkTree().toFile(), generator.getPath());
 		assertTrue(submoduleDir.isDirectory());
 		assertNotEquals(0, submoduleDir.list().length);
 		return submoduleDir;
@@ -171,7 +171,7 @@ public class SubmoduleDeinitTest extends RepositoryTestCase {
 
 		File submoduleDir = assertSubmoduleIsInitialized();
 
-		write(new File(submoduleDir, "untracked"), "untracked");
+		write(new File(submoduleDir, "untracked").toPath(), "untracked");
 
 		SubmoduleDeinitCommand command = new SubmoduleDeinitCommand(db).addPath("sub").setForce(true);
 		SubmoduleDeinitResult result = runDeinit(command);
@@ -233,17 +233,17 @@ public class SubmoduleDeinitTest extends RepositoryTestCase {
 
 		StoredConfig config = db.getConfig();
 		config.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
-				ConfigConstants.CONFIG_KEY_URL, db.getDirectory().toURI()
+				ConfigConstants.CONFIG_KEY_URL, db.getDirectory().toFile().toURI()
 						.toString());
 		config.save();
 
 		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+				db.getWorkTree().toFile(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.save();
 
-		new File(db.getWorkTree(), "sub").mkdir();
+		new File(db.getWorkTree().toFile(), "sub").mkdir();
 		git.add().addFilepattern(Constants.DOT_GIT_MODULES).call();
 		git.commit().setMessage("create submodule").call();
 		return commit;

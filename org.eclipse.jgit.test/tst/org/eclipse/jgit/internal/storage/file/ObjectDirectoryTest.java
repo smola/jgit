@@ -192,7 +192,7 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 
 		String commit = "d3148f9410b071edd4a4c85d2a43d1fa2574b0d2";
 		try (PrintWriter writer = new PrintWriter(
-				new File(repository.getDirectory(), Constants.SHALLOW))) {
+				new File(repository.getDirectory().toFile(), Constants.SHALLOW))) {
 			writer.println(commit);
 		}
 		Set<ObjectId> shallowCommits = dir.getShallowCommits();
@@ -208,7 +208,7 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 
 		String commit = "X3148f9410b071edd4a4c85d2a43d1fa2574b0d2";
 		try (PrintWriter writer = new PrintWriter(
-				new File(repository.getDirectory(), Constants.SHALLOW))) {
+				new File(repository.getDirectory().toFile(), Constants.SHALLOW))) {
 			writer.println(commit);
 		}
 

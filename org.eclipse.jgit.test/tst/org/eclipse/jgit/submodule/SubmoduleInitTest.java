@@ -91,8 +91,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "git://server/repo.git";
@@ -131,8 +131,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "./sub.git";
@@ -172,8 +172,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "../sub.git";
@@ -213,8 +213,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "../../server2/sub.git";
@@ -242,7 +242,7 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 			GitAPIException, ConfigInvalidException {
 		final String path = addSubmoduleToIndex();
 
-		String base = db.getWorkTree().getAbsolutePath();
+		String base = db.getWorkTree().toFile().getAbsolutePath();
 		if (File.separatorChar == '\\')
 			base = base.replace('\\', '/');
 		FileBasedConfig config = db.getConfig();
@@ -255,8 +255,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "./sub.git";
@@ -296,8 +296,8 @@ public class SubmoduleInitTest extends RepositoryTestCase {
 		assertNull(generator.getConfigUrl());
 		assertNull(generator.getConfigUpdate());
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "../sub.git";

@@ -254,7 +254,7 @@ public class RefTest extends SampleDataRepositoryTestCase {
 		Ref ref = db.exactRef("refs/heads/master");
 		assertEquals(Storage.PACKED, ref.getStorage());
 		try (FileOutputStream os = new FileOutputStream(
-				new File(db.getDirectory(), "refs/heads/master"))) {
+				new File(db.getDirectory().toFile(), "refs/heads/master"))) {
 			os.write(ref.getObjectId().name().getBytes());
 			os.write('\n');
 		}

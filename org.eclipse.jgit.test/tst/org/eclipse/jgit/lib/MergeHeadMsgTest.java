@@ -48,6 +48,8 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -64,24 +66,24 @@ public class MergeHeadMsgTest extends RepositoryTestCase {
 		assertEquals(db.readMergeHeads(), null);
 		db.writeMergeHeads(Arrays.asList(ObjectId.zeroId(),
 				ObjectId.fromString(sampleId)));
-		assertEquals(read(new File(db.getDirectory(), "MERGE_HEAD")), "0000000000000000000000000000000000000000\n1c6db447abdbb291b25f07be38ea0b1bf94947c5\n");
+		assertEquals(read(db.getDirectory().resolve("MERGE_HEAD")), "0000000000000000000000000000000000000000\n1c6db447abdbb291b25f07be38ea0b1bf94947c5\n");
 		assertEquals(db.readMergeHeads().size(), 2);
 		assertEquals(db.readMergeHeads().get(0), ObjectId.zeroId());
 		assertEquals(db.readMergeHeads().get(1), ObjectId.fromString(sampleId));
 
 		// same test again, this time with lower-level io
-		try (FileOutputStream fos = new FileOutputStream(
-				new File(db.getDirectory(), "MERGE_HEAD"));) {
+		try (OutputStream fos = Files.newOutputStream(
+				db.getDirectory().resolve("MERGE_HEAD"))) {
 			fos.write("0000000000000000000000000000000000000000\n1c6db447abdbb291b25f07be38ea0b1bf94947c5\n".getBytes(Constants.CHARACTER_ENCODING));
 		}
 		assertEquals(db.readMergeHeads().size(), 2);
 		assertEquals(db.readMergeHeads().get(0), ObjectId.zeroId());
 		assertEquals(db.readMergeHeads().get(1), ObjectId.fromString(sampleId));
 		db.writeMergeHeads(Collections.<ObjectId> emptyList());
-		assertEquals(read(new File(db.getDirectory(), "MERGE_HEAD")), "");
+		assertEquals(read(db.getDirectory().resolve("MERGE_HEAD")), "");
 		assertEquals(db.readMergeHeads(), null);
-		try (FileOutputStream fos = new FileOutputStream(
-				new File(db.getDirectory(), "MERGE_HEAD"))) {
+		try (OutputStream fos = Files.newOutputStream(
+				db.getDirectory().resolve("MERGE_HEAD"))) {
 			fos.write(sampleId.getBytes(Constants.CHARACTER_ENCODING));
 		}
 		assertEquals(db.readMergeHeads().size(), 1);
@@ -91,15 +93,15 @@ public class MergeHeadMsgTest extends RepositoryTestCase {
 	@Test
 	public void testReadWriteMergeMsg() throws IOException {
 		assertEquals(db.readMergeCommitMsg(), null);
-		assertFalse(new File(db.getDirectory(), "MERGE_MSG").exists());
+		assertFalse(Files.exists(db.getDirectory().resolve("MERGE_MSG")));
 		db.writeMergeCommitMsg(mergeMsg);
 		assertEquals(db.readMergeCommitMsg(), mergeMsg);
-		assertEquals(read(new File(db.getDirectory(), "MERGE_MSG")), mergeMsg);
+		assertEquals(read(db.getDirectory().resolve("MERGE_MSG")), mergeMsg);
 		db.writeMergeCommitMsg(null);
 		assertEquals(db.readMergeCommitMsg(), null);
-		assertFalse(new File(db.getDirectory(), "MERGE_MSG").exists());
-		try (FileOutputStream fos = new FileOutputStream(
-				new File(db.getDirectory(), Constants.MERGE_MSG))) {
+		assertFalse(db.getDirectory().resolve("MERGE_MSG").toFile().exists());
+		try (OutputStream fos = Files.newOutputStream(
+				db.getDirectory().resolve(Constants.MERGE_MSG))) {
 			fos.write(mergeMsg.getBytes(Constants.CHARACTER_ENCODING));
 		}
 		assertEquals(db.readMergeCommitMsg(), mergeMsg);

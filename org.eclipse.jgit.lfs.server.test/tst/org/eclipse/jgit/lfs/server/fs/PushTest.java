@@ -86,12 +86,12 @@ public class PushTest extends LfsServerTest {
 		BuiltinLFS.register();
 
 		Path rtmp = Files.createTempDirectory("jgit_test_");
-		remoteDb = FileRepositoryBuilder.create(rtmp.toFile());
+		remoteDb = FileRepositoryBuilder.create(rtmp);
 		remoteDb.create(true);
 
 		Path tmp = Files.createTempDirectory("jgit_test_");
 		Repository db = FileRepositoryBuilder
-				.create(tmp.resolve(".git").toFile());
+				.create(tmp.resolve(".git"));
 		db.create(false);
 		StoredConfig cfg = db.getConfig();
 		cfg.setString("filter", "lfs", "usejgitbuiltin", "true");
@@ -118,9 +118,9 @@ public class PushTest extends LfsServerTest {
 	public void cleanup() throws Exception {
 		remoteDb.close();
 		localDb.getRepository().close();
-		FileUtils.delete(localDb.getRepository().getWorkTree().toPath(),
+		FileUtils.delete(localDb.getRepository().getWorkTree(),
 				FileUtils.RECURSIVE);
-		FileUtils.delete(remoteDb.getDirectory().toPath(), FileUtils.RECURSIVE);
+		FileUtils.delete(remoteDb.getDirectory(), FileUtils.RECURSIVE);
 	}
 
 	@Test

@@ -92,7 +92,7 @@ public class PushCommandTest extends RepositoryTestCase {
 		// setup the first repository
 		final StoredConfig config = db.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-		URIish uri = new URIish(db2.getDirectory().toURI().toURL());
+		URIish uri = new URIish(db2.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();
@@ -130,7 +130,7 @@ public class PushCommandTest extends RepositoryTestCase {
 		// setup the first repository
 		final StoredConfig config = db.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-		URIish uri = new URIish(db2.getDirectory().toURI().toURL());
+		URIish uri = new URIish(db2.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();
@@ -183,7 +183,7 @@ public class PushCommandTest extends RepositoryTestCase {
 
 			final StoredConfig config = db.getConfig();
 			RemoteConfig remoteConfig = new RemoteConfig(config, remote);
-			URIish uri = new URIish(db2.getDirectory().toURI().toURL());
+			URIish uri = new URIish(db2.getDirectory().toFile().toURI().toURL());
 			remoteConfig.addURI(uri);
 			remoteConfig.addFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/"
 					+ remote + "/*"));
@@ -221,7 +221,7 @@ public class PushCommandTest extends RepositoryTestCase {
 				Git git2 = new Git(createBareRepository())) {
 			final StoredConfig config = git.getRepository().getConfig();
 			RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-			URIish uri = new URIish(git2.getRepository().getDirectory().toURI()
+			URIish uri = new URIish(git2.getRepository().getDirectory().toFile().toURI()
 					.toURL());
 			remoteConfig.addURI(uri);
 			remoteConfig.addPushRefSpec(new RefSpec("+refs/heads/*:refs/heads/*"));
@@ -263,7 +263,7 @@ public class PushCommandTest extends RepositoryTestCase {
 				Git git2 = new Git(createBareRepository())) {
 			final StoredConfig config = git.getRepository().getConfig();
 			RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-			URIish uri = new URIish(git2.getRepository().getDirectory().toURI()
+			URIish uri = new URIish(git2.getRepository().getDirectory().toFile().toURI()
 					.toURL());
 			remoteConfig.addURI(uri);
 			remoteConfig.addPushRefSpec(new RefSpec("HEAD:refs/heads/newbranch"));
@@ -292,7 +292,7 @@ public class PushCommandTest extends RepositoryTestCase {
 				Git git2 = new Git(createBareRepository())) {
 			final StoredConfig config = git.getRepository().getConfig();
 			RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-			URIish uri = new URIish(git2.getRepository().getDirectory().toURI()
+			URIish uri = new URIish(git2.getRepository().getDirectory().toFile().toURI()
 					.toURL());
 			remoteConfig.addURI(uri);
 			remoteConfig.addFetchRefSpec(new RefSpec(
@@ -334,7 +334,7 @@ public class PushCommandTest extends RepositoryTestCase {
 		// setup the first repository
 		final StoredConfig config = db.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-		URIish uri = new URIish(db2.getDirectory().toURI().toURL());
+		URIish uri = new URIish(db2.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();
@@ -397,7 +397,7 @@ public class PushCommandTest extends RepositoryTestCase {
 		// setup the first repository
 		final StoredConfig config = db.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-		URIish uri = new URIish(db2.getDirectory().toURI().toURL());
+		URIish uri = new URIish(db2.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();

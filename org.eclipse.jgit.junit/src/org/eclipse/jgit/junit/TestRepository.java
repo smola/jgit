@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -761,7 +762,7 @@ public class TestRepository<R extends Repository> {
 				@Override
 				protected void writeFile(final String name, final byte[] bin)
 						throws IOException {
-					File path = new File(fr.getDirectory(), name);
+					Path path = fr.getDirectory().resolve(name);
 					TestRepository.this.writeFile(path, bin);
 				}
 			};
@@ -774,8 +775,8 @@ public class TestRepository<R extends Repository> {
 				w.append(p.getPackFile().getName());
 				w.append('\n');
 			}
-			writeFile(new File(new File(fr.getObjectDatabase().getDirectory().toFile(),
-					"info"), "packs"), Constants.encodeASCII(w.toString()));
+			writeFile(fr.getObjectDatabase().getDirectory().resolve("info").resolve("packs"),
+					Constants.encodeASCII(w.toString()));
 		}
 	}
 
@@ -944,9 +945,9 @@ public class TestRepository<R extends Repository> {
 		return new File(packdir, "pack-" + name.name() + t);
 	}
 
-	private void writeFile(final File p, final byte[] bin) throws IOException,
+	private void writeFile(final Path p, final byte[] bin) throws IOException,
 			ObjectWritingException {
-		final LockFile lck = new LockFile(p);
+		final LockFile lck = new LockFile(p.toFile());
 		if (!lck.lock())
 			throw new ObjectWritingException("Can't write " + p);
 		try {

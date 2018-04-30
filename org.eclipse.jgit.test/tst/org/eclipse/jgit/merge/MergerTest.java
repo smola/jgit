@@ -106,7 +106,7 @@ public class MergerTest extends RepositoryTestCase {
 	@Theory
 	public void failingDeleteOfDirectoryWithUntrackedContent(
 			MergeStrategy strategy) throws Exception {
-		File folder1 = new File(db.getWorkTree(), "folder1");
+		File folder1 = new File(db.getWorkTree().toFile(), "folder1");
 		FileUtils.mkdir(folder1);
 		File file = new File(folder1, "file1.txt");
 		write(file, "folder1--file1.txt");
@@ -125,7 +125,7 @@ public class MergerTest extends RepositoryTestCase {
 
 			git.checkout().setName(base.name()).call();
 
-			file = new File(db.getWorkTree(), "unrelated.txt");
+			file = new File(db.getWorkTree().toFile(), "unrelated.txt");
 			write(file, "unrelated");
 
 			git.add().addFilepattern("unrelated.txt").call();
@@ -355,7 +355,7 @@ public class MergerTest extends RepositoryTestCase {
 
 		// Untracked empty directory hierarcy e/1 shall not conflict with merged
 		// e/1
-		FileUtils.mkdirs(new File(trash, "e/1"), true);
+		FileUtils.mkdirs(new File(trash.toFile(), "e/1"), true);
 
 		MergeResult mergeRes = git.merge().setStrategy(strategy)
 				.include(masterCommit).call();
@@ -414,7 +414,7 @@ public class MergerTest extends RepositoryTestCase {
 
 		git.checkout().setName("brancha").call();
 		File testFile = writeTrashFile("crlf.txt",
-				"a first line\r\na crlf file\r\n");
+				"a first line\r\na crlf file\r\n").toFile();
 		git.add().addFilepattern("crlf.txt").call();
 		git.commit().setMessage("on brancha").call();
 
@@ -1032,7 +1032,7 @@ public class MergerTest extends RepositoryTestCase {
 
 		// Get a handle to the the file so on windows it can't be deleted.
 		try (FileInputStream fis = new FileInputStream(
-				new File(db.getWorkTree(), "b.txt"))) {
+				new File(db.getWorkTree().toFile(), "b.txt"))) {
 			MergeResult mergeRes = git.merge().setStrategy(strategy)
 					.include(masterCommit).call();
 			if (mergeRes.getMergeStatus().equals(MergeStatus.FAILED)) {
@@ -1053,10 +1053,10 @@ public class MergerTest extends RepositoryTestCase {
 		File f;
 		long lastTs4, lastTsIndex;
 		Git git = Git.wrap(db);
-		File indexFile = db.getIndexFile();
+		File indexFile = db.getIndexFile().toFile();
 
 		// Create initial content and remember when the last file was written.
-		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig");
+		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig").toFile();
 		lastTs4 = FS.DETECTED.lastModified(f.toPath());
 
 		// add all files, commit and check this doesn't update any working tree
@@ -1070,14 +1070,14 @@ public class MergerTest extends RepositoryTestCase {
 		checkConsistentLastModified("0", "1", "2", "3", "4");
 		checkModificationTimeStampOrder("1", "2", "3", "4", "<.git/index");
 		assertEquals("Commit should not touch working tree file 4", lastTs4,
-				FS.DETECTED.lastModified(new File(db.getWorkTree(), "4").toPath()));
+				FS.DETECTED.lastModified(new File(db.getWorkTree().toFile(), "4").toPath()));
 		lastTsIndex = FS.DETECTED.lastModified(indexFile.toPath());
 
 		// Do modifications on the master branch. Then add and commit. This
 		// should touch only "0", "2 and "3"
 		fsTick(indexFile);
 		f = writeTrashFiles(false, "master", null, "1master\n2\n3", "master",
-				null);
+				null).toFile();
 		fsTick(f);
 		git.add().addFilepattern(".").call();
 		RevCommit masterCommit = git.commit().setMessage("master commit")
@@ -1106,7 +1106,7 @@ public class MergerTest extends RepositoryTestCase {
 				+ "[4, mode:100644, content:orig]", //
 				indexState(CONTENT));
 		fsTick(indexFile);
-		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig");
+		f = writeTrashFiles(false, "orig", "orig", "1\n2\n3", "orig", "orig").toFile();
 		lastTs4 = FS.DETECTED.lastModified(f.toPath());
 		fsTick(f);
 		git.add().addFilepattern(".").call();
@@ -1117,7 +1117,7 @@ public class MergerTest extends RepositoryTestCase {
 
 		// Do modifications on the side branch. Touch only "1", "2 and "3"
 		fsTick(indexFile);
-		f = writeTrashFiles(false, null, "side", "1\n2\n3side", "side", null);
+		f = writeTrashFiles(false, null, "side", "1\n2\n3side", "side", null).toFile();
 		fsTick(f);
 		git.add().addFilepattern(".").call();
 		git.commit().setMessage("side commit").call();
@@ -1205,7 +1205,7 @@ public class MergerTest extends RepositoryTestCase {
 		// add/add submodule merges
 		String existing = read(Constants.DOT_GIT_MODULES);
 		String context = "\n# context\n# more context\n# yet more context\n";
-		write(new File(db.getWorkTree(), Constants.DOT_GIT_MODULES),
+		write(new File(db.getWorkTree().toFile(), Constants.DOT_GIT_MODULES),
 				existing + context + context + context);
 
 		git.add().addFilepattern(Constants.DOT_GIT_MODULES).call();
@@ -1224,12 +1224,12 @@ public class MergerTest extends RepositoryTestCase {
 		// .gitmodules hackery
 		addSubmoduleToIndex("three", ObjectId
 				.fromString("1000000000000000000000000000000000000000"));
-		new File(db.getWorkTree(), "three").mkdir();
+		new File(db.getWorkTree().toFile(), "three").mkdir();
 
 		existing = read(Constants.DOT_GIT_MODULES);
 		String three = "[submodule \"three\"]\n\tpath = three\n\turl = "
-				+ db.getDirectory().toURI() + "\n";
-		write(new File(db.getWorkTree(), Constants.DOT_GIT_MODULES),
+				+ db.getDirectory().toFile().toURI() + "\n";
+		write(new File(db.getWorkTree().toFile(), Constants.DOT_GIT_MODULES),
 				three + existing);
 
 		git.add().addFilepattern(Constants.DOT_GIT_MODULES).call();
@@ -1241,23 +1241,23 @@ public class MergerTest extends RepositoryTestCase {
 		assertNull(result.getCheckoutConflicts());
 		assertNull(result.getFailingPaths());
 		for (String dir : Arrays.asList("one", "two", "three")) {
-			assertTrue(new File(db.getWorkTree(), dir).isDirectory());
+			assertTrue(new File(db.getWorkTree().toFile(), dir).isDirectory());
 		}
 	}
 
 	private void writeSubmodule(String path, ObjectId commit)
 			throws IOException, ConfigInvalidException {
 		addSubmoduleToIndex(path, commit);
-		new File(db.getWorkTree(), path).mkdir();
+		new File(db.getWorkTree().toFile(), path).mkdir();
 
 		StoredConfig config = db.getConfig();
 		config.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_URL,
-				db.getDirectory().toURI().toString());
+				db.getDirectory().toFile().toURI().toString());
 		config.save();
 
 		FileBasedConfig modulesConfig = new FileBasedConfig(
-				new File(db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(),
+				new File(db.getWorkTree().toFile(), Constants.DOT_GIT_MODULES).toPath(),
 				db.getFS());
 		modulesConfig.load();
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
@@ -1286,7 +1286,7 @@ public class MergerTest extends RepositoryTestCase {
 	private void checkConsistentLastModified(String... pathes)
 			throws IOException {
 		DirCache dc = db.readDirCache();
-		File workTree = db.getWorkTree();
+		File workTree = db.getWorkTree().toFile();
 		for (String path : pathes)
 			assertEquals(
 					"IndexEntry with path "
@@ -1310,7 +1310,7 @@ public class MergerTest extends RepositoryTestCase {
 			boolean fixed = p.charAt(strong ? 1 : 0) == '*';
 			p = p.substring((strong ? 1 : 0) + (fixed ? 1 : 0));
 			long curMod = fixed ? Long.valueOf(p).longValue()
-					: FS.DETECTED.lastModified(new File(db.getWorkTree(), p).toPath());
+					: FS.DETECTED.lastModified(new File(db.getWorkTree().toFile(), p).toPath());
 			if (strong)
 				assertTrue("path " + p + " is not younger than predecesssor",
 						curMod > lastMod);

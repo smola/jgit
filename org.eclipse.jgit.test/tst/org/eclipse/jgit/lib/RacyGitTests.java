@@ -66,19 +66,19 @@ public class RacyGitTests extends RepositoryTestCase {
 		TreeSet<Long> modTimes = new TreeSet<>();
 		File lastFile = null;
 		for (int i = 0; i < 10; i++) {
-			lastFile = new File(db.getWorkTree(), "0." + i);
+			lastFile = new File(db.getWorkTree().toFile(), "0." + i);
 			FileUtils.createNewFile(lastFile.toPath());
 			if (i == 5)
 				fsTick(lastFile);
 		}
 		modTimes.add(valueOf(fsTick(lastFile)));
 		for (int i = 0; i < 10; i++) {
-			lastFile = new File(db.getWorkTree(), "1." + i);
+			lastFile = new File(db.getWorkTree().toFile(), "1." + i);
 			FileUtils.createNewFile(lastFile.toPath());
 		}
 		modTimes.add(valueOf(fsTick(lastFile)));
 		for (int i = 0; i < 10; i++) {
-			lastFile = new File(db.getWorkTree(), "2." + i);
+			lastFile = new File(db.getWorkTree().toFile(), "2." + i);
 			FileUtils.createNewFile(lastFile.toPath());
 			if (i % 4 == 0)
 				fsTick(lastFile);
@@ -157,7 +157,7 @@ public class RacyGitTests extends RepositoryTestCase {
 		// Remember the last modTime of index file. All modifications times of
 		// further modification are translated to this value so it looks that
 		// files have been modified in the same time slot as the index file
-		modTimes.add(Long.valueOf(db.getIndexFile().lastModified()));
+		modTimes.add(Long.valueOf(db.getIndexFile().toFile().lastModified()));
 
 		// modify one file
 		addToWorkDir("a", "a2");
@@ -175,7 +175,7 @@ public class RacyGitTests extends RepositoryTestCase {
 	}
 
 	private File addToWorkDir(String path, String content) throws IOException {
-		File f = new File(db.getWorkTree(), path);
+		File f = new File(db.getWorkTree().toFile(), path);
 		try (FileOutputStream fos = new FileOutputStream(f)) {
 			fos.write(content.getBytes(Constants.CHARACTER_ENCODING));
 			return f;

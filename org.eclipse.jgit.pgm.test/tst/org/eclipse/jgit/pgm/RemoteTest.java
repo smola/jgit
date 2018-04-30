@@ -79,7 +79,7 @@ public class RemoteTest extends CLIRepositoryTestCase {
 		remote.addFetchRefSpec(
 				new RefSpec("+refs/heads/*:refs/remotes/test/*"));
 		URIish uri = new URIish(
-				remoteRepository.getDirectory().toURI().toURL());
+				remoteRepository.getDirectory().toFile().toURI().toURL());
 		remote.addURI(uri);
 		remote.update(config);
 		config.save();

@@ -135,7 +135,7 @@ public class ReceivePackAdvertiseRefsHookTest extends LocalDiskRepositoryTestCas
 	public void testFilterHidesPrivate() throws Exception {
 		Map<String, Ref> refs;
 		try (TransportLocal t = new TransportLocal(src, uriOf(dst),
-				dst.getDirectory()) {
+				dst.getDirectory().toFile()) {
 			@Override
 			ReceivePack createReceivePack(final Repository db) {
 				db.close();
@@ -165,7 +165,7 @@ public class ReceivePackAdvertiseRefsHookTest extends LocalDiskRepositoryTestCas
 	public void resetsHaves() throws Exception {
 		AtomicReference<Set<ObjectId>> haves = new AtomicReference<>();
 		try (TransportLocal t = new TransportLocal(src, uriOf(dst),
-				dst.getDirectory()) {
+				dst.getDirectory().toFile()) {
 			@Override
 			ReceivePack createReceivePack(Repository db) {
 				dst.incrementOpen();
@@ -202,7 +202,7 @@ public class ReceivePackAdvertiseRefsHookTest extends LocalDiskRepositoryTestCas
 
 	private TransportLocal newTransportLocalWithStrictValidation()
 			throws Exception {
-		return new TransportLocal(src, uriOf(dst), dst.getDirectory()) {
+		return new TransportLocal(src, uriOf(dst), dst.getDirectory().toFile()) {
 			@Override
 			ReceivePack createReceivePack(final Repository db) {
 				db.close();
@@ -599,6 +599,6 @@ public class ReceivePackAdvertiseRefsHookTest extends LocalDiskRepositoryTestCas
 	}
 
 	private static URIish uriOf(Repository r) throws URISyntaxException {
-		return new URIish(r.getDirectory().getAbsolutePath());
+		return new URIish(r.getDirectory().toFile().getAbsolutePath());
 	}
 }

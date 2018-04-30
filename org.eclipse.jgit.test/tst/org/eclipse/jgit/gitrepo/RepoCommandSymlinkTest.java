@@ -81,7 +81,7 @@ public class RepoCommandSymlinkTest extends RepositoryTestCase {
 			addRepoToClose(defaultDb);
 		}
 
-		defaultUri = defaultDb.getDirectory().toURI().toString();
+		defaultUri = defaultDb.getDirectory().toFile().toURI().toString();
 		int root = defaultUri.lastIndexOf("/",
 				defaultUri.lastIndexOf("/.git") - 1)
 				+ 1;
@@ -115,17 +115,17 @@ public class RepoCommandSymlinkTest extends RepositoryTestCase {
 					xmlContent.toString());
 			RepoCommand command = new RepoCommand(remoteDb);
 			command.setPath(
-					tempDb.getWorkTree().getAbsolutePath() + "/manifest.xml")
+					tempDb.getWorkTree().toFile().getAbsolutePath() + "/manifest.xml")
 					.setURI(rootUri).call();
 			// Clone it
 			File directory = createTempDirectory("testCopyFileBare");
 			try (Repository localDb = Git.cloneRepository()
 					.setDirectory(directory)
-					.setURI(remoteDb.getDirectory().toURI().toString()).call()
+					.setURI(remoteDb.getDirectory().toFile().toURI().toString()).call()
 					.getRepository()) {
 
 				// The LinkedHello symlink should exist.
-				File linkedhello = new File(localDb.getWorkTree(),
+				File linkedhello = new File(localDb.getWorkTree().toFile(),
 						"LinkedHello");
 				assertTrue("The LinkedHello file should exist",
 						localDb.getFS().exists(linkedhello.toPath()));
@@ -135,13 +135,13 @@ public class RepoCommandSymlinkTest extends RepositoryTestCase {
 						localDb.getFS().readSymLink(linkedhello.toPath()));
 
 				// The foo/LinkedHello file should be skipped.
-				File linkedfoohello = new File(localDb.getWorkTree(),
+				File linkedfoohello = new File(localDb.getWorkTree().toFile(),
 						"foo/LinkedHello");
 				assertFalse("The foo/LinkedHello file should be skipped",
 						localDb.getFS().exists(linkedfoohello.toPath()));
 
 				// The subdir/LinkedHello file should use a relative ../
-				File linkedsubdirhello = new File(localDb.getWorkTree(),
+				File linkedsubdirhello = new File(localDb.getWorkTree().toFile(),
 						"subdir/LinkedHello");
 				assertTrue("The subdir/LinkedHello file should exist",
 						localDb.getFS().exists(linkedsubdirhello.toPath()));
@@ -151,7 +151,7 @@ public class RepoCommandSymlinkTest extends RepositoryTestCase {
 						localDb.getFS().readSymLink(linkedsubdirhello.toPath()));
 
 				// The bar/foo/LinkedHello file should use a single relative ../
-				File linkedbarfoohello = new File(localDb.getWorkTree(),
+				File linkedbarfoohello = new File(localDb.getWorkTree().toFile(),
 						"bar/foo/LinkedHello");
 				assertTrue("The bar/foo/LinkedHello file should exist",
 						localDb.getFS().exists(linkedbarfoohello.toPath()));

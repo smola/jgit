@@ -122,7 +122,7 @@ public class GitAddTask extends Task {
 
 		AddCommand gitAdd;
 		try (Repository repo = new FileRepositoryBuilder().readEnvironment()
-				.findGitDir(src).build();
+				.findGitDir(src.toPath()).build();
 			Git git = new Git(repo);) {
 			gitAdd = git.add();
 		} catch (IOException e) {

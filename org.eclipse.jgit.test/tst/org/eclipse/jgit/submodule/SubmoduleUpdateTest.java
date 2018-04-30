@@ -103,12 +103,12 @@ public class SubmoduleUpdateTest extends RepositoryTestCase {
 
 		StoredConfig config = db.getConfig();
 		config.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
-				ConfigConstants.CONFIG_KEY_URL, db.getDirectory().toURI()
+				ConfigConstants.CONFIG_KEY_URL, db.getDirectory().toFile().toURI()
 						.toString());
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.save();
@@ -145,8 +145,8 @@ public class SubmoduleUpdateTest extends RepositoryTestCase {
 		});
 		editor.commit();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "git://server/repo.git";
@@ -182,7 +182,7 @@ public class SubmoduleUpdateTest extends RepositoryTestCase {
 		editor.commit();
 
 		Repository subRepo = Git.init().setBare(false)
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		assertNotNull(subRepo);
 

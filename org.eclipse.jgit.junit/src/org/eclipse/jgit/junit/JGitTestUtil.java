@@ -57,6 +57,7 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jgit.lib.Repository;
@@ -203,9 +204,9 @@ public abstract class JGitTestUtil {
 	 * @return the trash file
 	 * @throws IOException
 	 */
-	public static File writeTrashFile(final Repository db,
+	public static Path writeTrashFile(final Repository db,
 			final String name, final String data) throws IOException {
-		File path = new File(db.getWorkTree(), name);
+		Path path = db.getWorkTree().resolve(name);
 		write(path, data);
 		return path;
 	}
@@ -220,10 +221,10 @@ public abstract class JGitTestUtil {
 	 * @return the trash file
 	 * @throws IOException
 	 */
-	public static File writeTrashFile(final Repository db,
+	public static Path writeTrashFile(final Repository db,
 			final String subdir,
 			final String name, final String data) throws IOException {
-		File path = new File(db.getWorkTree() + "/" + subdir, name);
+		Path path = db.getWorkTree().resolve("subdir").resolve(name);
 		write(path, data);
 		return path;
 	}
@@ -242,14 +243,20 @@ public abstract class JGitTestUtil {
 	 * @throws IOException
 	 *             the file could not be written.
 	 */
-	public static void write(final File f, final String body)
+	public static void write(final Path f, final String body)
 			throws IOException {
-		FileUtils.mkdirs(f.getParentFile(), true);
-		try (Writer w = new OutputStreamWriter(new FileOutputStream(f),
+		FileUtils.mkdirs(f.getParent().toFile(), true);
+		try (Writer w =  new OutputStreamWriter(Files.newOutputStream(f),
 				CHARSET)) {
 			w.write(body);
 		}
 	}
+
+
+    public static void write(final File f, final String body)
+            throws IOException {
+        write(f.toPath(), body);
+    }
 
 	/**
 	 * Fully read a UTF-8 file and return as a string.
@@ -261,10 +268,14 @@ public abstract class JGitTestUtil {
 	 * @throws IOException
 	 *             the file does not exist, or could not be read.
 	 */
-	public static String read(final File file) throws IOException {
-		final byte[] body = IO.readFully(file);
+	public static String read(final Path file) throws IOException {
+		final byte[] body = Files.readAllBytes(file);
 		return new String(body, 0, body.length, CHARSET);
 	}
+
+    public static String read(final File file) throws IOException {
+        return read(file.toPath());
+    }
 
 	/**
 	 * Read a file's content
@@ -276,7 +287,7 @@ public abstract class JGitTestUtil {
 	 */
 	public static String read(final Repository db, final String name)
 			throws IOException {
-		File file = new File(db.getWorkTree(), name);
+		Path file = db.getWorkTree().resolve(name);
 		return read(file);
 	}
 
@@ -289,8 +300,8 @@ public abstract class JGitTestUtil {
 	 * @return {@code true} if the file exists
 	 */
 	public static boolean check(final Repository db, final String name) {
-		File file = new File(db.getWorkTree(), name);
-		return file.exists();
+		Path file = db.getWorkTree().resolve(name);
+		return Files.exists(file);
 	}
 
 	/**
@@ -302,8 +313,8 @@ public abstract class JGitTestUtil {
 	 */
 	public static void deleteTrashFile(final Repository db,
 			final String name) throws IOException {
-		File path = new File(db.getWorkTree(), name);
-		FileUtils.delete(path.toPath());
+		Path path = db.getWorkTree().resolve(name);
+		FileUtils.delete(path);
 	}
 
 	/**
@@ -321,7 +332,7 @@ public abstract class JGitTestUtil {
 	 */
 	public static Path writeLink(Repository db, String link,
 			String target) throws Exception {
-		return FileUtils.createSymLink(new File(db.getWorkTree(), link).toPath(),
+		return FileUtils.createSymLink(db.getWorkTree().resolve(link),
 				target);
 	}
 

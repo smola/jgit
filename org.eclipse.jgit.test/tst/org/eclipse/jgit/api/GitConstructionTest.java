@@ -73,7 +73,7 @@ public class GitConstructionTest extends RepositoryTestCase {
 		}
 
 		bareRepo = Git.cloneRepository().setBare(true)
-				.setURI(db.getDirectory().toURI().toString())
+				.setURI(db.getDirectory().toFile().toURI().toString())
 				.setDirectory(createUniqueTestGitDir(true)).call()
 				.getRepository();
 		addRepoToClose(bareRepo);
@@ -131,7 +131,7 @@ public class GitConstructionTest extends RepositoryTestCase {
 	 */
 	public void testClose() throws IOException, JGitInternalException,
 			GitAPIException {
-		File workTree = db.getWorkTree();
+		File workTree = db.getWorkTree().toFile();
 		Git git = Git.open(workTree);
 		git.gc().setExpire(null).call();
 		git.checkout().setName(git.getRepository().resolve("HEAD^").getName())

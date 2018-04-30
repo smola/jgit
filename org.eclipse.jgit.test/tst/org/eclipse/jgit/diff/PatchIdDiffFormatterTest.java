@@ -45,6 +45,7 @@ package org.eclipse.jgit.diff;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.dircache.DirCacheIterator;
@@ -57,15 +58,15 @@ public class PatchIdDiffFormatterTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiff() throws Exception {
-		write(new File(db.getDirectory().getParent(), "test.txt"), "test");
-		File folder = new File(db.getDirectory().getParent(), "folder");
-		folder.mkdir();
-		write(new File(folder, "folder.txt"), "folder");
+		write(db.getDirectory().getParent().resolve("test.txt"), "test");
+		Path folder = db.getDirectory().getParent().resolve("folder");
+		folder.toFile().mkdir();
+		write(folder.resolve("folder.txt"), "folder");
 		try (Git git = new Git(db);
 				PatchIdDiffFormatter df = new PatchIdDiffFormatter()) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "folder change");
+			write(folder.resolve("folder.txt"), "folder change");
 
 			df.setRepository(db);
 			df.setPathFilter(PathFilter.create("folder"));
@@ -81,14 +82,14 @@ public class PatchIdDiffFormatterTest extends RepositoryTestCase {
 
 	@Test
 	public void testSameDiff() throws Exception {
-		write(new File(db.getDirectory().getParent(), "test.txt"), "test");
-		File folder = new File(db.getDirectory().getParent(), "folder");
-		folder.mkdir();
-		write(new File(folder, "folder.txt"), "\n\n\n\nfolder");
+		write(db.getDirectory().getParent().resolve("test.txt"), "test");
+		Path folder = db.getDirectory().getParent().resolve("folder");
+		folder.toFile().mkdir();
+		write(folder.resolve("folder.txt"), "\n\n\n\nfolder");
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "\n\n\n\nfolder change");
+			write(folder.resolve("folder.txt"), "\n\n\n\nfolder change");
 
 			try (PatchIdDiffFormatter df = new PatchIdDiffFormatter()) {
 				df.setRepository(db);
@@ -102,10 +103,10 @@ public class PatchIdDiffFormatterTest extends RepositoryTestCase {
 						.getCalulatedPatchId().name());
 			}
 
-			write(new File(folder, "folder.txt"), "a\n\n\n\nfolder");
+			write(folder.resolve("folder.txt"), "a\n\n\n\nfolder");
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "a\n\n\n\nfolder change");
+			write(folder.resolve("folder.txt"), "a\n\n\n\nfolder change");
 
 			try (PatchIdDiffFormatter df = new PatchIdDiffFormatter()) {
 				df.setRepository(db);

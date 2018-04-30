@@ -133,8 +133,8 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 		});
 		editor.commit();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
@@ -180,8 +180,8 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 				ConfigConstants.CONFIG_KEY_URL, url);
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
@@ -189,7 +189,7 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 		modulesConfig.save();
 
 		Repository subRepo = Git.init().setBare(false)
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		assertNotNull(subRepo);
 
@@ -232,8 +232,8 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 				ConfigConstants.CONFIG_KEY_URL, url);
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
@@ -259,7 +259,7 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 	public void repositoryWithInitializedSubmodule() throws Exception {
 		String path = "sub";
 		Repository subRepo = Git.init().setBare(false)
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		assertNotNull(subRepo);
 
@@ -284,8 +284,8 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 				ConfigConstants.CONFIG_KEY_URL, url);
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
@@ -311,7 +311,7 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 	public void repositoryWithDifferentRevCheckedOutSubmodule() throws Exception {
 		String path = "sub";
 		Repository subRepo = Git.init().setBare(false)
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		assertNotNull(subRepo);
 
@@ -336,8 +336,8 @@ public class SubmoduleStatusTest extends RepositoryTestCase {
 				ConfigConstants.CONFIG_KEY_URL, url);
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,

@@ -75,7 +75,7 @@ public class CloneTest extends CLIRepositoryTestCase {
 	public void testClone() throws Exception {
 		createInitialCommit();
 
-		File gitDir = db.getDirectory();
+		File gitDir = db.getDirectory().toFile();
 		String sourceURI = gitDir.toURI().toString();
 		File target = createTempDirectory("target");
 		StringBuilder cmd = new StringBuilder("git clone ").append(sourceURI
@@ -98,7 +98,7 @@ public class CloneTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testCloneEmpty() throws Exception {
-		File gitDir = db.getDirectory();
+		File gitDir = db.getDirectory().toFile();
 		String sourceURI = gitDir.toURI().toString();
 		File target = createTempDirectory("target");
 		StringBuilder cmd = new StringBuilder("git clone ").append(sourceURI
@@ -122,7 +122,7 @@ public class CloneTest extends CLIRepositoryTestCase {
 		MockSystemReader sr = (MockSystemReader) SystemReader.getInstance();
 		sr.setProperty(Constants.OS_USER_DIR, target.getAbsolutePath());
 
-		File gitDir = db.getDirectory();
+		File gitDir = db.getDirectory().toFile();
 		String sourceURI = gitDir.toURI().toString();
 		String name = new URIish(sourceURI).getHumanishName();
 		StringBuilder cmd = new StringBuilder("git clone ").append(sourceURI);
@@ -139,7 +139,7 @@ public class CloneTest extends CLIRepositoryTestCase {
 	public void testCloneBare() throws Exception {
 		createInitialCommit();
 
-		File gitDir = db.getDirectory();
+		File gitDir = db.getDirectory().toFile();
 		String sourcePath = gitDir.getAbsolutePath();
 		String targetPath = (new File(sourcePath)).getParentFile()
 				.getParentFile().getAbsolutePath()

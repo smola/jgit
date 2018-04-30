@@ -327,7 +327,7 @@ public class Main {
 	 */
 	protected Repository openGitDir(String aGitdir) throws IOException {
 		RepositoryBuilder rb = new RepositoryBuilder() //
-				.setGitDir(aGitdir != null ? new File(aGitdir) : null) //
+				.setGitDir(aGitdir != null ? new File(aGitdir).toPath() : null) //
 				.readEnvironment() //
 				.findGitDir();
 		if (rb.getGitDir() == null)

@@ -115,7 +115,7 @@ public class GitCheckoutTask extends Task {
 	public void execute() throws BuildException {
 		CheckoutCommand checkout;
 		try (Repository repo = new FileRepositoryBuilder().readEnvironment()
-				.findGitDir(src).build();
+				.findGitDir(src.toPath()).build();
 			Git git = new Git(repo)) {
 			checkout = git.checkout();
 		} catch (IOException e) {

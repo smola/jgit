@@ -335,7 +335,7 @@ public class FS_POSIX extends FS {
 	/** {@inheritDoc} */
 	@Override
 	public Path findHook(Repository repository, String hookName) {
-		final File gitdir = repository.getDirectory();
+		final File gitdir = repository.getDirectory().toFile();
 		if (gitdir == null) {
 			return null;
 		}

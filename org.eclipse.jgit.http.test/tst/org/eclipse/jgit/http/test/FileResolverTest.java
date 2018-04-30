@@ -97,9 +97,9 @@ public class FileResolverTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void testExportOk() throws IOException {
 		final Repository a = createBareRepository();
-		final String name = a.getDirectory().getName();
-		final File base = a.getDirectory().getParentFile();
-		final File export = new File(a.getDirectory(), "git-daemon-export-ok");
+		final String name = a.getDirectory().getFileName().toString();
+		final File base = a.getDirectory().getParent().toFile();
+		final File export = new File(a.getDirectory().toFile(), "git-daemon-export-ok");
 		FileResolver<RepositoryResolver> resolver;
 
 		assertFalse("no git-daemon-export-ok", export.exists());
@@ -140,8 +140,8 @@ public class FileResolverTest extends LocalDiskRepositoryTestCase {
 	public void testNotAGitRepository() throws IOException,
 			ServiceNotEnabledException {
 		final Repository a = createBareRepository();
-		final String name = a.getDirectory().getName() + "-not-a-git";
-		final File base = a.getDirectory().getParentFile();
+		final String name = a.getDirectory().getFileName().toString() + "-not-a-git";
+		final File base = a.getDirectory().getParent().toFile();
 		FileResolver<RepositoryResolver> resolver = new FileResolver<>(
 				base, false);
 

@@ -167,7 +167,7 @@ public class RmCommand extends GitCommand<DirCache> {
 					final FileMode mode = tw.getFileMode(0);
 					if (mode.getObjectType() == Constants.OBJ_BLOB) {
 						String relativePath = tw.getPathString();
-						final File path = new File(repo.getWorkTree(),
+						final File path = new File(repo.getWorkTree().toFile(),
 								relativePath);
 						// Deleting a blob is simply a matter of removing
 						// the file or symlink named by the tree entry.

@@ -182,8 +182,8 @@ public class IndexDiffWithSymlinkTest extends LocalDiskRepositoryTestCase {
 
 	@Test
 	public void testSymlinkWithEncodingDifference() throws Exception {
-		try (Repository testRepo = FileRepositoryBuilder.create(testRepoDir)) {
-			File workingTree = testRepo.getWorkTree();
+		try (Repository testRepo = FileRepositoryBuilder.create(testRepoDir.toPath())) {
+			File workingTree = testRepo.getWorkTree().toFile();
 			File symLink = new File(new File(workingTree, TESTFOLDER),
 					TESTLINK);
 			// Read the symlink as it was created by cgit

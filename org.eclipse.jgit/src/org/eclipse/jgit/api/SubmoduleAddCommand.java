@@ -180,7 +180,7 @@ public class SubmoduleAddCommand extends
 		CloneCommand clone = Git.cloneRepository();
 		configure(clone);
 		clone.setDirectory(moduleDirectory);
-		clone.setGitDir(new File(new File(repo.getDirectory(),
+		clone.setGitDir(new File(new File(repo.getDirectory().toFile(),
 				Constants.MODULES), path));
 		clone.setURI(resolvedUri);
 		if (monitor != null)
@@ -203,7 +203,7 @@ public class SubmoduleAddCommand extends
 
 		// Save path and URL to parent repository's .gitmodules file
 		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				repo.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), repo.getFS());
+				repo.getWorkTree().toFile(), Constants.DOT_GIT_MODULES).toPath(), repo.getFS());
 		try {
 			modulesConfig.load();
 			modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION,

@@ -48,6 +48,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -204,7 +205,7 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 	@Test
 	public void testIndexOnly() throws IOException, NoFilepatternException,
 			GitAPIException {
-		List<File> attrFiles = new ArrayList<>();
+		List<Path> attrFiles = new ArrayList<>();
 		attrFiles.add(writeGlobalAttributeFile("globalAttributesFile",
 				"*.txt -custom2"));
 		attrFiles.add(writeAttributesFile(".git/info/attributes",
@@ -225,8 +226,8 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 		git.add().addFilepattern(".").call();
 
 		// Modify all attributes
-		for (File attrFile : attrFiles)
-			attrFile.delete();
+		for (Path attrFile : attrFiles)
+			attrFile.toFile().delete();
 
 		beginWalk();
 
@@ -259,13 +260,13 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 	@Test
 	public void testIndexOnly2()
 			throws IOException, NoFilepatternException, GitAPIException {
-		File l2 = writeTrashFile("level1/level2/l2.txt", "");
+		Path l2 = writeTrashFile("level1/level2/l2.txt", "");
 		writeTrashFile("level1/level2/l1.txt", "");
 
 		git.add().addFilepattern(".").call();
 
 		writeAttributesFile(".gitattributes", "*.txt custom=root");
-		assertTrue(l2.delete());
+		assertTrue(l2.toFile().delete());
 
 		beginWalk();
 
@@ -820,7 +821,7 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 		return (ret);
 	}
 
-	private File writeAttributesFile(String name, String... rules)
+	private Path writeAttributesFile(String name, String... rules)
 			throws IOException {
 		StringBuilder data = new StringBuilder();
 		for (String line : rules)
@@ -837,7 +838,7 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 	 * @throws IOException
 	 * @see Repository#getConfig()
 	 */
-	private File writeGlobalAttributeFile(String fileName, String... attributes)
+	private Path writeGlobalAttributeFile(String fileName, String... attributes)
 			throws IOException {
 		customAttributeFile = File.createTempFile("tmp_", fileName, null);
 		customAttributeFile.deleteOnExit();
@@ -845,11 +846,11 @@ public class TreeWalkAttributeTest extends RepositoryTestCase {
 		for (String attr : attributes) {
 			attributesFileContent.append(attr).append("\n");
 		}
-		JGitTestUtil.write(customAttributeFile,
+		JGitTestUtil.write(customAttributeFile.toPath(),
 				attributesFileContent.toString());
 		db.getConfig().setString("core", null, "attributesfile",
 				customAttributeFile.getAbsolutePath());
-		return customAttributeFile;
+		return customAttributeFile.toPath();
 	}
 
 	static Set<Attribute> asSet(Attribute... attrs) {

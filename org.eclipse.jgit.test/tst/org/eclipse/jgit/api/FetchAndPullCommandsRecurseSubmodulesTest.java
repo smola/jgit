@@ -111,7 +111,7 @@ public class FetchAndPullCommandsRecurseSubmodulesTest extends RepositoryTestCas
 
 		String file = "file.txt";
 
-		write(new File(sub1.getWorkTree(), file), "content");
+		write(new File(sub1.getWorkTree().toFile(), file).toPath(), "content");
 		sub1Git.add().addFilepattern(file).call();
 		RevCommit commit = sub1Git.commit().setMessage("create file").call();
 		assertNotNull(commit);
@@ -125,14 +125,14 @@ public class FetchAndPullCommandsRecurseSubmodulesTest extends RepositoryTestCas
 		assertNotNull(sub2);
 		addRepoToClose(sub2);
 
-		write(new File(sub2.getWorkTree(), file), "content");
+		write(new File(sub2.getWorkTree().toFile(), file).toPath(), "content");
 		sub2Git.add().addFilepattern(file).call();
 		RevCommit sub2Head = sub2Git.commit().setMessage("create file").call();
 		assertNotNull(sub2Head);
 
 		// Add submodule 2 to submodule 1
 		Repository r2 = sub1Git.submoduleAdd().setPath(PATH)
-				.setURI(sub2.getDirectory().toURI().toString()).call();
+				.setURI(sub2.getDirectory().toFile().toURI().toString()).call();
 		assertNotNull(r2);
 		addRepoToClose(r2);
 		RevCommit sub1Head = sub1Git.commit().setAll(true)
@@ -141,7 +141,7 @@ public class FetchAndPullCommandsRecurseSubmodulesTest extends RepositoryTestCas
 
 		// Add submodule 1 to default repository
 		Repository r1 = git.submoduleAdd().setPath(PATH)
-				.setURI(sub1.getDirectory().toURI().toString()).call();
+				.setURI(sub1.getDirectory().toFile().toURI().toString()).call();
 		assertNotNull(r1);
 		addRepoToClose(r1);
 		assertNotNull(git.commit().setAll(true).setMessage("Adding submodule")
@@ -153,7 +153,7 @@ public class FetchAndPullCommandsRecurseSubmodulesTest extends RepositoryTestCas
 		CloneCommand clone = Git.cloneRepository();
 		clone.setDirectory(directory);
 		clone.setCloneSubmodules(true);
-		clone.setURI(git.getRepository().getDirectory().toURI().toString());
+		clone.setURI(git.getRepository().getDirectory().toFile().toURI().toString());
 		git2 = clone.call();
 		addRepoToClose(git2.getRepository());
 		assertNotNull(git2);

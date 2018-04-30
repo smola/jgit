@@ -81,7 +81,7 @@ public class CGitAttributesTest extends RepositoryTestCase {
 		// files cannot influence the tests. So we set core.excludesFile to an
 		// empty file inside the repository.
 		StoredConfig config = db.getConfig();
-		File fakeUserGitignore = writeTrashFile(".fake_user_gitignore", "");
+		File fakeUserGitignore = writeTrashFile(".fake_user_gitignore", "").toFile();
 		config.setString("core", null, "excludesFile",
 				fakeUserGitignore.getAbsolutePath());
 		// Disable case-insensitivity -- JGit doesn't handle that yet.
@@ -124,7 +124,7 @@ public class CGitAttributesTest extends RepositoryTestCase {
 		}
 		ProcessBuilder builder = fs.runInShell("git",
 				new String[] { "check-attr", "--stdin", "--all" });
-		builder.directory(db.getWorkTree());
+		builder.directory(db.getWorkTree().toFile());
 		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder, new ByteArrayInputStream(
 				input.toString().getBytes(Constants.CHARSET)));

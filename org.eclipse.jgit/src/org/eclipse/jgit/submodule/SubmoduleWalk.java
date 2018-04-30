@@ -210,7 +210,7 @@ public class SubmoduleWalk implements AutoCloseable {
 	 */
 	public static File getSubmoduleDirectory(final Repository parent,
 			final String path) {
-		return new File(parent.getWorkTree(), path);
+		return new File(parent.getWorkTree().toFile(), path);
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class SubmoduleWalk implements AutoCloseable {
 	 */
 	public static Repository getSubmoduleRepository(final Repository parent,
 			final String path) throws IOException {
-		return getSubmoduleRepository(parent.getWorkTree(), path,
+		return getSubmoduleRepository(parent.getWorkTree().toFile(), path,
 				parent.getFS());
 	}
 
@@ -266,7 +266,7 @@ public class SubmoduleWalk implements AutoCloseable {
 			return new RepositoryBuilder() //
 					.setMustExist(true) //
 					.setFS(fs) //
-					.setWorkTree(workTree) //
+					.setWorkTree(workTree.toPath()) //
 					.build();
 		} catch (RepositoryNotFoundException e) {
 			return null;
@@ -317,7 +317,7 @@ public class SubmoduleWalk implements AutoCloseable {
 
 		// Fall back to parent repository's working directory if no remote URL
 		if (remoteUrl == null) {
-			remoteUrl = parent.getWorkTree().getAbsolutePath();
+			remoteUrl = parent.getWorkTree().toFile().getAbsolutePath();
 			// Normalize slashes to '/'
 			if ('\\' == File.separatorChar)
 				remoteUrl = remoteUrl.replace('\\', '/');
@@ -452,7 +452,7 @@ public class SubmoduleWalk implements AutoCloseable {
 	 */
 	public SubmoduleWalk loadModulesConfig() throws IOException, ConfigInvalidException {
 		if (rootTree == null) {
-			File modulesFile = new File(repository.getWorkTree(),
+			File modulesFile = new File(repository.getWorkTree().toFile(),
 					Constants.DOT_GIT_MODULES);
 			FileBasedConfig config = new FileBasedConfig(modulesFile.toPath(),
 					repository.getFS());
@@ -525,7 +525,7 @@ public class SubmoduleWalk implements AutoCloseable {
 		if (repository.isBare()) {
 			return false;
 		}
-		File modulesFile = new File(repository.getWorkTree(),
+		File modulesFile = new File(repository.getWorkTree().toFile(),
 				Constants.DOT_GIT_MODULES);
 		return (modulesFile.exists());
 	}

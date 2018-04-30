@@ -154,7 +154,7 @@ public class TransportAmazonS3 extends HttpTransport implements WalkTransport {
 		super(local, uri);
 
 		Properties props = loadProperties();
-		File directory = local.getDirectory();
+		File directory = local.getDirectory().toFile();
 		if (!props.containsKey("tmpdir") && directory != null) //$NON-NLS-1$
 			props.put("tmpdir", directory.getPath()); //$NON-NLS-1$
 
@@ -171,7 +171,7 @@ public class TransportAmazonS3 extends HttpTransport implements WalkTransport {
 
 	private Properties loadProperties() throws NotSupportedException {
 		if (local.getDirectory() != null) {
-			File propsFile = new File(local.getDirectory(), uri.getUser());
+			File propsFile = new File(local.getDirectory().toFile(), uri.getUser());
 			if (propsFile.isFile())
 				return loadPropertiesFile(propsFile);
 		}

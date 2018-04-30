@@ -90,16 +90,16 @@ public class InitCommand implements Callable<Git> {
 			}
 			builder.readEnvironment();
 			if (gitDir != null)
-				builder.setGitDir(gitDir);
+				builder.setGitDir(gitDir.toPath());
 			else
-				gitDir = builder.getGitDir();
+				gitDir = builder.getGitDir().toFile();
 			if (directory != null) {
 				if (bare)
-					builder.setGitDir(directory);
+					builder.setGitDir(directory.toPath());
 				else {
-					builder.setWorkTree(directory);
+					builder.setWorkTree(directory.toPath());
 					if (gitDir == null)
-						builder.setGitDir(new File(directory, Constants.DOT_GIT));
+						builder.setGitDir(new File(directory, Constants.DOT_GIT).toPath());
 				}
 			} else if (builder.getGitDir() == null) {
 				String dStr = SystemReader.getInstance()
@@ -109,7 +109,7 @@ public class InitCommand implements Callable<Git> {
 				File d = new File(dStr);
 				if (!bare)
 					d = new File(d, Constants.DOT_GIT);
-				builder.setGitDir(d);
+				builder.setGitDir(d.toPath());
 			} else {
 				// directory was not set but gitDir was set
 				if (!bare) {
@@ -117,7 +117,7 @@ public class InitCommand implements Callable<Git> {
 							"user.dir"); //$NON-NLS-1$
 					if (dStr == null)
 						dStr = "."; //$NON-NLS-1$
-					builder.setWorkTree(new File(dStr));
+					builder.setWorkTree(new File(dStr).toPath());
 				}
 			}
 			Repository repository = builder.build();

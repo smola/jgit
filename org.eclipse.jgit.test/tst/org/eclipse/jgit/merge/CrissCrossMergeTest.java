@@ -772,7 +772,7 @@ public class CrissCrossMergeTest extends RepositoryTestCase {
 			setIndex(blob, path);
 			break;
 		case Bare:
-			File file = new File(db.getDirectory(), "index");
+			File file = new File(db.getDirectory().toFile(), "index");
 			if (!file.exists())
 				return;
 			db.close();
@@ -819,32 +819,32 @@ public class CrissCrossMergeTest extends RepositoryTestCase {
 			throws Exception {
 		switch (worktreeState) {
 		case Missing:
-			new File(db.getWorkTree(), path).delete();
+			new File(db.getWorkTree().toFile(), path).delete();
 			break;
 		case DifferentFromHeadAndOther:
-			write(new File(db.getWorkTree(), path),
+			write(db.getWorkTree().resolve(path),
 					Integer.toString(counter++));
 			break;
 		case SameAsHead:
 			try (FileOutputStream fos = new FileOutputStream(
-					new File(db.getWorkTree(), path))) {
+					new File(db.getWorkTree().toFile(), path))) {
 				db.newObjectReader().open(contentId(Constants.HEAD, path))
 						.copyTo(fos);
 			}
 			break;
 		case SameAsOther:
 			try (FileOutputStream fos = new FileOutputStream(
-					new File(db.getWorkTree(), path))) {
+					new File(db.getWorkTree().toFile(), path))) {
 				db.newObjectReader().open(contentId(other, path)).copyTo(fos);
 			}
 			break;
 		case Bare:
 			if (db.isBare())
 				return;
-			File workTreeFile = db.getWorkTree();
+			File workTreeFile = db.getWorkTree().toFile();
 			db.getConfig().setBoolean("core", null, "bare", true);
-			db.getDirectory().renameTo(new File(workTreeFile, "test.git"));
-			db = new FileRepository(new File(workTreeFile, "test.git"));
+			db.getDirectory().toFile().renameTo(new File(workTreeFile, "test.git"));
+			db = new FileRepository(new File(workTreeFile, "test.git").toPath());
 			db_t = new TestRepository<>(db);
 		}
 	}

@@ -87,11 +87,11 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		git = Git.wrap(db);
-		committedFile = writeTrashFile("file.txt", "content");
+		committedFile = writeTrashFile("file.txt", "content").toFile();
 		git.add().addFilepattern("file.txt").call();
 		head = git.commit().setMessage("add file").call();
 		assertNotNull(head);
-		untrackedFile = writeTrashFile("untracked.txt", "content");
+		untrackedFile = writeTrashFile("untracked.txt", "content").toFile();
 	}
 
 	private void validateStashedCommit(final RevCommit commit)
@@ -190,7 +190,7 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void indexAdd() throws Exception {
-		File addedFile = writeTrashFile("file2.txt", "content2");
+		File addedFile = writeTrashFile("file2.txt", "content2").toFile();
 		git.add().addFilepattern("file2.txt").call();
 
 		RevCommit stashed = Git.wrap(db).stashCreate().call();
@@ -264,7 +264,7 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 	@Test
 	public void workingDirectoryModifyInSubfolder() throws Exception {
 		String path = "d1/d2/f.txt";
-		File subfolderFile = writeTrashFile(path, "content");
+		File subfolderFile = writeTrashFile(path, "content").toFile();
 		git.add().addFilepattern(path).call();
 		head = git.commit().setMessage("add file").call();
 
@@ -348,7 +348,7 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 	@Test
 	public void workingDirectoryDeleteIndexAdd() throws Exception {
 		String path = "file2.txt";
-		File added = writeTrashFile(path, "content2");
+		File added = writeTrashFile(path, "content2").toFile();
 		assertTrue(added.exists());
 		git.add().addFilepattern(path).call();
 		FileUtils.delete(added.toPath());
@@ -382,7 +382,7 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void workingDirectoryDeleteIndexEdit() throws Exception {
-		File edited = writeTrashFile("file.txt", "content2");
+		File edited = writeTrashFile("file.txt", "content2").toFile();
 		git.add().addFilepattern("file.txt").call();
 		FileUtils.delete(edited.toPath());
 		assertFalse(edited.exists());
@@ -415,7 +415,7 @@ public class StashCreateCommandTest extends RepositoryTestCase {
 	@Test
 	public void multipleEdits() throws Exception {
 		git.rm().addFilepattern("file.txt").call();
-		File addedFile = writeTrashFile("file2.txt", "content2");
+		File addedFile = writeTrashFile("file2.txt", "content2").toFile();
 		git.add().addFilepattern("file2.txt").call();
 
 		RevCommit stashed = Git.wrap(db).stashCreate().call();

@@ -143,7 +143,7 @@ public class PushOptionsTest extends RepositoryTestCase {
 		StoredConfig config = local.getRepository().getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
 		remoteConfig.addURI(new URIish(
-				remote.getRepository().getDirectory().toURI().toURL()));
+				remote.getRepository().getDirectory().toFile().toURI().toURL()));
 		remoteConfig.addFetchRefSpec(
 				new RefSpec("+refs/heads/*:refs/remotes/origin/*"));
 		remoteConfig.update(config);

@@ -145,7 +145,7 @@ public class FileResolver<C> implements RepositoryResolver<C> {
 		if (exportBase.size() == 1) {
 			File dir = new File(exportBase.iterator().next(), name);
 			throw new RepositoryNotFoundException(name,
-					new RepositoryNotFoundException(dir));
+					new RepositoryNotFoundException(dir.toPath()));
 		}
 
 		throw new RepositoryNotFoundException(name);
@@ -230,7 +230,7 @@ public class FileResolver<C> implements RepositoryResolver<C> {
 		if (isExportAll())
 			return true;
 		else if (db.getDirectory() != null)
-			return new File(db.getDirectory(), "git-daemon-export-ok").exists(); //$NON-NLS-1$
+			return new File(db.getDirectory().toFile(), "git-daemon-export-ok").exists(); //$NON-NLS-1$
 		else
 			return false;
 	}

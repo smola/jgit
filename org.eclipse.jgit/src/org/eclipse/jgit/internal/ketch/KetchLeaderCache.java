@@ -118,7 +118,7 @@ public class KetchLeaderCache {
 		}
 
 		if (repo.getDirectory() != null) {
-			return repo.getDirectory().toURI().toString();
+			return repo.getDirectory().toFile().toURI().toString();
 		}
 
 		throw new IllegalArgumentException();

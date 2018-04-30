@@ -304,7 +304,7 @@ public class PullCommandWithRebaseTest extends RepositoryTestCase {
 		source.commit().setMessage(SOURCE_COMMIT_MESSAGE).call();
 
 		// create commit in target, not conflicting with the new commit in source
-		File newFile = new File(dbTarget.getWorkTree().getPath() + "/newFile.txt");
+		File newFile = new File(dbTarget.getWorkTree().toFile().getPath() + "/newFile.txt");
 		writeToFile(newFile, NEW_FILE_CONTENTS);
 		target.add().addFilepattern(newFile.getName()).call();
 		target.commit().setMessage(TARGET_COMMIT_MESSAGE).call();
@@ -358,7 +358,7 @@ public class PullCommandWithRebaseTest extends RepositoryTestCase {
 		target = new Git(dbTarget);
 
 		// put some file in the source repo
-		sourceFile = new File(db.getWorkTree(), "SomeFile.txt");
+		sourceFile = new File(db.getWorkTree().toFile(), "SomeFile.txt");
 		writeToFile(sourceFile, "Hello world");
 		// and commit it
 		source.add().addFilepattern("SomeFile.txt").call();
@@ -373,13 +373,13 @@ public class PullCommandWithRebaseTest extends RepositoryTestCase {
 
 		config
 				.addURI(new URIish(source.getRepository().getWorkTree()
-						.getAbsolutePath()));
+						.toFile().getAbsolutePath()));
 		config.addFetchRefSpec(new RefSpec(
 				"+refs/heads/*:refs/remotes/origin/*"));
 		config.update(targetConfig);
 		targetConfig.save();
 
-		targetFile = new File(dbTarget.getWorkTree(), "SomeFile.txt");
+		targetFile = new File(dbTarget.getWorkTree().toFile(), "SomeFile.txt");
 		// make sure we have the same content
 		target.pull().call();
 		target.checkout().setStartPoint("refs/remotes/origin/master").setName(

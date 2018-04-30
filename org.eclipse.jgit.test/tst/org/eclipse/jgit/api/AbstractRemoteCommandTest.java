@@ -75,7 +75,7 @@ public class AbstractRemoteCommandTest extends RepositoryTestCase {
 		remoteConfig.addFetchRefSpec(refSpec);
 
 		URIish uri = new URIish(
-				remoteRepository.getDirectory().toURI().toURL());
+				remoteRepository.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 
 		remoteConfig.update(config);

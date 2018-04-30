@@ -93,7 +93,7 @@ public class HMACSHA1NonceGenerator implements NonceGenerator {
 		if (repo instanceof DfsRepository) {
 			path = ((DfsRepository) repo).getDescription().getRepositoryName();
 		} else {
-			File directory = repo.getDirectory();
+			File directory = repo.getDirectory().toFile();
 			if (directory != null) {
 				path = directory.getPath();
 			} else {

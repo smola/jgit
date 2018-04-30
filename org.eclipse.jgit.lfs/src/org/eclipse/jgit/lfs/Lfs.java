@@ -71,7 +71,7 @@ public class Lfs {
 	 * @since 4.11
 	 */
 	public Lfs(Repository db) {
-		this.root = db.getDirectory().toPath().resolve(Constants.LFS);
+		this.root = db.getDirectory().resolve(Constants.LFS);
 	}
 
 	/**

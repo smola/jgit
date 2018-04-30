@@ -71,7 +71,7 @@ public class FetchTest extends CLIRepositoryTestCase {
 		// setup the first repository to fetch from the second repository
 		final StoredConfig config = db.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, "test");
-		URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
+		URIish uri = new URIish(remoteRepository.getDirectory().toFile().toURI().toURL());
 		remoteConfig.addURI(uri);
 		remoteConfig.update(config);
 		config.save();

@@ -153,26 +153,26 @@ public class RepoTest extends CLIRepositoryTestCase {
 		StringBuilder cmd = new StringBuilder("git repo --base-uri=\"")
 			.append(rootUri)
 			.append("\" --groups=\"all,-a\" \"")
-			.append(db.getWorkTree().getAbsolutePath())
+			.append(db.getWorkTree().toFile().getAbsolutePath())
 			.append("/manifest.xml\"");
 		execute(cmd.toString());
 
-		File file = new File(db.getWorkTree(), "foo/hello.txt");
+		File file = new File(db.getWorkTree().toFile(), "foo/hello.txt");
 		assertFalse("\"all,-a\" doesn't have foo", file.exists());
-		file = new File(db.getWorkTree(), "bar/world.txt");
+		file = new File(db.getWorkTree().toFile(), "bar/world.txt");
 		assertTrue("\"all,-a\" has bar", file.exists());
-		file = new File(db.getWorkTree(), "a/a.txt");
+		file = new File(db.getWorkTree().toFile(), "a/a.txt");
 		assertFalse("\"all,-a\" doesn't have a", file.exists());
-		file = new File(db.getWorkTree(), "b/b.txt");
+		file = new File(db.getWorkTree().toFile(), "b/b.txt");
 		assertTrue("\"all,-a\" has have b", file.exists());
 	}
 
 	private void resolveRelativeUris() {
 		// Find the longest common prefix ends with "/" as rootUri.
-		defaultUri = defaultDb.getDirectory().toURI().toString();
-		notDefaultUri = notDefaultDb.getDirectory().toURI().toString();
-		groupAUri = groupADb.getDirectory().toURI().toString();
-		groupBUri = groupBDb.getDirectory().toURI().toString();
+		defaultUri = defaultDb.getDirectory().toFile().toURI().toString();
+		notDefaultUri = notDefaultDb.getDirectory().toFile().toURI().toString();
+		groupAUri = groupADb.getDirectory().toFile().toURI().toString();
+		groupBUri = groupBDb.getDirectory().toFile().toURI().toString();
 		int start = 0;
 		while (start <= defaultUri.length()) {
 			int newStart = defaultUri.indexOf('/', start + 1);

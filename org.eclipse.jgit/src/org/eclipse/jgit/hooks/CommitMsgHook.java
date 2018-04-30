@@ -128,12 +128,12 @@ public class CommitMsgHook extends GitHook<String> {
 	 *         repository's work tree, or null if the repository is bare.
 	 */
 	private String getCommitEditMessageFilePath() {
-		File gitDir = getRepository().getDirectory();
+		File gitDir = getRepository().getDirectory().toFile();
 		if (gitDir == null) {
 			return null;
 		}
-		return Repository.stripWorkDir(getRepository().getWorkTree(), new File(
-				gitDir, Constants.COMMIT_EDITMSG));
+		return Repository.stripWorkDir(getRepository().getWorkTree().toAbsolutePath(), new File(
+				gitDir, Constants.COMMIT_EDITMSG).toPath());
 	}
 
 	/**

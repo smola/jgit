@@ -253,7 +253,7 @@ public class TransportTest extends SampleDataRepositoryTestCase {
 	@Test
 	public void testLocalTransportWithRelativePath() throws Exception {
 		Repository other = createWorkRepository();
-		String otherDir = other.getWorkTree().getName();
+		String otherDir = other.getWorkTree().toFile().getName();
 
 		RemoteConfig config = new RemoteConfig(db.getConfig(), "other");
 		config.addURI(new URIish("../" + otherDir));
@@ -265,7 +265,7 @@ public class TransportTest extends SampleDataRepositoryTestCase {
 	@Test
 	public void testLocalTransportFetchWithoutLocalRepository()
 			throws Exception {
-		URIish uri = new URIish("file://" + db.getWorkTree().getAbsolutePath());
+		URIish uri = new URIish("file://" + db.getWorkTree().toFile().getAbsolutePath());
 		try (Transport transport = Transport.open(uri)) {
 			try (FetchConnection fetchConnection = transport.openFetch()) {
 				Ref head = fetchConnection.getRef(Constants.HEAD);

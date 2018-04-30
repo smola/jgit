@@ -51,6 +51,8 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -200,7 +202,7 @@ public abstract class LocalDiskRepositoryTestCase {
 		if (useMMAP)
 			System.gc();
 		if (tmp != null)
-			recursiveDelete(tmp, false, true);
+			recursiveDelete(tmp.toPath(), false, true);
 		if (tmp != null && !tmp.exists())
 			CleanupThread.removed(tmp);
 
@@ -225,30 +227,34 @@ public abstract class LocalDiskRepositoryTestCase {
 	 * @param dir
 	 *            the recursively directory to delete, if present.
 	 */
-	protected void recursiveDelete(final File dir) {
+	protected void recursiveDelete(final Path dir) {
 		recursiveDelete(dir, false, true);
 	}
 
-	private static boolean recursiveDelete(final File dir,
+	protected void recursiveDelete(final File dir) {
+	    recursiveDelete(dir.toPath());
+    }
+
+	private static boolean recursiveDelete(final Path dir,
 			boolean silent, boolean failOnError) {
 		assert !(silent && failOnError);
-		if (!dir.exists())
+		if (!Files.exists(dir))
 			return silent;
-		final File[] ls = dir.listFiles();
+		final File[] ls = dir.toFile().listFiles();
 		if (ls != null)
 			for (int k = 0; k < ls.length; k++) {
 				final File e = ls[k];
 				if (e.isDirectory())
-					silent = recursiveDelete(e, silent, failOnError);
+					silent = recursiveDelete(e.toPath(), silent, failOnError);
 				else if (!e.delete()) {
 					if (!silent)
 						reportDeleteFailure(failOnError, e);
 					silent = !failOnError;
 				}
 			}
-		if (!dir.delete()) {
+		if (!dir.toFile().delete()) {
 			if (!silent)
-				reportDeleteFailure(failOnError, dir);
+				reportDeleteFailure(failOnError, dir.toFile());
 			silent = !failOnError;
 		}
 		return silent;
@@ -415,7 +421,7 @@ public abstract class LocalDiskRepositoryTestCase {
 	public FileRepository createRepository(boolean bare, boolean autoClose)
 			throws IOException {
 		File gitdir = createUniqueTestGitDir(bare);
-		FileRepository db = new FileRepository(gitdir);
+		FileRepository db = new FileRepository(gitdir.toPath());
 		assertFalse(gitdir.exists());
 		db.create(bare);
 		if (autoClose) {
@@ -509,11 +515,11 @@ public abstract class LocalDiskRepositoryTestCase {
 		System.arraycopy(args, 0, argv, 1, args.length);
 
 		final Map<String, String> env = cloneEnv();
-		env.put("GIT_DIR", db.getDirectory().getAbsolutePath());
+		env.put("GIT_DIR", db.getDirectory().toFile().getAbsolutePath());
 		putPersonIdent(env, "AUTHOR", author);
 		putPersonIdent(env, "COMMITTER", committer);
 
-		final File cwd = db.getWorkTree();
+		final File cwd = db.getWorkTree().toFile();
 		final Process p = Runtime.getRuntime().exec(argv, toEnvArray(env), cwd);
 		p.getOutputStream().close();
 		p.getErrorStream().close();
@@ -540,11 +546,11 @@ public abstract class LocalDiskRepositoryTestCase {
 	 * @throws IOException
 	 *             the file could not be written.
 	 */
-	protected File write(final String body) throws IOException {
+	protected Path write(final String body) throws IOException {
 		final File f = File.createTempFile("temp", "txt", tmp);
 		try {
-			write(f, body);
-			return f;
+			write(f.toPath(), body);
+			return f.toPath();
 		} catch (Error e) {
 			f.delete();
 			throw e;
@@ -571,9 +577,13 @@ public abstract class LocalDiskRepositoryTestCase {
 	 * @throws IOException
 	 *             the file could not be written.
 	 */
-	protected void write(final File f, final String body) throws IOException {
+	protected void write(final Path f, final String body) throws IOException {
 		JGitTestUtil.write(f, body);
 	}
+
+    protected void write(final File f, final String body) throws IOException {
+        JGitTestUtil.write(f, body);
+    }
 
 	/**
 	 * Read a file's content
@@ -583,9 +593,13 @@ public abstract class LocalDiskRepositoryTestCase {
 	 * @return the content of the file
 	 * @throws IOException
 	 */
-	protected String read(final File f) throws IOException {
+	protected String read(final Path f) throws IOException {
 		return JGitTestUtil.read(f);
 	}
+
+    protected String read(final File f) throws IOException {
+        return JGitTestUtil.read(f);
+    }
 
 	private static String[] toEnvArray(final Map<String, String> env) {
 		final String[] envp = new String[env.size()];
@@ -632,7 +646,7 @@ public abstract class LocalDiskRepositoryTestCase {
 				boolean silent = false;
 				boolean failOnError = false;
 				for (File tmp : toDelete)
-					recursiveDelete(tmp, silent, failOnError);
+					recursiveDelete(tmp.toPath(), silent, failOnError);
 			}
 		}
 	}

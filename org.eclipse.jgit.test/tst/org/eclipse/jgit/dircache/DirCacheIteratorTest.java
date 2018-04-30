@@ -427,7 +427,7 @@ public class DirCacheIteratorTest extends RepositoryTestCase {
 		final File path = JGitTestUtil
 				.getTestResourceFile("dircache.testRemovedSubtree");
 
-		final DirCache dc = DirCache.read(path, FS.DETECTED);
+		final DirCache dc = DirCache.read(path.toPath(), FS.DETECTED);
 		assertEquals(2, dc.getEntryCount());
 
 		try (final TreeWalk tw = new TreeWalk(db)) {

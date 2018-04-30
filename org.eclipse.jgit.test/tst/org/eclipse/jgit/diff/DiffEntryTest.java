@@ -129,7 +129,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 		// given
 		try (Git git = new Git(db);
 				TreeWalk walk = new TreeWalk(db)) {
-			File file = writeTrashFile("a.txt", "content");
+			File file = writeTrashFile("a.txt", "content").toFile();
 			git.add().addFilepattern("a.txt").call();
 			RevCommit c1 = git.commit().setMessage("initial commit").call();
 			write(file, "new content");
@@ -156,7 +156,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 		// given
 		try (Git git = new Git(db);
 				TreeWalk walk = new TreeWalk(db)) {
-			File file = writeTrashFile("a.txt", "content");
+			File file = writeTrashFile("a.txt", "content").toFile();
 			git.add().addFilepattern("a.txt").call();
 			RevCommit c1 = git.commit().setMessage("initial commit").call();
 			delete(file.toPath());
@@ -185,7 +185,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 		// given
 		try (Git git = new Git(db);
 				TreeWalk walk = new TreeWalk(db)) {
-			File tree = new File(new File(db.getWorkTree(), "a"), "b");
+			File tree = new File(new File(db.getWorkTree().toFile(), "a"), "b");
 			FileUtils.mkdirs(tree);
 			File file = new File(tree, "c.txt");
 			FileUtils.createNewFile(file.toPath());
@@ -217,7 +217,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 		// given
 		try (Git git = new Git(db);
 				TreeWalk walk = new TreeWalk(db)) {
-			File tree = new File(new File(db.getWorkTree(), "a"), "b");
+			File tree = new File(new File(db.getWorkTree().toFile(), "a"), "b");
 			FileUtils.mkdirs(tree);
 			File file = new File(tree, "c.txt");
 			FileUtils.createNewFile(file.toPath());
@@ -281,7 +281,7 @@ public class DiffEntryTest extends RepositoryTestCase {
 		try (Git git = new Git(db);
 				TreeWalk walk = new TreeWalk(db)) {
 			RevCommit c1 = git.commit().setMessage("initial commit").call();
-			FileUtils.mkdir(new File(db.getWorkTree(), "b"));
+			FileUtils.mkdir(new File(db.getWorkTree().toFile(), "b"));
 			writeTrashFile("a.txt", "a");
 			writeTrashFile("b/1.txt", "b1");
 			writeTrashFile("b/2.txt", "b2");

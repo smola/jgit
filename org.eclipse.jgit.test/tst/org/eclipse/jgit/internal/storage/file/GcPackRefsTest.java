@@ -91,7 +91,7 @@ public class GcPackRefsTest extends GcTestCase {
 		String ref = "dir/ref";
 		tr.branch(ref).commit().create();
 		String name = repo.findRef(ref).getName();
-		Path dir = repo.getDirectory().toPath().resolve(name).getParent();
+		Path dir = repo.getDirectory().resolve(name).getParent();
 		assertNotNull(dir);
 		gc.packRefs();
 		assertFalse(Files.exists(dir));
@@ -131,7 +131,7 @@ public class GcPackRefsTest extends GcTestCase {
 		RevBlob a = tr.blob("a");
 		tr.lightweightTag("t1", a);
 		tr.lightweightTag("t2", a);
-		LockFile refLock = new LockFile(new File(repo.getDirectory(),
+		LockFile refLock = new LockFile(new File(repo.getDirectory().toFile(),
 				"refs/tags/t1"));
 		try {
 			refLock.lock();

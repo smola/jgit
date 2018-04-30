@@ -68,7 +68,7 @@ public class NetRCTest extends RepositoryTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		home = new File(trash, "home");
+		home = new File(trash.toFile(), "home");
 		FileUtils.mkdir(home);
 
 		configFile = new File(home, ".netrc");

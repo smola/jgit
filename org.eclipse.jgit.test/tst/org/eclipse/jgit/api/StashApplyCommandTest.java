@@ -91,7 +91,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 		git = Git.wrap(db);
 		recorder = new ChangeRecorder();
 		handle = db.getListenerList().addWorkingTreeModifiedListener(recorder);
-		committedFile = writeTrashFile(PATH, "content");
+		committedFile = writeTrashFile(PATH, "content").toFile();
 		git.add().addFilepattern(PATH).call();
 		head = git.commit().setMessage("add file").call();
 		assertNotNull(head);
@@ -136,7 +136,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	@Test
 	public void indexAdd() throws Exception {
 		String addedPath = "file2.txt";
-		File addedFile = writeTrashFile(addedPath, "content2");
+		File addedFile = writeTrashFile(addedPath, "content2").toFile();
 		git.add().addFilepattern(addedPath).call();
 
 		RevCommit stashed = git.stashCreate().call();
@@ -218,7 +218,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	@Test
 	public void workingDirectoryModifyInSubfolder() throws Exception {
 		String path = "d1/d2/f.txt";
-		File subfolderFile = writeTrashFile(path, "content");
+		File subfolderFile = writeTrashFile(path, "content").toFile();
 		git.add().addFilepattern(path).call();
 		head = git.commit().setMessage("add file").call();
 		recorder.assertNoEvent();
@@ -309,7 +309,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	@Test
 	public void workingDirectoryDeleteIndexAdd() throws Exception {
 		String path = "file2.txt";
-		File added = writeTrashFile(path, "content2");
+		File added = writeTrashFile(path, "content2").toFile();
 		assertTrue(added.exists());
 		git.add().addFilepattern(path).call();
 		FileUtils.delete(added.toPath());
@@ -371,7 +371,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	public void multipleEdits() throws Exception {
 		String addedPath = "file2.txt";
 		git.rm().addFilepattern(PATH).call();
-		File addedFile = writeTrashFile(addedPath, "content2");
+		File addedFile = writeTrashFile(addedPath, "content2").toFile();
 		git.add().addFilepattern(addedPath).call();
 
 		RevCommit stashed = git.stashCreate().call();
@@ -465,7 +465,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 		git.add().addFilepattern(PATH).call();
 		git.commit().setMessage("more content").call();
 		String path2 = "file2.txt";
-		File file2 = writeTrashFile(path2, "content\nmore content\n");
+		File file2 = writeTrashFile(path2, "content\nmore content\n").toFile();
 		git.add().addFilepattern(PATH).call();
 		git.add().addFilepattern(path2).call();
 		git.commit().setMessage("even content").call();
@@ -512,7 +512,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 		git.add().addFilepattern(PATH).call();
 		git.commit().setMessage("more content").call();
 		String path2 = "file2.txt";
-		File file2 = writeTrashFile(path2, "content\nmore content\n");
+		File file2 = writeTrashFile(path2, "content\nmore content\n").toFile();
 		git.add().addFilepattern(PATH).call();
 		git.add().addFilepattern(path2).call();
 		git.commit().setMessage("even content").call();
@@ -711,7 +711,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testApplyStashWithDeletedFile() throws Exception {
-		File file = writeTrashFile("file", "content");
+		File file = writeTrashFile("file", "content").toFile();
 		git.add().addFilepattern("file").call();
 		git.commit().setMessage("x").call();
 		file.delete();
@@ -730,7 +730,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	@Test
 	public void untrackedFileNotIncluded() throws Exception {
 		String untrackedPath = "untracked.txt";
-		File untrackedFile = writeTrashFile(untrackedPath, "content");
+		File untrackedFile = writeTrashFile(untrackedPath, "content").toFile();
 		// at least one modification needed
 		writeTrashFile(PATH, "content2");
 		git.add().addFilepattern(PATH).call();
@@ -757,7 +757,7 @@ public class StashApplyCommandTest extends RepositoryTestCase {
 	@Test
 	public void untrackedFileIncluded() throws Exception {
 		String path = "a/b/untracked.txt";
-		File untrackedFile = writeTrashFile(path, "content");
+		File untrackedFile = writeTrashFile(path, "content").toFile();
 		RevCommit stashedCommit = git.stashCreate().setIncludeUntracked(true)
 				.call();
 		assertNotNull(stashedCommit);

@@ -211,7 +211,7 @@ public class CommitCommandTest extends RepositoryTestCase {
 			SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 			String path = "sub";
 			command.setPath(path);
-			String uri = db.getDirectory().toURI().toString();
+			String uri = db.getDirectory().toFile().toURI().toString();
 			command.setURI(uri);
 			Repository repo = command.call();
 			assertNotNull(repo);
@@ -261,7 +261,7 @@ public class CommitCommandTest extends RepositoryTestCase {
 			SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 			String path = "sub";
 			command.setPath(path);
-			String uri = db.getDirectory().toURI().toString();
+			String uri = db.getDirectory().toFile().toURI().toString();
 			command.setURI(uri);
 			Repository repo = command.call();
 			assertNotNull(repo);
@@ -311,11 +311,11 @@ public class CommitCommandTest extends RepositoryTestCase {
 	@Test
 	public void commitUpdatesSmudgedEntries() throws Exception {
 		try (Git git = new Git(db)) {
-			File file1 = writeTrashFile("file1.txt", "content1");
+			File file1 = writeTrashFile("file1.txt", "content1").toFile();
 			assertTrue(file1.setLastModified(file1.lastModified() - 5000));
-			File file2 = writeTrashFile("file2.txt", "content2");
+			File file2 = writeTrashFile("file2.txt", "content2").toFile();
 			assertTrue(file2.setLastModified(file2.lastModified() - 5000));
-			File file3 = writeTrashFile("file3.txt", "content3");
+			File file3 = writeTrashFile("file3.txt", "content3").toFile();
 			assertTrue(file3.setLastModified(file3.lastModified() - 5000));
 
 			assertNotNull(git.add().addFilepattern("file1.txt")
@@ -347,8 +347,8 @@ public class CommitCommandTest extends RepositoryTestCase {
 			assertEquals(0, cache.getEntry("file2.txt").getLength());
 			assertEquals(0, cache.getEntry("file3.txt").getLength());
 
-			long indexTime = db.getIndexFile().lastModified();
-			db.getIndexFile().setLastModified(indexTime - 5000);
+			long indexTime = db.getIndexFile().toFile().lastModified();
+			db.getIndexFile().toFile().setLastModified(indexTime - 5000);
 
 			write(file1, "content4");
 			assertTrue(file1.setLastModified(file1.lastModified() + 2500));
@@ -368,9 +368,9 @@ public class CommitCommandTest extends RepositoryTestCase {
 	@Test
 	public void commitIgnoresSmudgedEntryWithDifferentId() throws Exception {
 		try (Git git = new Git(db)) {
-			File file1 = writeTrashFile("file1.txt", "content1");
+			File file1 = writeTrashFile("file1.txt", "content1").toFile();
 			assertTrue(file1.setLastModified(file1.lastModified() - 5000));
-			File file2 = writeTrashFile("file2.txt", "content2");
+			File file2 = writeTrashFile("file2.txt", "content2").toFile();
 			assertTrue(file2.setLastModified(file2.lastModified() - 5000));
 
 			assertNotNull(git.add().addFilepattern("file1.txt")
@@ -400,8 +400,8 @@ public class CommitCommandTest extends RepositoryTestCase {
 			assertEquals(0, cache.getEntry("file1.txt").getLength());
 			assertEquals(0, cache.getEntry("file2.txt").getLength());
 
-			long indexTime = db.getIndexFile().lastModified();
-			db.getIndexFile().setLastModified(indexTime - 5000);
+			long indexTime = db.getIndexFile().toFile().lastModified();
+			db.getIndexFile().toFile().setLastModified(indexTime - 5000);
 
 			write(file1, "content5");
 			assertTrue(file1.setLastModified(file1.lastModified() + 1000));
@@ -422,14 +422,14 @@ public class CommitCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("file1").call();
 			RevCommit first = git.commit().setMessage("initial commit").call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file1").exists());
 			createBranch(first, "refs/heads/branch1");
 			checkoutBranch("refs/heads/branch1");
 
 			writeTrashFile("file2", "file2");
 			git.add().addFilepattern("file2").call();
 			git.commit().setMessage("second commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file2").exists());
 
 			checkoutBranch("refs/heads/master");
 
@@ -438,8 +438,8 @@ public class CommitCommandTest extends RepositoryTestCase {
 					.setSquash(true)
 					.call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file1").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file2").exists());
 			assertEquals(MergeResult.MergeStatus.FAST_FORWARD_SQUASHED,
 					result.getMergeStatus());
 

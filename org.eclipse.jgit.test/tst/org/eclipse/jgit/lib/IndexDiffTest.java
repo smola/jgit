@@ -103,8 +103,8 @@ public class IndexDiffTest extends RepositoryTestCase {
 
 		DirCache index = db.lockDirCache();
 		DirCacheEditor editor = index.editor();
-		editor.add(add(db, trash, "file1"));
-		editor.add(add(db, trash, "dir/subfile"));
+		editor.add(add(db, trash.toFile(), "file1"));
+		editor.add(add(db, trash.toFile(), "dir/subfile"));
 		editor.commit();
 		FileTreeIterator iterator = new FileTreeIterator(db);
 		IndexDiff diff = new IndexDiff(db, tree, iterator);

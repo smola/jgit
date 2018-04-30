@@ -112,7 +112,7 @@ public abstract class RepositoryTestCase extends LocalDiskRepositoryTestCase {
 	 * @return the trash file
 	 * @throws IOException
 	 */
-	protected File writeTrashFile(final String name, final String data)
+	protected Path writeTrashFile(final String name, final String data)
 			throws IOException {
 		return JGitTestUtil.writeTrashFile(db, name, data);
 	}
@@ -142,7 +142,7 @@ public abstract class RepositoryTestCase extends LocalDiskRepositoryTestCase {
 	 * @return the trash file
 	 * @throws IOException
 	 */
-	protected File writeTrashFile(final String subdir, final String name,
+	protected Path writeTrashFile(final String subdir, final String name,
 			final String data)
 			throws IOException {
 		return JGitTestUtil.writeTrashFile(db, subdir, name, data);
@@ -206,7 +206,7 @@ public abstract class RepositoryTestCase extends LocalDiskRepositoryTestCase {
 	protected FileRepository db;
 
 	/** Working directory of {@link #db}. */
-	protected File trash;
+	protected Path trash;
 
 	/** {@inheritDoc} */
 	@Override
@@ -444,10 +444,10 @@ public abstract class RepositoryTestCase extends LocalDiskRepositoryTestCase {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected File writeTrashFiles(boolean ensureDistinctTimestamps,
+	protected Path writeTrashFiles(boolean ensureDistinctTimestamps,
 			String... contents)
 			throws IOException, InterruptedException {
-				File f = null;
+				Path f = null;
 				for (int i = 0; i < contents.length; i++)
 					if (contents[i] != null) {
 						if (ensureDistinctTimestamps && (f != null))

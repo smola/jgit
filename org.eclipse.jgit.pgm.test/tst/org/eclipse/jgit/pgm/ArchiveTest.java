@@ -146,7 +146,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testFormatOverridesFilename() throws Exception {
-		File archive = new File(db.getWorkTree(), "format-overrides-name.tar");
+		File archive = new File(db.getWorkTree().toFile(), "format-overrides-name.tar");
 		String path = archive.getAbsolutePath();
 
 		commitGreeting();
@@ -161,7 +161,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testUnrecognizedExtensionMeansTar() throws Exception {
-		File archive = new File(db.getWorkTree(), "example.txt");
+		File archive = new File(db.getWorkTree().toFile(), "example.txt");
 		String path = archive.getAbsolutePath();
 
 		commitGreeting();
@@ -175,7 +175,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testNoExtensionMeansTar() throws Exception {
-		File archive = new File(db.getWorkTree(), "example");
+		File archive = new File(db.getWorkTree().toFile(), "example");
 		String path = archive.getAbsolutePath();
 
 		commitGreeting();
@@ -188,7 +188,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testExtensionMatchIsAnchored() throws Exception {
-		File archive = new File(db.getWorkTree(), "two-extensions.zip.bak");
+		File archive = new File(db.getWorkTree().toFile(), "two-extensions.zip.bak");
 		String path = archive.getAbsolutePath();
 
 		commitGreeting();
@@ -201,8 +201,8 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testZipExtension() throws Exception {
-		File archiveWithDot = new File(db.getWorkTree(), "greeting.zip");
-		File archiveNoDot = new File(db.getWorkTree(), "greetingzip");
+		File archiveWithDot = new File(db.getWorkTree().toFile(), "greeting.zip");
+		File archiveNoDot = new File(db.getWorkTree().toFile(), "greetingzip");
 
 		commitGreeting();
 		execute("git archive " +
@@ -217,7 +217,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	@Test
 	public void testTarExtension() throws Exception {
-		File archive = new File(db.getWorkTree(), "tarball.tar");
+		File archive = new File(db.getWorkTree().toFile(), "tarball.tar");
 		String path = archive.getAbsolutePath();
 
 		commitGreeting();
@@ -233,8 +233,8 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 		commitGreeting();
 
 		for (String ext : Arrays.asList("tar.gz", "tgz")) {
-			File archiveWithDot = new File(db.getWorkTree(), "tarball." + ext);
-			File archiveNoDot = new File(db.getWorkTree(), "tarball" + ext);
+			File archiveWithDot = new File(db.getWorkTree().toFile(), "tarball." + ext);
+			File archiveNoDot = new File(db.getWorkTree().toFile(), "tarball" + ext);
 
 			execute("git archive " +
 				shellQuote("--output=" + archiveWithDot.getAbsolutePath()) + " " +
@@ -252,8 +252,8 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 		commitGreeting();
 
 		for (String ext : Arrays.asList("tar.bz2", "tbz", "tbz2")) {
-			File archiveWithDot = new File(db.getWorkTree(), "tarball." + ext);
-			File archiveNoDot = new File(db.getWorkTree(), "tarball" + ext);
+			File archiveWithDot = new File(db.getWorkTree().toFile(), "tarball." + ext);
+			File archiveNoDot = new File(db.getWorkTree().toFile(), "tarball" + ext);
 
 			execute("git archive " +
 				shellQuote("--output=" + archiveWithDot.getAbsolutePath()) + " " +
@@ -271,8 +271,8 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 		commitGreeting();
 
 		for (String ext : Arrays.asList("tar.xz", "txz")) {
-			File archiveWithDot = new File(db.getWorkTree(), "tarball." + ext);
-			File archiveNoDot = new File(db.getWorkTree(), "tarball" + ext);
+			File archiveWithDot = new File(db.getWorkTree().toFile(), "tarball." + ext);
+			File archiveNoDot = new File(db.getWorkTree().toFile(), "tarball" + ext);
 
 			execute("git archive " +
 				shellQuote("--output=" + archiveWithDot.getAbsolutePath()) + " " +
@@ -595,7 +595,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 	}
 
 	private Process spawnAssumingCommandPresent(String... cmdline) {
-		File cwd = db.getWorkTree();
+		File cwd = db.getWorkTree().toFile();
 		ProcessBuilder procBuilder = new ProcessBuilder(cmdline)
 				.directory(cwd)
 				.redirectErrorStream(true);
@@ -683,7 +683,7 @@ public class ArchiveTest extends CLIRepositoryTestCase {
 
 	private void writeRaw(String filename, byte[] data)
 			throws IOException {
-		File path = new File(db.getWorkTree(), filename);
+		File path = new File(db.getWorkTree().toFile(), filename);
 		try (OutputStream out = new FileOutputStream(path)) {
 			out.write(data);
 		}

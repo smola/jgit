@@ -100,7 +100,7 @@ public class GitCloneTaskTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void shouldCloneAValidGitRepository() throws Exception {
 		Repository repo = createBareRepository();
-		File directory = repo.getDirectory();
+		File directory = repo.getDirectory().toFile();
 		task.setUri("file://" + directory.getAbsolutePath());
 		task.execute();
 
@@ -110,7 +110,7 @@ public class GitCloneTaskTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void shouldCreateABareCloneOfAValidGitRepository() throws Exception {
 		Repository repo = createBareRepository();
-		File directory = repo.getDirectory();
+		File directory = repo.getDirectory().toFile();
 		task.setUri("file://" + directory.getAbsolutePath());
 		task.setBare(true);
 		task.execute();

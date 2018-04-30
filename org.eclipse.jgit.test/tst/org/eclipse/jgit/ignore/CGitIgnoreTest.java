@@ -52,6 +52,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -81,10 +82,10 @@ public class CGitIgnoreTest extends RepositoryTestCase {
 		// we run C-git, we must ensure that global or user exclude files cannot
 		// influence the tests. So we set core.excludesFile to an empty file
 		// inside the repository.
-		File fakeUserGitignore = writeTrashFile(".fake_user_gitignore", "");
+		Path fakeUserGitignore = writeTrashFile(".fake_user_gitignore", "");
 		StoredConfig config = db.getConfig();
 		config.setString("core", null, "excludesFile",
-				fakeUserGitignore.getAbsolutePath());
+				fakeUserGitignore.toFile().getAbsolutePath());
 		// Disable case-insensitivity -- JGit doesn't handle that yet.
 		config.setBoolean("core", null, "ignoreCase", false);
 		config.save();
@@ -104,7 +105,7 @@ public class CGitIgnoreTest extends RepositoryTestCase {
 		FS fs = db.getFS();
 		ProcessBuilder builder = fs.runInShell("git", new String[] { "ls-files",
 				"--ignored", "--exclude-standard", "-o" });
-		builder.directory(db.getWorkTree());
+		builder.directory(db.getWorkTree().toFile());
 		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder,
 				new ByteArrayInputStream(new byte[0]));
@@ -122,7 +123,7 @@ public class CGitIgnoreTest extends RepositoryTestCase {
 		FS fs = db.getFS();
 		ProcessBuilder builder = fs.runInShell("git",
 				new String[] { "ls-files", "--exclude-standard", "-o" });
-		builder.directory(db.getWorkTree());
+		builder.directory(db.getWorkTree().toFile());
 		builder.environment().put("HOME", fs.userHome().toAbsolutePath().toString());
 		ExecutionResult result = fs.execute(builder,
 				new ByteArrayInputStream(new byte[0]));

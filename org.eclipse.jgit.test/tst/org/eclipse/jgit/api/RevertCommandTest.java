@@ -100,8 +100,8 @@ public class RevertCommandTest extends RepositoryTestCase {
 
 			assertEquals(RepositoryState.SAFE, db.getRepositoryState());
 
-			assertTrue(new File(db.getWorkTree(), "b").exists());
-			checkFile(new File(db.getWorkTree(), "a"),
+			assertTrue(new File(db.getWorkTree().toFile(), "b").exists());
+			checkFile(new File(db.getWorkTree().toFile(), "a"),
 					"first line\nsec. line\nthird line\nfourth line\n");
 			Iterator<RevCommit> history = git.log().call().iterator();
 			RevCommit revertCommit = history.next();
@@ -145,7 +145,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 
 			assertEquals(RepositoryState.SAFE, db.getRepositoryState());
 
-			checkFile(new File(db.getWorkTree(), "a"), "first\n");
+			checkFile(new File(db.getWorkTree().toFile(), "a"), "first\n");
 			Iterator<RevCommit> history = git.log().call().iterator();
 			RevCommit revertCommit = history.next();
 			String expectedMessage = "Revert \"add second\"\n\n"
@@ -197,7 +197,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 			// not SAFE because it failed
 			assertEquals(RepositoryState.REVERTING, db.getRepositoryState());
 
-			checkFile(new File(db.getWorkTree(), "a"), "first\n"
+			checkFile(new File(db.getWorkTree().toFile(), "a"), "first\n"
 					+ "<<<<<<< master\n" + "second\n" + "third\n" + "=======\n"
 					+ ">>>>>>> " + secondCommit.getId().abbreviate(7).name()
 					+ " add second\n");
@@ -262,12 +262,12 @@ public class RevertCommandTest extends RepositoryTestCase {
 			assertNull(newHead);
 			MergeResult result = revert.getFailingResult();
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
-			assertTrue(new File(db.getDirectory(), Constants.MERGE_MSG).exists());
+			assertTrue(new File(db.getDirectory().toFile(), Constants.MERGE_MSG).exists());
 			assertEquals("Revert \"" + sideCommit.getShortMessage()
 					+ "\"\n\nThis reverts commit " + sideCommit.getId().getName()
 					+ ".\n\nConflicts:\n\ta\n",
 					db.readMergeCommitMsg());
-			assertTrue(new File(db.getDirectory(), Constants.REVERT_HEAD)
+			assertTrue(new File(db.getDirectory().toFile(), Constants.REVERT_HEAD)
 					.exists());
 			assertEquals(sideCommit.getId(), db.readRevertHead());
 			assertEquals(RepositoryState.REVERTING, db.getRepositoryState());
@@ -297,13 +297,13 @@ public class RevertCommandTest extends RepositoryTestCase {
 
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 			assertEquals(RepositoryState.REVERTING, db.getRepositoryState());
-			assertTrue(new File(db.getDirectory(), Constants.REVERT_HEAD)
+			assertTrue(new File(db.getDirectory().toFile(), Constants.REVERT_HEAD)
 					.exists());
 
 			git.reset().setMode(ResetType.MIXED).setRef("HEAD").call();
 
 			assertEquals(RepositoryState.SAFE, db.getRepositoryState());
-			assertFalse(new File(db.getDirectory(), Constants.REVERT_HEAD)
+			assertFalse(new File(db.getDirectory().toFile(), Constants.REVERT_HEAD)
 					.exists());
 		}
 	}
@@ -312,7 +312,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 	public void testRevertOverExecutableChangeOnNonExectuableFileSystem()
 			throws Exception {
 		try (Git git = new Git(db)) {
-			File file = writeTrashFile("test.txt", "a");
+			File file = writeTrashFile("test.txt", "a").toFile();
 			assertNotNull(git.add().addFilepattern("test.txt").call());
 			assertNotNull(git.commit().setMessage("commit1").call());
 
@@ -358,7 +358,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 
 			String expected = "<<<<<<< master\na(latest)\n=======\na\n>>>>>>> ca96c31 second master\n";
-			checkFile(new File(db.getWorkTree(), "a"), expected);
+			checkFile(new File(db.getWorkTree().toFile(), "a"), expected);
 		}
 	}
 
@@ -375,7 +375,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 
 			String expected = "<<<<<<< custom name\na(latest)\n=======\na\n>>>>>>> ca96c31 second master\n";
-			checkFile(new File(db.getWorkTree(), "a"), expected);
+			checkFile(new File(db.getWorkTree().toFile(), "a"), expected);
 		}
 	}
 
@@ -415,7 +415,7 @@ public class RevertCommandTest extends RepositoryTestCase {
 		// staged file a causes DIRTY_INDEX
 		assertEquals(1, result.getFailingPaths().size());
 		assertEquals(reason, result.getFailingPaths().get("a"));
-		assertEquals("a(modified)", read(new File(db.getWorkTree(), "a")));
+		assertEquals("a(modified)", read(new File(db.getWorkTree().toFile(), "a")));
 		// index shall be unchanged
 		assertEquals(indexState, indexState(CONTENT));
 		assertEquals(RepositoryState.SAFE, db.getRepositoryState());

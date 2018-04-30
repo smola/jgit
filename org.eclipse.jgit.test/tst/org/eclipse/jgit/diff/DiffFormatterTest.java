@@ -377,8 +377,8 @@ public class DiffFormatterTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiff() throws Exception {
-		write(new File(db.getDirectory().getParent(), "test.txt"), "test");
-		File folder = new File(db.getDirectory().getParent(), "folder");
+		write(new File(db.getDirectory().getParent().toFile(), "test.txt"), "test");
+		File folder = new File(db.getDirectory().getParent().toFile(), "folder");
 		FileUtils.mkdir(folder);
 		write(new File(folder, "folder.txt"), "folder");
 		try (Git git = new Git(db);
@@ -410,8 +410,8 @@ public class DiffFormatterTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffRootNullToTree() throws Exception {
-		write(new File(db.getDirectory().getParent(), "test.txt"), "test");
-		File folder = new File(db.getDirectory().getParent(), "folder");
+		write(new File(db.getDirectory().getParent().toFile(), "test.txt"), "test");
+		File folder = new File(db.getDirectory().getParent().toFile(), "folder");
 		FileUtils.mkdir(folder);
 		write(new File(folder, "folder.txt"), "folder");
 		try (Git git = new Git(db);
@@ -442,8 +442,8 @@ public class DiffFormatterTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffRootTreeToNull() throws Exception {
-		write(new File(db.getDirectory().getParent(), "test.txt"), "test");
-		File folder = new File(db.getDirectory().getParent(), "folder");
+		write(new File(db.getDirectory().getParent().toFile(), "test.txt"), "test");
+		File folder = new File(db.getDirectory().getParent().toFile(), "folder");
 		FileUtils.mkdir(folder);
 		write(new File(folder, "folder.txt"), "folder");
 		try (Git git = new Git(db);

@@ -273,20 +273,20 @@ class TextHashFunctions extends TextBuiltin {
 	protected void run() throws Exception {
 		if (gitDirs.isEmpty()) {
 			RepositoryBuilder rb = new RepositoryBuilder() //
-					.setGitDir(new File(gitdir)) //
+					.setGitDir(new File(gitdir).toPath()) //
 					.readEnvironment() //
 					.findGitDir();
 			if (rb.getGitDir() == null)
 				throw die(CLIText.get().cantFindGitDirectory);
-			gitDirs.add(rb.getGitDir());
+			gitDirs.add(rb.getGitDir().toFile());
 		}
 
 		for (File dir : gitDirs) {
 			RepositoryBuilder rb = new RepositoryBuilder();
 			if (RepositoryCache.FileKey.isGitRepository(dir.toPath(), FS.DETECTED))
-				rb.setGitDir(dir);
+				rb.setGitDir(dir.toPath());
 			else
-				rb.findGitDir(dir);
+				rb.findGitDir(dir.toPath());
 
 			try (Repository repo = rb.build()) {
 				run(repo);
@@ -340,7 +340,7 @@ class TextHashFunctions extends TextBuiltin {
 			}
 		}
 
-		File directory = repo.getDirectory();
+		File directory = repo.getDirectory().toFile();
 		if (directory != null) {
 			String name = directory.getName();
 			File parent = directory.getParentFile();

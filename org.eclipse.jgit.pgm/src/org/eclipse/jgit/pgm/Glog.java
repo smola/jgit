@@ -131,7 +131,7 @@ class Glog extends RevWalkTextBuiltin {
 	}
 
 	private String repoName() {
-		final File gitDir = db.getDirectory();
+		final File gitDir = db.getDirectory().toFile();
 		if (gitDir == null)
 			return db.toString();
 		String n = gitDir.getName();

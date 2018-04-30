@@ -86,7 +86,7 @@ public class AdvertiseErrorTest extends HttpTestCase {
 		super.setUp();
 
 		final TestRepository<Repository> src = createTestRepository();
-		final String srcName = src.getRepository().getDirectory().getName();
+		final String srcName = src.getRepository().getDirectory().getFileName().toString();
 
 		ServletContextHandler app = server.addContext("/git");
 		GitServlet gs = new GitServlet();

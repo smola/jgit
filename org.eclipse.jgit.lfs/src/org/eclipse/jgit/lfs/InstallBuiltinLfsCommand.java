@@ -94,8 +94,8 @@ public class InstallBuiltinLfsCommand implements LfsInstallCommand {
 		ProcessBuilder builder = FS.DETECTED.runInShell("git", //$NON-NLS-1$
 				repository == null ? ARGS_USER : ARGS_LOCAL);
 		if (repository != null) {
-			builder.directory(repository.isBare() ? repository.getDirectory()
-					: repository.getWorkTree());
+			builder.directory(repository.isBare() ? repository.getDirectory().toFile()
+					: repository.getWorkTree().toFile());
 		}
 		FS.DETECTED.runProcess(builder, null, null, (String) null);
 

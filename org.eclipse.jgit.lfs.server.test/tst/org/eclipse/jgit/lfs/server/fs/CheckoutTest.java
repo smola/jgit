@@ -77,7 +77,7 @@ public class CheckoutTest extends LfsServerTest {
 
 		Path tmp = Files.createTempDirectory("jgit_test_");
 		Repository db = FileRepositoryBuilder
-				.create(tmp.resolve(".git").toFile());
+				.create(tmp.resolve(".git"));
 		db.create();
 		StoredConfig cfg = db.getConfig();
 		cfg.setBoolean(ConfigConstants.CONFIG_FILTER_SECTION,
@@ -105,7 +105,7 @@ public class CheckoutTest extends LfsServerTest {
 	@After
 	public void cleanup() throws Exception {
 		tdb.getRepository().close();
-		FileUtils.delete(tdb.getRepository().getWorkTree().toPath(),
+		FileUtils.delete(tdb.getRepository().getWorkTree(),
 				FileUtils.RECURSIVE);
 	}
 

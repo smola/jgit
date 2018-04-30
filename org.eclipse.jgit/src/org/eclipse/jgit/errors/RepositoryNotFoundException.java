@@ -43,7 +43,7 @@
 
 package org.eclipse.jgit.errors;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.jgit.internal.JGitText;
@@ -60,8 +60,8 @@ public class RepositoryNotFoundException extends TransportException {
 	 * @param location
 	 *            description of the repository not found, usually file path.
 	 */
-	public RepositoryNotFoundException(final File location) {
-		this(location.getPath());
+	public RepositoryNotFoundException(final Path location) {
+		this(location.toString());
 	}
 
 	/**
@@ -72,8 +72,8 @@ public class RepositoryNotFoundException extends TransportException {
 	 * @param why
 	 *            why the repository does not exist.
 	 */
-	public RepositoryNotFoundException(final File location, Throwable why) {
-		this(location.getPath(), why);
+	public RepositoryNotFoundException(final Path location, Throwable why) {
+		this(location.toString(), why);
 	}
 
 	/**

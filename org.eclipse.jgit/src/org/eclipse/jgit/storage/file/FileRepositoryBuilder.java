@@ -43,8 +43,8 @@
 
 package org.eclipse.jgit.storage.file;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
@@ -54,8 +54,8 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * Constructs a {@link org.eclipse.jgit.internal.storage.file.FileRepository}.
  * <p>
- * Applications must set one of {@link #setGitDir(File)} or
- * {@link #setWorkTree(File)}, or use {@link #readEnvironment()} or
+ * Applications must set one of {@link #setGitDir(Path)} or
+ * {@link #setWorkTree(Path)}, or use {@link #readEnvironment()} or
  * {@link #findGitDir()} in order to configure the minimum property set
  * necessary to open a repository.
  * <p>
@@ -103,7 +103,7 @@ public class FileRepositoryBuilder extends
 	 *             the builder's parameters.
 	 * @since 3.0
 	 */
-	public static Repository create(File gitDir) throws IOException {
+	public static Repository create(Path gitDir) throws IOException {
 		return new FileRepositoryBuilder().setGitDir(gitDir).readEnvironment()
 				.build();
 	}

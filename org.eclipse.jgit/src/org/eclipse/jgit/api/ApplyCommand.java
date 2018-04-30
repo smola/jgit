@@ -175,7 +175,7 @@ public class ApplyCommand extends GitCommand<ApplyResult> {
 
 	private File getFile(String path, boolean create)
 			throws PatchApplyException {
-		File f = new File(getRepository().getWorkTree(), path);
+		File f = new File(getRepository().getWorkTree().toFile(), path);
 		if (create)
 			try {
 				File parent = f.getParentFile();

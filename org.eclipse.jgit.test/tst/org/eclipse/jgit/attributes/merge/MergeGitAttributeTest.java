@@ -160,8 +160,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			// Check that the image was not modified (not conflict marker added)
 			String result = read(
 					writeTrashFile("res.cat", "A\n" + "E\n" + "C\n" + "F\n"));
-			assertEquals(result, read(git.getRepository().getWorkTree().toPath()
-					.resolve("main.cat").toFile()));
+			assertEquals(result, read(git.getRepository().getWorkTree().resolve("main.cat")));
 		}
 	}
 
@@ -196,8 +195,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			checkoutBranch(REFS_HEADS_LEFT);
 			// Merge refs/heads/enabled_checked -> refs/heads/disabled_checked
 
-			String catContent = read(git.getRepository().getWorkTree().toPath()
-					.resolve("main.cat").toFile());
+			String catContent = read(git.getRepository().getWorkTree().resolve("main.cat"));
 
 			MergeResult mergeResult = git.merge()
 					.include(git.getRepository().resolve(REFS_HEADS_RIGHT))
@@ -206,7 +204,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 
 			// Check that the image was not modified (not conflict marker added)
 			assertEquals(catContent, read(git.getRepository().getWorkTree()
-					.toPath().resolve("main.cat").toFile()));
+					.resolve("main.cat")));
 		}
 	}
 
@@ -250,7 +248,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			String result = read(
 					writeTrashFile("res.cat", "A\n" + "E\n" + "C\n" + "F\n"));
 			assertEquals(result, read(git.getRepository().getWorkTree()
-					.toPath().resolve("main.cat").toFile()));
+					.resolve("main.cat")));
 		}
 	}
 
@@ -287,8 +285,8 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			checkoutBranch(REFS_HEADS_LEFT);
 			// Merge refs/heads/enabled_checked -> refs/heads/disabled_checked
 
-			String catContent = read(git.getRepository().getWorkTree().toPath()
-					.resolve("main.cat").toFile());
+			String catContent = read(git.getRepository().getWorkTree()
+					.resolve("main.cat"));
 
 			MergeResult mergeResult = git.merge()
 					.include(git.getRepository().resolve(REFS_HEADS_RIGHT))
@@ -297,7 +295,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 
 			// Check that the image was not modified (not conflict marker added)
 			assertEquals(catContent, read(git.getRepository().getWorkTree()
-					.toPath().resolve("main.cat").toFile()));
+					.resolve("main.cat")));
 		}
 	}
 
@@ -316,7 +314,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 		// Set up a git with conflict commits on images
 		try (Git git = new Git(db)) {
 			// First commit
-			write(new File(db.getWorkTree(), ".gitattributes"), "");
+			write(new File(db.getWorkTree().toFile(), ".gitattributes").toPath(), "");
 			git.add().addFilepattern(".gitattributes").call();
 			RevCommit firstCommit = git.commit()
 					.setMessage("initial commit adding git attribute file")
@@ -351,9 +349,8 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, mergeResult.getMergeStatus());
 
 			// Check that the image was not modified (no conflict marker added)
-			try (FileInputStream mergeResultFile = new FileInputStream(
-					db.getWorkTree().toPath().resolve(ENABLED_CHECKED_GIF)
-							.toFile())) {
+			try (InputStream mergeResultFile = Files.newInputStream(
+					db.getWorkTree().resolve(ENABLED_CHECKED_GIF))) {
 				assertTrue(contentEquals(
 						getClass().getResourceAsStream(ENABLED_CHECKED_GIF),
 						mergeResultFile));
@@ -372,7 +369,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 		// Set up a git whith conflict commits on images
 		try (Git git = new Git(db)) {
 			// First commit
-			write(new File(db.getWorkTree(), ".gitattributes"), "*.gif -merge");
+			write(db.getWorkTree().resolve(".gitattributes"), "*.gif -merge");
 			git.add().addFilepattern(".gitattributes").call();
 			RevCommit firstCommit = git.commit()
 					.setMessage("initial commit adding git attribute file")
@@ -407,9 +404,8 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, mergeResult.getMergeStatus());
 
 			// Check that the image was not modified (not conflict marker added)
-			try (FileInputStream mergeResultFile = new FileInputStream(
-					db.getWorkTree().toPath().resolve(ENABLED_CHECKED_GIF)
-							.toFile())) {
+			try (InputStream mergeResultFile = Files.newInputStream(
+					db.getWorkTree().resolve(ENABLED_CHECKED_GIF))) {
 				assertTrue(contentEquals(
 						getClass().getResourceAsStream(ENABLED_CHECKED_GIF),
 						mergeResultFile));
@@ -428,7 +424,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 		// Set up a git whith conflict commits on images
 		try (Git git = new Git(db)) {
 			// First commit
-			write(new File(db.getWorkTree(), ".gitattributes"), "*.gif merge");
+			write(db.getWorkTree().resolve(".gitattributes"), "*.gif merge");
 			git.add().addFilepattern(".gitattributes").call();
 			RevCommit firstCommit = git.commit()
 					.setMessage("initial commit adding git attribute file")
@@ -463,9 +459,8 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, mergeResult.getMergeStatus());
 
 			// Check that the image was not modified (not conflict marker added)
-			try (FileInputStream mergeResultFile = new FileInputStream(
-					db.getWorkTree().toPath().resolve(ENABLED_CHECKED_GIF)
-							.toFile())) {
+			try (InputStream mergeResultFile = Files.newInputStream(
+					db.getWorkTree().resolve(ENABLED_CHECKED_GIF))) {
 				assertFalse(contentEquals(
 						getClass().getResourceAsStream(ENABLED_CHECKED_GIF),
 						mergeResultFile));
@@ -568,8 +563,7 @@ public class MergeGitAttributeTest extends RepositoryTestCase {
 	private void copy(String resourcePath, String resourceNewName,
 			String pathInRepo) throws IOException {
 		InputStream input = getClass().getResourceAsStream(resourcePath);
-		Files.copy(input, db.getWorkTree().toPath().resolve(pathInRepo)
-				.resolve(resourceNewName));
+		Files.copy(input, db.getWorkTree().resolve(pathInRepo).resolve(resourceNewName));
 	}
 
 }

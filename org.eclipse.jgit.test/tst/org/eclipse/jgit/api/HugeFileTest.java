@@ -86,7 +86,7 @@ public class HugeFileTest extends RepositoryTestCase {
 	@Test
 	public void testAddHugeFile() throws Exception {
 		measure("Commencing test");
-		File file = new File(db.getWorkTree(), "a.txt");
+		File file = new File(db.getWorkTree().toFile(), "a.txt");
 		try (RandomAccessFile rf = new RandomAccessFile(file, "rw")) {
 			rf.setLength(4429185024L);
 		}

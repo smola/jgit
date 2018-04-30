@@ -368,7 +368,7 @@ public class BlameCommandTest extends RepositoryTestCase {
 			config.save();
 
 			String joinedCrlf = "a\r\nb\r\nc\r\n";
-			File trashFile = writeTrashFile("file.txt", joinedCrlf);
+			File trashFile = writeTrashFile("file.txt", joinedCrlf).toFile();
 			git.add().addFilepattern("file.txt").call();
 			RevCommit commit = git.commit().setMessage("create file").call();
 

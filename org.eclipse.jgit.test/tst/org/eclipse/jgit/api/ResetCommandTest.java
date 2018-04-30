@@ -53,6 +53,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -95,7 +96,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		initialCommit = git.commit().setMessage("initial commit").call();
 
 		// create nested file
-		File dir = new File(db.getWorkTree(), "dir");
+		File dir = new File(db.getWorkTree().toFile(), "dir");
 		FileUtils.mkdir(dir);
 		File nestedFile = new File(dir, "b.txt");
 		FileUtils.createNewFile(nestedFile.toPath());
@@ -105,7 +106,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 			nestedFileWriter.flush();
 
 			// create file
-			indexFile = new File(db.getWorkTree(), "a.txt");
+			indexFile = new File(db.getWorkTree().toFile(), "a.txt");
 			FileUtils.createNewFile(indexFile.toPath());
 			try (PrintWriter writer = new PrintWriter(indexFile)) {
 				writer.print("content");
@@ -127,7 +128,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		git.add().addFilepattern("a.txt").addFilepattern("dir").call();
 
 		// create a file not added to the index
-		untrackedFile = new File(db.getWorkTree(),
+		untrackedFile = new File(db.getWorkTree().toFile(),
 				"notAddedToIndex.txt");
 		FileUtils.createNewFile(untrackedFile.toPath());
 		try (PrintWriter writer2 = new PrintWriter(untrackedFile)) {
@@ -184,11 +185,11 @@ public class ResetCommandTest extends RepositoryTestCase {
 			AmbiguousObjectException, IOException, GitAPIException {
 		setupRepository();
 		git.rm().setCached(true).addFilepattern("a.txt").call();
-		assertTrue(new File(db.getWorkTree(), "a.txt").exists());
+		assertTrue(new File(db.getWorkTree().toFile(), "a.txt").exists());
 		git.reset().setMode(ResetType.HARD).setRef(Constants.HEAD)
 				.call();
-		assertTrue(new File(db.getWorkTree(), "a.txt").exists());
-		assertEquals("content", read(new File(db.getWorkTree(), "a.txt")));
+		assertTrue(new File(db.getWorkTree().toFile(), "a.txt").exists());
+		assertEquals("content", read(db.getWorkTree().resolve("a.txt")));
 	}
 
 	@Test
@@ -198,12 +199,12 @@ public class ResetCommandTest extends RepositoryTestCase {
 		setupRepository();
 		writeTrashFile("d/c.txt", "x");
 		git.add().addFilepattern("d/c.txt").call();
-		FileUtils.delete(new File(db.getWorkTree(), "d").toPath(), FileUtils.RECURSIVE);
+		FileUtils.delete(db.getWorkTree().resolve("d"), FileUtils.RECURSIVE);
 		writeTrashFile("d", "y");
 
 		git.reset().setMode(ResetType.HARD).setRef(Constants.HEAD)
 				.call();
-		assertFalse(new File(db.getWorkTree(), "d").exists());
+		assertFalse(new File(db.getWorkTree().toFile(), "d").exists());
 	}
 
 	@Test
@@ -269,12 +270,12 @@ public class ResetCommandTest extends RepositoryTestCase {
 	public void testMixedResetRetainsSizeAndModifiedTime() throws Exception {
 		git = new Git(db);
 
-		writeTrashFile("a.txt", "a").setLastModified(
+		writeTrashFile("a.txt", "a").toFile().setLastModified(
 				System.currentTimeMillis() - 60 * 1000);
 		assertNotNull(git.add().addFilepattern("a.txt").call());
 		assertNotNull(git.commit().setMessage("a commit").call());
 
-		writeTrashFile("b.txt", "b").setLastModified(
+		writeTrashFile("b.txt", "b").toFile().setLastModified(
 				System.currentTimeMillis() - 60 * 1000);
 		assertNotNull(git.add().addFilepattern("b.txt").call());
 		RevCommit commit2 = git.commit().setMessage("b commit").call();
@@ -519,14 +520,14 @@ public class ResetCommandTest extends RepositoryTestCase {
 		git.add().addFilepattern("file1").call();
 		RevCommit first = git.commit().setMessage("initial commit").call();
 
-		assertTrue(new File(db.getWorkTree(), "file1").exists());
+		assertTrue(new File(db.getWorkTree().toFile(), "file1").exists());
 		createBranch(first, "refs/heads/branch1");
 		checkoutBranch("refs/heads/branch1");
 
 		writeTrashFile("file2", "file2");
 		git.add().addFilepattern("file2").call();
 		git.commit().setMessage("second commit").call();
-		assertTrue(new File(db.getWorkTree(), "file2").exists());
+		assertTrue(new File(db.getWorkTree().toFile(), "file2").exists());
 
 		checkoutBranch("refs/heads/master");
 
@@ -548,7 +549,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 	@Test
 	public void testHardResetOnUnbornBranch() throws Exception {
 		git = new Git(db);
-		File fileA = writeTrashFile("a.txt", "content");
+		Path fileA = writeTrashFile("a.txt", "content");
 		git.add().addFilepattern("a.txt").call();
 		// Should assume an empty tree, like in C Git 1.8.2
 		assertSameAsHead(git.reset().setMode(ResetType.HARD).call());
@@ -556,7 +557,7 @@ public class ResetCommandTest extends RepositoryTestCase {
 		DirCache cache = db.readDirCache();
 		DirCacheEntry aEntry = cache.getEntry("a.txt");
 		assertNull(aEntry);
-		assertFalse(fileA.exists());
+		assertFalse(fileA.toFile().exists());
 		assertNull(db.resolve(Constants.HEAD));
 	}
 
