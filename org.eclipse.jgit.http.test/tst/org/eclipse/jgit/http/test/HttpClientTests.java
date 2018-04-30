@@ -119,7 +119,7 @@ public class HttpClientTests extends HttpTestCase {
 	}
 
 	private ServletContextHandler dumb(final String path) {
-		final File srcGit = remoteRepository.getRepository().getDirectory();
+		final File srcGit = remoteRepository.getRepository().getDirectory().toFile();
 		final URI base = srcGit.getParentFile().toURI();
 
 		ServletContextHandler ctx = server.addContext(path);
@@ -152,7 +152,7 @@ public class HttpClientTests extends HttpTestCase {
 	}
 
 	private static String nameOf(final Repository db) {
-		return db.getDirectory().getName();
+		return db.getDirectory().getFileName().toString();
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class HttpClientTests extends HttpTestCase {
 	@Test
 	public void testListRemote_Dumb_NoHEAD() throws Exception {
 		Repository src = remoteRepository.getRepository();
-		File headref = new File(src.getDirectory(), Constants.HEAD);
+		File headref = new File(src.getDirectory().toFile(), Constants.HEAD);
 		assertTrue("HEAD used to be present", headref.delete());
 		assertFalse("HEAD is gone", headref.exists());
 

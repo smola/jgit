@@ -50,11 +50,12 @@ package org.eclipse.jgit.lib;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,7 +94,6 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
-import org.eclipse.jgit.util.IO;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.slf4j.Logger;
@@ -143,7 +143,7 @@ public abstract class Repository implements AutoCloseable {
 	final AtomicLong closedAt = new AtomicLong();
 
 	/** Metadata directory holding the repository's critical files. */
-	private final File gitDir;
+	private final Path gitDir;
 
 	/** File abstraction used to resolve paths. */
 	private final FS fs;
@@ -151,10 +151,10 @@ public abstract class Repository implements AutoCloseable {
 	private final ListenerList myListeners = new ListenerList();
 
 	/** If not bare, the top level directory of the working files. */
-	private final File workTree;
+	private final Path workTree;
 
 	/** If not bare, the index file caching the working file states. */
-	private final File indexFile;
+	private final Path indexFile;
 
 	/**
 	 * Initialize a new repository instance.
@@ -231,7 +231,7 @@ public abstract class Repository implements AutoCloseable {
 	 * annotation would only cause compiler errors at places where the actual
 	 * directory can never be null.
 	 */
-	public File getDirectory() {
+	public Path getDirectory() {
 		return gitDir;
 	}
 
@@ -977,9 +977,9 @@ public abstract class Repository implements AutoCloseable {
 	@NonNull
 	public String toString() {
 		String desc;
-		File directory = getDirectory();
+		Path directory = getDirectory();
 		if (directory != null)
-			desc = directory.getPath();
+			desc = directory.toString();
 		else
 			desc = getClass().getSimpleName() + "-" //$NON-NLS-1$
 					+ System.identityHashCode(this);
@@ -1183,7 +1183,7 @@ public abstract class Repository implements AutoCloseable {
 	 *             See {@link #isBare()}.
 	 */
 	@NonNull
-	public File getIndexFile() throws NoWorkTreeException {
+	public Path getIndexFile() throws NoWorkTreeException {
 		if (isBare())
 			throw new NoWorkTreeException();
 		return indexFile;
@@ -1284,26 +1284,26 @@ public abstract class Repository implements AutoCloseable {
 			return RepositoryState.BARE;
 
 		// Pre Git-1.6 logic
-		if (new File(getWorkTree(), ".dotest").exists()) //$NON-NLS-1$
+		if (Files.exists(getWorkTree().resolve(".dotest"))) //$NON-NLS-1$
 			return RepositoryState.REBASING;
-		if (new File(getDirectory(), ".dotest-merge").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve(".dotest-merge"))) //$NON-NLS-1$
 			return RepositoryState.REBASING_INTERACTIVE;
 
 		// From 1.6 onwards
-		if (new File(getDirectory(),"rebase-apply/rebasing").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("rebase-apply/rebasing"))) //$NON-NLS-1$
 			return RepositoryState.REBASING_REBASING;
-		if (new File(getDirectory(),"rebase-apply/applying").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("rebase-apply/applying"))) //$NON-NLS-1$
 			return RepositoryState.APPLY;
-		if (new File(getDirectory(),"rebase-apply").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("rebase-apply"))) //$NON-NLS-1$
 			return RepositoryState.REBASING;
 
-		if (new File(getDirectory(),"rebase-merge/interactive").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("rebase-merge/interactive"))) //$NON-NLS-1$
 			return RepositoryState.REBASING_INTERACTIVE;
-		if (new File(getDirectory(),"rebase-merge").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("rebase-merge"))) //$NON-NLS-1$
 			return RepositoryState.REBASING_MERGE;
 
 		// Both versions
-		if (new File(getDirectory(), Constants.MERGE_HEAD).exists()) {
+		if (Files.exists(getDirectory().resolve(Constants.MERGE_HEAD))) {
 			// we are merging - now check whether we have unmerged paths
 			try {
 				if (!readDirCache().hasUnmergedPaths()) {
@@ -1318,10 +1318,10 @@ public abstract class Repository implements AutoCloseable {
 			return RepositoryState.MERGING;
 		}
 
-		if (new File(getDirectory(), "BISECT_LOG").exists()) //$NON-NLS-1$
+		if (Files.exists(getDirectory().resolve("BISECT_LOG"))) //$NON-NLS-1$
 			return RepositoryState.BISECTING;
 
-		if (new File(getDirectory(), Constants.CHERRY_PICK_HEAD).exists()) {
+		if (Files.exists(getDirectory().resolve(Constants.CHERRY_PICK_HEAD))) {
 			try {
 				if (!readDirCache().hasUnmergedPaths()) {
 					// no unmerged paths
@@ -1334,7 +1334,7 @@ public abstract class Repository implements AutoCloseable {
 			return RepositoryState.CHERRY_PICKING;
 		}
 
-		if (new File(getDirectory(), Constants.REVERT_HEAD).exists()) {
+		if (Files.exists(getDirectory().resolve(Constants.REVERT_HEAD))) {
 			try {
 				if (!readDirCache().hasUnmergedPaths()) {
 					// no unmerged paths
@@ -1513,15 +1513,16 @@ public abstract class Repository implements AutoCloseable {
 	 *         file is not relative to the work directory.
 	 */
 	@NonNull
-	public static String stripWorkDir(File workDir, File file) {
-		final String filePath = file.getPath();
-		final String workDirPath = workDir.getPath();
+	public static String stripWorkDir(Path workDir, Path file) {
+		//FIXME
+		final String filePath = file.toString();
+		final String workDirPath = workDir.toString();
 
 		if (filePath.length() <= workDirPath.length() ||
 		    filePath.charAt(workDirPath.length()) != File.separatorChar ||
 		    !filePath.startsWith(workDirPath)) {
-			File absWd = workDir.isAbsolute() ? workDir : workDir.getAbsoluteFile();
-			File absFile = file.isAbsolute() ? file : file.getAbsoluteFile();
+			Path absWd = workDir.isAbsolute() ? workDir : workDir.toAbsolutePath();
+			Path absFile = file.isAbsolute() ? file : file.toAbsolutePath();
 			if (absWd == workDir && absFile == file)
 				return ""; //$NON-NLS-1$
 			return stripWorkDir(absWd, absFile);
@@ -1553,7 +1554,7 @@ public abstract class Repository implements AutoCloseable {
 	 *             See {@link #isBare()}.
 	 */
 	@NonNull
-	public File getWorkTree() throws NoWorkTreeException {
+	public Path getWorkTree() throws NoWorkTreeException {
 		if (isBare())
 			throw new NoWorkTreeException();
 		return workTree;
@@ -1702,7 +1703,7 @@ public abstract class Repository implements AutoCloseable {
 	 * @throws java.io.IOException
 	 */
 	public void writeMergeCommitMsg(String msg) throws IOException {
-		File mergeMsgFile = new File(gitDir, Constants.MERGE_MSG);
+		Path mergeMsgFile = gitDir.resolve(Constants.MERGE_MSG);
 		writeCommitMsg(mergeMsgFile, msg);
 	}
 
@@ -1736,7 +1737,7 @@ public abstract class Repository implements AutoCloseable {
 	 * @since 4.0
 	 */
 	public void writeCommitEditMsg(String msg) throws IOException {
-		File commiEditMsgFile = new File(gitDir, Constants.COMMIT_EDITMSG);
+		Path commiEditMsgFile = gitDir.resolve(Constants.COMMIT_EDITMSG);
 		writeCommitMsg(commiEditMsgFile, msg);
 	}
 
@@ -1925,7 +1926,7 @@ public abstract class Repository implements AutoCloseable {
 	 * @throws java.io.IOException
 	 */
 	public void writeSquashCommitMsg(String msg) throws IOException {
-		File squashMsgFile = new File(gitDir, Constants.SQUASH_MSG);
+		Path squashMsgFile = gitDir.resolve(Constants.SQUASH_MSG);
 		writeCommitMsg(squashMsgFile, msg);
 	}
 
@@ -1934,11 +1935,11 @@ public abstract class Repository implements AutoCloseable {
 		if (isBare() || getDirectory() == null)
 			throw new NoWorkTreeException();
 
-		File mergeMsgFile = new File(getDirectory(), msgFilename);
+		Path mergeMsgFile = getDirectory().resolve(msgFilename);
 		try {
-			return RawParseUtils.decode(IO.readFully(mergeMsgFile));
-		} catch (FileNotFoundException e) {
-			if (mergeMsgFile.exists()) {
+			return RawParseUtils.decode(Files.readAllBytes(mergeMsgFile));
+		} catch (NoSuchFileException e) {
+			if (Files.exists(mergeMsgFile)) {
 				throw e;
 			}
 			// the file has disappeared in the meantime ignore it
@@ -1946,13 +1947,13 @@ public abstract class Repository implements AutoCloseable {
 		}
 	}
 
-	private void writeCommitMsg(File msgFile, String msg) throws IOException {
+	private void writeCommitMsg(Path msgFile, String msg) throws IOException {
 		if (msg != null) {
-			try (FileOutputStream fos = new FileOutputStream(msgFile)) {
+			try (OutputStream fos = Files.newOutputStream(msgFile)) {
 				fos.write(msg.getBytes(Constants.CHARACTER_ENCODING));
 			}
 		} else {
-			FileUtils.delete(msgFile.toPath(), FileUtils.SKIP_MISSING);
+			FileUtils.delete(msgFile, FileUtils.SKIP_MISSING);
 		}
 	}
 
@@ -1966,12 +1967,12 @@ public abstract class Repository implements AutoCloseable {
 	 */
 	@Nullable
 	private byte[] readGitDirectoryFile(String filename) throws IOException {
-		File file = new File(getDirectory(), filename);
+		Path file = getDirectory().resolve(filename);
 		try {
-			byte[] raw = IO.readFully(file);
+			byte[] raw = Files.readAllBytes(file);
 			return raw.length > 0 ? raw : null;
-		} catch (FileNotFoundException notFound) {
-			if (file.exists()) {
+		} catch (NoSuchFileException notFound) {
+			if (Files.exists(file)) {
 				throw notFound;
 			}
 			return null;
@@ -1985,22 +1986,22 @@ public abstract class Repository implements AutoCloseable {
 	 *            a list of object ids to write or null if the file should be
 	 *            deleted.
 	 * @param filename
-	 * @throws FileNotFoundException
+	 * @throws NoSuchFileException
 	 * @throws IOException
 	 */
 	private void writeHeadsFile(List<? extends ObjectId> heads, String filename)
-			throws FileNotFoundException, IOException {
-		File headsFile = new File(getDirectory(), filename);
+			throws IOException {
+		Path headsFile = getDirectory().resolve(filename);
 		if (heads != null) {
 			try (OutputStream bos = new BufferedOutputStream(
-					new FileOutputStream(headsFile))) {
+					Files.newOutputStream(headsFile))) {
 				for (ObjectId id : heads) {
 					id.copyTo(bos);
 					bos.write('\n');
 				}
 			}
 		} else {
-			FileUtils.delete(headsFile.toPath(), FileUtils.SKIP_MISSING);
+			FileUtils.delete(headsFile, FileUtils.SKIP_MISSING);
 		}
 	}
 

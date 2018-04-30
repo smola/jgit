@@ -248,7 +248,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 	protected RebaseCommand(Repository repo) {
 		super(repo);
 		walk = new RevWalk(repo);
-		rebaseState = new RebaseState(repo.getDirectory());
+		rebaseState = new RebaseState(repo.getDirectory().toFile());
 	}
 
 	/**
@@ -937,7 +937,7 @@ public class RebaseCommand extends GitCommand<RebaseResult> {
 			if (needsDeleteFiles) {
 				List<String> fileList = dco.getToBeDeleted();
 				for (String filePath : fileList) {
-					File fileToDelete = new File(repo.getWorkTree(), filePath);
+					File fileToDelete = new File(repo.getWorkTree().toFile(), filePath);
 					if (repo.getFS().exists(fileToDelete.toPath()))
 						FileUtils.delete(fileToDelete.toPath(), FileUtils.RECURSIVE
 								| FileUtils.RETRY);

@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.Constants;
@@ -112,7 +113,7 @@ public class FileTreeIterator extends WorkingTreeIterator {
 	 * @since 4.3
 	 */
 	public FileTreeIterator(Repository repo, FileModeStrategy fileModeStrategy) {
-		this(repo.getWorkTree(), repo.getFS(),
+		this(repo.getWorkTree().toFile(), repo.getFS(),
 				repo.getConfig().get(WorkingTreeOptions.KEY),
 				fileModeStrategy);
 		initRootIterator(repo);
@@ -133,6 +134,10 @@ public class FileTreeIterator extends WorkingTreeIterator {
 	public FileTreeIterator(final File root, FS fs, WorkingTreeOptions options) {
 		this(root, fs, options, DefaultFileModeStrategy.INSTANCE);
 	}
+
+    public FileTreeIterator(final Path root, FS fs, WorkingTreeOptions options) {
+        this(root.toFile(), fs, options);
+    }
 
 	/**
 	 * Create a new iterator to traverse the given directory and its children.
@@ -158,6 +163,11 @@ public class FileTreeIterator extends WorkingTreeIterator {
 		this.fileModeStrategy = fileModeStrategy;
 		init(entries());
 	}
+
+    public FileTreeIterator(final Path root, FS fs, WorkingTreeOptions options,
+                            FileModeStrategy fileModeStrategy) {
+	    this(root.toFile(), fs, options, fileModeStrategy);
+    }
 
 	/**
 	 * Create a new iterator to traverse a subdirectory.

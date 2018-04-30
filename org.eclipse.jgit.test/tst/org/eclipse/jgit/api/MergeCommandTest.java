@@ -53,6 +53,8 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode;
@@ -181,21 +183,21 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("file1").call();
 			RevCommit first = git.commit().setMessage("initial commit").call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file1").exists());
 			createBranch(first, "refs/heads/branch1");
 
 			writeTrashFile("file2", "file2");
 			git.add().addFilepattern("file2").call();
 			RevCommit second = git.commit().setMessage("second commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file2").exists());
 
 			checkoutBranch("refs/heads/branch1");
-			assertFalse(new File(db.getWorkTree(), "file2").exists());
+			assertFalse(new File(db.getWorkTree().toFile(), "file2").exists());
 
 			MergeResult result = git.merge().include(db.exactRef(R_HEADS + MASTER)).call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file1").exists());
+			assertTrue(new File(db.getWorkTree().toFile(), "file2").exists());
 			assertEquals(MergeResult.MergeStatus.FAST_FORWARD, result.getMergeStatus());
 			assertEquals(second, result.getNewHead());
 		}
@@ -222,8 +224,8 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.commit().setMessage("third commit").call();
 
 			checkoutBranch("refs/heads/branch1");
-			assertFalse(new File(db.getWorkTree(), "file2").exists());
-			assertFalse(new File(db.getWorkTree(), "file3").exists());
+			assertFalse(new File(db.getWorkTree().toFile(), "file2").exists());
+			assertFalse(new File(db.getWorkTree().toFile(), "file3").exists());
 
 			MergeCommand merge = git.merge();
 			merge.include(second.getId());
@@ -310,9 +312,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na(main)\n3\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -325,10 +327,10 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(
 					"1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n",
-					read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+					read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
+					read(db.getWorkTree().resolve("c/c/c")));
 
 			assertEquals(1, result.getConflicts().size());
 			assertEquals(3, result.getConflicts().get("a")[0].length);
@@ -413,9 +415,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na(main)\n3\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -423,7 +425,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.commit().setMessage("main").call();
 
 			writeTrashFile("d", "1\nd\n3\n");
-			assertTrue(new File(db.getWorkTree(), "e").mkdir());
+			assertTrue(db.getWorkTree().resolve("e").toFile().mkdir());
 
 			MergeResult result = git.merge().include(secondCommit.getId())
 					.setStrategy(MergeStrategy.RESOLVE).call();
@@ -431,12 +433,12 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(
 					"1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n",
-					read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+					read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
-			assertEquals("1\nd\n3\n", read(new File(db.getWorkTree(), "d")));
-			File dir = new File(db.getWorkTree(), "e");
+					read(db.getWorkTree().resolve("c/c/c")));
+			assertEquals("1\nd\n3\n", read(db.getWorkTree().resolve("d")));
+			File dir = db.getWorkTree().resolve("e").toFile();
 			assertTrue(dir.isDirectory());
 
 			assertEquals(1, result.getConflicts().size());
@@ -495,7 +497,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 			MergeResult result = git.merge().include(secondCommit.getId())
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.MERGED, result.getMergeStatus());
-			assertEquals("1\nb(1)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(1)\n3\n", read(db.getWorkTree().resolve("b")));
 			assertEquals("merge " + secondCommit.getId().getName()
 					+ ": Merge made by resolve.", db
 					.getReflogReader(Constants.HEAD)
@@ -525,9 +527,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -538,11 +540,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.MERGED, result.getMergeStatus());
 
-			assertEquals("1(side)\na\n3(main)\n", read(new File(db.getWorkTree(),
-					"a")));
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
-			assertEquals("1\nc(main)\n3\n", read(new File(db.getWorkTree(),
-					"c/c/c")));
+			assertEquals("1(side)\na\n3(main)\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
+			assertEquals("1\nc(main)\n3\n", read(db.getWorkTree().resolve("c/c/c")));
 
 			assertEquals(null, result.getConflicts());
 
@@ -583,9 +583,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -599,11 +599,10 @@ public class MergeCommandTest extends RepositoryTestCase {
 			assertEquals(db.exactRef(Constants.HEAD).getTarget().getObjectId(),
 					thirdCommit.getId());
 
-			assertEquals("1(side)\na\n3(main)\n", read(new File(db.getWorkTree(),
-					"a")));
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1(side)\na\n3(main)\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
+					read(db.getWorkTree().resolve("c/c/c")));
 
 			assertEquals(null, result.getConflicts());
 
@@ -635,9 +634,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -649,12 +648,10 @@ public class MergeCommandTest extends RepositoryTestCase {
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.MERGED, result.getMergeStatus());
 
-			assertEquals("1(side)\na\n3(main)\n", read(new File(db.getWorkTree(),
-					"a")));
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
-			assertEquals("1\nc(main)\n3\n", read(new File(db.getWorkTree(),
-					"c/c/c")));
-			assertEquals("--- dirty ---", read(new File(db.getWorkTree(), "d")));
+			assertEquals("1(side)\na\n3(main)\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
+			assertEquals("1\nc(main)\n3\n", read(db.getWorkTree().resolve("c/c/c")));
+			assertEquals("--- dirty ---", read(db.getWorkTree().resolve("d")));
 
 			assertEquals(null, result.getConflicts());
 
@@ -690,13 +687,13 @@ public class MergeCommandTest extends RepositoryTestCase {
 			createBranch(initialCommit, "refs/heads/side");
 			checkoutBranch("refs/heads/side");
 
-			assertTrue(new File(db.getWorkTree(), "b").delete());
+			assertTrue(db.getWorkTree().resolve("b").toFile().delete());
 			git.add().addFilepattern("b").setUpdate(true).call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "b").exists());
+			assertTrue(db.getWorkTree().resolve("b").toFile().exists());
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -708,26 +705,26 @@ public class MergeCommandTest extends RepositoryTestCase {
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.MERGED, result.getMergeStatus());
 
-			assertEquals("1\na\n3(main)\n", read(new File(db.getWorkTree(), "a")));
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+			assertEquals("1\na\n3(main)\n", read(db.getWorkTree().resolve("a")));
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
-			assertEquals("1\nd\n3\n", read(new File(db.getWorkTree(), "d")));
+					read(db.getWorkTree().resolve("c/c/c")));
+			assertEquals("1\nd\n3\n", read(db.getWorkTree().resolve("d")));
 
 			// Do the opposite, be on a branch where we have deleted a file and
 			// merge in a old commit where this file was not deleted
 			checkoutBranch("refs/heads/side");
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 
 			result = git.merge().include(thirdCommit.getId())
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.MERGED, result.getMergeStatus());
 
-			assertEquals("1\na\n3(main)\n", read(new File(db.getWorkTree(), "a")));
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+			assertEquals("1\na\n3(main)\n", read(db.getWorkTree().resolve("a")));
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
-			assertEquals("1\nd\n3\n", read(new File(db.getWorkTree(), "d")));
+					read(db.getWorkTree().resolve("c/c/c")));
+			assertEquals("1\nd\n3\n", read(db.getWorkTree().resolve("d")));
 		}
 	}
 
@@ -741,15 +738,15 @@ public class MergeCommandTest extends RepositoryTestCase {
 			createBranch(initialCommit, "refs/heads/side");
 			checkoutBranch("refs/heads/side");
 
-			assertTrue(new File(db.getWorkTree(), "a").delete());
+			assertTrue(db.getWorkTree().resolve("a").toFile().delete());
 			git.add().addFilepattern("a").setUpdate(true).call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertFalse(new File(db.getWorkTree(), "a").exists());
+			assertFalse(db.getWorkTree().resolve("a").toFile().exists());
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "a").exists());
+			assertTrue(db.getWorkTree().resolve("a").toFile().exists());
 
-			assertTrue(new File(db.getWorkTree(), "a").delete());
+			assertTrue(db.getWorkTree().resolve("a").toFile().delete());
 			git.add().addFilepattern("a").setUpdate(true).call();
 			git.commit().setMessage("main").call();
 
@@ -774,15 +771,15 @@ public class MergeCommandTest extends RepositoryTestCase {
 			createBranch(initialCommit, "refs/heads/side");
 			checkoutBranch("refs/heads/side");
 
-			assertTrue(new File(db.getWorkTree(), "b").delete());
+			assertTrue(db.getWorkTree().resolve("b").toFile().delete());
 			writeTrashFile("a", "1\na\n3(side)\n");
 			git.add().addFilepattern("b").setUpdate(true).call();
 			git.add().addFilepattern("a").setUpdate(true).call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "b").exists());
+			assertTrue(db.getWorkTree().resolve("b").toFile().exists());
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			writeTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -796,11 +793,11 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(
 					"1\na\n<<<<<<< HEAD\n3(main)\n=======\n3(side)\n>>>>>>> 54ffed45d62d252715fc20e41da92d44c48fb0ff\n",
-					read(new File(db.getWorkTree(), "a")));
-			assertFalse(new File(db.getWorkTree(), "b").exists());
+					read(db.getWorkTree().resolve("a")));
+			assertFalse(db.getWorkTree().resolve("b").toFile().exists());
 			assertEquals("1\nc(main)\n3\n",
-					read(new File(db.getWorkTree(), "c/c/c")));
-			assertEquals("1\nd\n3\n", read(new File(db.getWorkTree(), "d")));
+					read(db.getWorkTree().resolve("c/c/c")));
+			assertEquals("1\nd\n3\n", read(db.getWorkTree().resolve("d")));
 		}
 	}
 
@@ -830,9 +827,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 
 			// result should be 'a' conflicting with workspace content from side
-			assertTrue(new File(db.getWorkTree(), "a").exists());
-			assertEquals("1\na(side)\n3\n", read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertTrue(db.getWorkTree().resolve("a").toFile().exists());
+			assertEquals("1\na(side)\n3\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 		}
 	}
 
@@ -861,9 +858,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 					.setStrategy(MergeStrategy.RESOLVE).call();
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 
-			assertTrue(new File(db.getWorkTree(), "a").exists());
-			assertEquals("1\na(main)\n3\n", read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertTrue(db.getWorkTree().resolve("a").toFile().exists());
+			assertEquals("1\na(main)\n3\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			assertEquals(1, result.getConflicts().size());
 			assertEquals(3, result.getConflicts().get("a")[0].length);
@@ -885,8 +882,8 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			// rename x to y on d1
 			checkoutBranch("refs/heads/d1");
-			new File(db.getWorkTree(), "x")
-					.renameTo(new File(db.getWorkTree(), "y"));
+			db.getWorkTree().resolve("x").toFile()
+					.renameTo(db.getWorkTree().resolve("y").toFile());
 			git.rm().addFilepattern("x").call();
 			git.add().addFilepattern("y").call();
 			RevCommit d1Commit = git.commit().setMessage("d1 rename x -> y").call();
@@ -925,9 +922,9 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("a").addFilepattern("b").call();
 			RevCommit secondCommit = git.commit().setMessage("side").call();
 
-			assertEquals("1\nb(side)\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb(side)\n3\n", read(db.getWorkTree().resolve("b")));
 			checkoutBranch("refs/heads/master");
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			writeTrashFile("a", "1\na\n3(main)\n");
 			git.add().addFilepattern("a").call();
@@ -939,8 +936,8 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(MergeStatus.FAILED, result.getMergeStatus());
 
-			assertEquals("--- dirty ---", read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
+			assertEquals("--- dirty ---", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
 
 			assertEquals(null, result.getConflicts());
 
@@ -976,10 +973,10 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(MergeStatus.CONFLICTING, result.getMergeStatus());
 
-			assertEquals("1\na\n3\n", read(new File(db.getWorkTree(), "a")));
-			assertEquals("1\nb\n3\n", read(new File(db.getWorkTree(), "b")));
-			assertEquals("1\nc(main)\n3\n", read(new File(db.getWorkTree(), "c")));
-			assertEquals("1\nd(main)\n3\n", read(new File(db.getWorkTree(), "d/d/d")));
+			assertEquals("1\na\n3\n", read(db.getWorkTree().resolve("a")));
+			assertEquals("1\nb\n3\n", read(db.getWorkTree().resolve("b")));
+			assertEquals("1\nc(main)\n3\n", read(db.getWorkTree().resolve("c")));
+			assertEquals("1\nd(main)\n3\n", read(db.getWorkTree().resolve("d/d/d")));
 
 			assertEquals(null, result.getConflicts());
 
@@ -990,7 +987,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 	@Test
 	public void testSuccessfulMergeFailsDueToDirtyIndex() throws Exception {
 		try (Git git = new Git(db)) {
-			File fileA = writeTrashFile("a", "a");
+			Path fileA = writeTrashFile("a", "a");
 			RevCommit initialCommit = addAllAndCommit(git);
 
 			// switch branch
@@ -1026,7 +1023,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 	@Test
 	public void testConflictingMergeFailsDueToDirtyIndex() throws Exception {
 		try (Git git = new Git(db)) {
-			File fileA = writeTrashFile("a", "a");
+			Path fileA = writeTrashFile("a", "a");
 			RevCommit initialCommit = addAllAndCommit(git);
 
 			// switch branch
@@ -1064,7 +1061,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 	@Test
 	public void testSuccessfulMergeFailsDueToDirtyWorktree() throws Exception {
 		try (Git git = new Git(db)) {
-			File fileA = writeTrashFile("a", "a");
+			Path fileA = writeTrashFile("a", "a");
 			RevCommit initialCommit = addAllAndCommit(git);
 
 			// switch branch
@@ -1099,7 +1096,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 	@Test
 	public void testConflictingMergeFailsDueToDirtyWorktree() throws Exception {
 		try (Git git = new Git(db)) {
-			File fileA = writeTrashFile("a", "a");
+			Path fileA = writeTrashFile("a", "a");
 			RevCommit initialCommit = addAllAndCommit(git);
 
 			// switch branch
@@ -1135,22 +1132,22 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testMergeRemovingFolders() throws Exception {
-		File folder1 = new File(db.getWorkTree(), "folder1");
-		File folder2 = new File(db.getWorkTree(), "folder2");
-		FileUtils.mkdir(folder1);
-		FileUtils.mkdir(folder2);
-		File file = new File(folder1, "file1.txt");
+		Path folder1 = db.getWorkTree().resolve("folder1");
+		Path folder2 = db.getWorkTree().resolve("folder2");
+		FileUtils.mkdir(folder1.toFile());
+		FileUtils.mkdir(folder2.toFile());
+		Path file = folder1.resolve("file1.txt");
 		write(file, "folder1--file1.txt");
-		file = new File(folder1, "file2.txt");
+		file = folder1.resolve("file2.txt");
 		write(file, "folder1--file2.txt");
-		file = new File(folder2, "file1.txt");
+		file = folder2.resolve("file1.txt");
 		write(file, "folder--file1.txt");
-		file = new File(folder2, "file2.txt");
+		file = folder2.resolve("file2.txt");
 		write(file, "folder2--file2.txt");
 
 		try (Git git = new Git(db)) {
-			git.add().addFilepattern(folder1.getName())
-					.addFilepattern(folder2.getName()).call();
+			git.add().addFilepattern(folder1.getFileName().toString())
+					.addFilepattern(folder2.getFileName().toString()).call();
 			RevCommit commit1 = git.commit().setMessage("adding folders").call();
 
 			recursiveDelete(folder1);
@@ -1169,29 +1166,29 @@ public class MergeCommandTest extends RepositoryTestCase {
 			assertEquals(MergeResult.MergeStatus.FAST_FORWARD,
 					result.getMergeStatus());
 			assertEquals(commit2, result.getNewHead());
-			assertFalse(folder1.exists());
-			assertFalse(folder2.exists());
+			assertFalse(Files.exists(folder1));
+			assertFalse(Files.exists(folder2));
 		}
 	}
 
 	@Test
 	public void testMergeRemovingFoldersWithoutFastForward() throws Exception {
-		File folder1 = new File(db.getWorkTree(), "folder1");
-		File folder2 = new File(db.getWorkTree(), "folder2");
-		FileUtils.mkdir(folder1);
-		FileUtils.mkdir(folder2);
-		File file = new File(folder1, "file1.txt");
+		Path folder1 = db.getWorkTree().resolve("folder1");
+		Path folder2 = db.getWorkTree().resolve("folder2");
+		FileUtils.mkdir(folder1.toFile());
+		FileUtils.mkdir(folder2.toFile());
+		Path file = folder1.resolve("file1.txt");
 		write(file, "folder1--file1.txt");
-		file = new File(folder1, "file2.txt");
+		file = folder1.resolve("file2.txt");
 		write(file, "folder1--file2.txt");
-		file = new File(folder2, "file1.txt");
+		file = folder2.resolve("file1.txt");
 		write(file, "folder--file1.txt");
-		file = new File(folder2, "file2.txt");
+		file = folder2.resolve("file2.txt");
 		write(file, "folder2--file2.txt");
 
 		try (Git git = new Git(db)) {
-			git.add().addFilepattern(folder1.getName())
-					.addFilepattern(folder2.getName()).call();
+			git.add().addFilepattern(folder1.getFileName().toString())
+					.addFilepattern(folder2.getFileName().toString()).call();
 			RevCommit base = git.commit().setMessage("adding folders").call();
 
 			recursiveDelete(folder1);
@@ -1205,10 +1202,10 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			git.checkout().setName(base.name()).call();
 
-			file = new File(folder2, "file3.txt");
+			file = folder2.resolve("file3.txt");
 			write(file, "folder2--file3.txt");
 
-			git.add().addFilepattern(folder2.getName()).call();
+			git.add().addFilepattern(folder2.getFileName().toString()).call();
 			git.commit().setMessage("adding another file").call();
 
 			MergeResult result = git.merge().include(other.getId())
@@ -1216,7 +1213,7 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 			assertEquals(MergeResult.MergeStatus.MERGED,
 					result.getMergeStatus());
-			assertFalse(folder1.exists());
+			assertFalse(Files.exists(folder1));
 		}
 	}
 
@@ -1243,8 +1240,8 @@ public class MergeCommandTest extends RepositoryTestCase {
 			createBranch(initialCommit, "refs/heads/side2");
 			checkoutBranch("refs/heads/side2");
 			setExecutable(git, "mergeableMode", false);
-			assertFalse(new File(git.getRepository().getWorkTree(),
-					"conflictingModeNoBase").exists());
+			assertFalse(git.getRepository().getWorkTree().resolve("conflictingModeNoBase")
+					.toFile().exists());
 			writeTrashFile("conflictingModeNoBase", "b");
 			setExecutable(git, "conflictingModeNoBase", false);
 			addAllAndCommit(git);
@@ -1297,33 +1294,33 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("file1").call();
 			RevCommit first = git.commit().setMessage("initial commit").call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
 			createBranch(first, "refs/heads/branch1");
 			checkoutBranch("refs/heads/branch1");
 
 			writeTrashFile("file2", "file2");
 			git.add().addFilepattern("file2").call();
 			RevCommit second = git.commit().setMessage("second commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 
 			writeTrashFile("file3", "file3");
 			git.add().addFilepattern("file3").call();
 			RevCommit third = git.commit().setMessage("third commit").call();
-			assertTrue(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file3").toFile().exists());
 
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertFalse(new File(db.getWorkTree(), "file2").exists());
-			assertFalse(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertFalse(db.getWorkTree().resolve("file2").toFile().exists());
+			assertFalse(db.getWorkTree().resolve("file3").toFile().exists());
 
 			MergeResult result = git.merge()
 					.include(db.exactRef("refs/heads/branch1"))
 					.setSquash(true)
 					.call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
-			assertTrue(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file3").toFile().exists());
 			assertEquals(MergeResult.MergeStatus.FAST_FORWARD_SQUASHED,
 					result.getMergeStatus());
 			assertEquals(first, result.getNewHead()); // HEAD didn't move
@@ -1363,34 +1360,34 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("file1").call();
 			RevCommit first = git.commit().setMessage("initial commit").call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
 			createBranch(first, "refs/heads/branch1");
 
 			writeTrashFile("file2", "file2");
 			git.add().addFilepattern("file2").call();
 			RevCommit second = git.commit().setMessage("second commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 
 			checkoutBranch("refs/heads/branch1");
 
 			writeTrashFile("file3", "file3");
 			git.add().addFilepattern("file3").call();
 			RevCommit third = git.commit().setMessage("third commit").call();
-			assertTrue(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file3").toFile().exists());
 
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
-			assertFalse(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
+			assertFalse(db.getWorkTree().resolve("file3").toFile().exists());
 
 			MergeResult result = git.merge()
 					.include(db.exactRef("refs/heads/branch1"))
 					.setSquash(true)
 					.call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
-			assertTrue(new File(db.getWorkTree(), "file3").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file3").toFile().exists());
 			assertEquals(MergeResult.MergeStatus.MERGED_SQUASHED,
 					result.getMergeStatus());
 			assertEquals(second, result.getNewHead()); // HEAD didn't move
@@ -1421,32 +1418,32 @@ public class MergeCommandTest extends RepositoryTestCase {
 			git.add().addFilepattern("file1").call();
 			RevCommit first = git.commit().setMessage("initial commit").call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
 			createBranch(first, "refs/heads/branch1");
 
 			writeTrashFile("file2", "master");
 			git.add().addFilepattern("file2").call();
 			RevCommit second = git.commit().setMessage("second commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 
 			checkoutBranch("refs/heads/branch1");
 
 			writeTrashFile("file2", "branch");
 			git.add().addFilepattern("file2").call();
 			RevCommit third = git.commit().setMessage("third commit").call();
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 
 			checkoutBranch("refs/heads/master");
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 
 			MergeResult result = git.merge()
 					.include(db.exactRef("refs/heads/branch1"))
 					.setSquash(true)
 					.call();
 
-			assertTrue(new File(db.getWorkTree(), "file1").exists());
-			assertTrue(new File(db.getWorkTree(), "file2").exists());
+			assertTrue(db.getWorkTree().resolve("file1").toFile().exists());
+			assertTrue(db.getWorkTree().resolve("file2").toFile().exists());
 			assertEquals(MergeResult.MergeStatus.CONFLICTING,
 					result.getMergeStatus());
 			assertNull(result.getNewHead());
@@ -1649,12 +1646,12 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 	private static void setExecutable(Git git, String path, boolean executable) {
 		FS.DETECTED.setExecute(
-				new File(git.getRepository().getWorkTree(), path).toPath(), executable);
+				git.getRepository().getWorkTree().resolve(path), executable);
 	}
 
 	private static boolean canExecute(Git git, String path) {
-		return FS.DETECTED.canExecute(new File(git.getRepository()
-				.getWorkTree(), path).toPath());
+		return FS.DETECTED.canExecute(git.getRepository()
+				.getWorkTree().resolve(path));
 	}
 
 	private static RevCommit addAllAndCommit(final Git git) throws Exception {
@@ -1664,12 +1661,12 @@ public class MergeCommandTest extends RepositoryTestCase {
 
 	private void checkMergeFailedResult(final MergeResult result,
 			final MergeFailureReason reason,
-			final String indexState, final File fileA) throws Exception {
+			final String indexState, final Path fileA) throws Exception {
 		assertEquals(MergeStatus.FAILED, result.getMergeStatus());
 		assertEquals(reason, result.getFailingPaths().get("a"));
 		assertEquals("a(modified)", read(fileA));
-		assertFalse(new File(db.getWorkTree(), "b").exists());
-		assertEquals("c", read(new File(db.getWorkTree(), "c")));
+		assertFalse(Files.exists(db.getWorkTree().resolve("b")));
+		assertEquals("c", read(db.getWorkTree().resolve("c")));
 		assertEquals(indexState, indexState(CONTENT));
 		assertEquals(null, result.getConflicts());
 		assertEquals(RepositoryState.SAFE, db.getRepositoryState());

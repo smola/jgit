@@ -278,7 +278,7 @@ public final class ServletUtils {
 		if (git instanceof DfsRepository) {
 			return ((DfsRepository) git).getDescription().getRepositoryName();
 		} else if (git.getDirectory() != null) {
-			return git.getDirectory().getPath();
+			return git.getDirectory().toFile().getPath();
 		}
 		return "unknown";
 	}

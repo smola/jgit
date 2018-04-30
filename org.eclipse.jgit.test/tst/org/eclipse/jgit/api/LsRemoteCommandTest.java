@@ -138,7 +138,7 @@ public class LsRemoteCommandTest extends RepositoryTestCase {
 	}
 
 	private String fileUri() {
-		return "file://" + git.getRepository().getWorkTree().getAbsolutePath();
+		return "file://" + git.getRepository().getWorkTree().toFile().getAbsolutePath();
 	}
 
 }

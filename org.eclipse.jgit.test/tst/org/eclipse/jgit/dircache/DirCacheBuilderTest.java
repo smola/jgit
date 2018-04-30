@@ -174,7 +174,7 @@ public class DirCacheBuilderTest extends RepositoryTestCase {
 			assertTrue(b.commit());
 			assertEquals(1, dc.getEntryCount());
 			assertSame(entOrig, dc.getEntry(0));
-			assertFalse(new File(db.getDirectory(), "index.lock").exists());
+			assertFalse(new File(db.getDirectory().toFile(), "index.lock").exists());
 		}
 		{
 			final DirCache dc = db.readDirCache();

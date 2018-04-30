@@ -206,7 +206,7 @@ public class RunExternalScriptTest {
 
 	private File writeTempFile(String body) throws IOException {
 		File f = File.createTempFile("RunProcessTestScript_", "");
-		JGitTestUtil.write(f, body);
+		JGitTestUtil.write(f.toPath(), body);
 		return f;
 	}
 }

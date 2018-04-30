@@ -162,7 +162,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 
 		command.verifyDirectories(new URIish(fileUri()));
 		File directory = command.getDirectory();
-		assertEquals(git.getRepository().getWorkTree().getName(), directory.getName());
+		assertEquals(git.getRepository().getWorkTree().toFile().getName(), directory.getName());
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 
 		command.verifyDirectories(new URIish(fileUri()));
 		File directory = command.getDirectory();
-		assertEquals(git.getRepository().getWorkTree().getName() + Constants.DOT_GIT_EXT, directory.getName());
+		assertEquals(git.getRepository().getWorkTree().toFile().getName() + Constants.DOT_GIT_EXT, directory.getName());
 	}
 
 	@Test
@@ -466,7 +466,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 		SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 		String path = "sub";
 		command.setPath(path);
-		String uri = db.getDirectory().toURI().toString();
+		String uri = db.getDirectory().toFile().toURI().toString();
 		command.setURI(uri);
 		Repository repo = command.call();
 		assertNotNull(repo);
@@ -480,9 +480,9 @@ public class CloneCommandTest extends RepositoryTestCase {
 			addRepoToClose(subRepo);
 			assertNotNull(subRepo);
 			assertEquals(
-					new File(git.getRepository().getWorkTree(), walk.getPath()),
+					new File(git.getRepository().getWorkTree().toFile(), walk.getPath()),
 					subRepo.getWorkTree());
-			assertEquals(new File(new File(git.getRepository().getDirectory(),
+			assertEquals(new File(new File(git.getRepository().getDirectory().toFile(),
 					"modules"), walk.getPath()), subRepo.getDirectory());
 		}
 
@@ -496,7 +496,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 		assertNotNull(git2);
 
 		assertEquals(Constants.MASTER, git2.getRepository().getBranch());
-		assertTrue(new File(git2.getRepository().getWorkTree(), path
+		assertTrue(new File(git2.getRepository().getWorkTree().toFile(), path
 				+ File.separatorChar + file).exists());
 
 		SubmoduleStatusCommand status = new SubmoduleStatusCommand(
@@ -514,10 +514,10 @@ public class CloneCommandTest extends RepositoryTestCase {
 			Repository clonedSub1 = walk.getRepository();
 			addRepoToClose(clonedSub1);
 			assertNotNull(clonedSub1);
-			assertEquals(new File(git2.getRepository().getWorkTree(),
+			assertEquals(new File(git2.getRepository().getWorkTree().toFile(),
 					walk.getPath()), clonedSub1.getWorkTree());
 			assertEquals(
-					new File(new File(git2.getRepository().getDirectory(),
+					new File(new File(git2.getRepository().getDirectory().toFile(),
 							"modules"), walk.getPath()),
 					clonedSub1.getDirectory());
 		}
@@ -538,7 +538,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 		String file = "file.txt";
 		String path = "sub";
 
-		write(new File(sub1.getWorkTree(), file), "content");
+		write(sub1.getWorkTree().resolve(file), "content");
 		sub1Git.add().addFilepattern(file).call();
 		RevCommit commit = sub1Git.commit().setMessage("create file").call();
 		assertNotNull(commit);
@@ -551,14 +551,14 @@ public class CloneCommandTest extends RepositoryTestCase {
 		assertNotNull(sub2);
 		addRepoToClose(sub2);
 
-		write(new File(sub2.getWorkTree(), file), "content");
+		write(sub2.getWorkTree().resolve(file), "content");
 		sub2Git.add().addFilepattern(file).call();
 		RevCommit sub2Head = sub2Git.commit().setMessage("create file").call();
 		assertNotNull(sub2Head);
 
 		// Add submodule 2 to submodule 1
 		Repository r = sub1Git.submoduleAdd().setPath(path)
-				.setURI(sub2.getDirectory().toURI().toString()).call();
+				.setURI(sub2.getDirectory().toFile().toURI().toString()).call();
 		assertNotNull(r);
 		addRepoToClose(r);
 		RevCommit sub1Head = sub1Git.commit().setAll(true)
@@ -567,7 +567,7 @@ public class CloneCommandTest extends RepositoryTestCase {
 
 		// Add submodule 1 to default repository
 		r = git.submoduleAdd().setPath(path)
-				.setURI(sub1.getDirectory().toURI().toString()).call();
+				.setURI(sub1.getDirectory().toFile().toURI().toString()).call();
 		assertNotNull(r);
 		addRepoToClose(r);
 		assertNotNull(git.commit().setAll(true).setMessage("Adding submodule")
@@ -578,15 +578,15 @@ public class CloneCommandTest extends RepositoryTestCase {
 		CloneCommand clone = Git.cloneRepository();
 		clone.setDirectory(directory);
 		clone.setCloneSubmodules(true);
-		clone.setURI(git.getRepository().getDirectory().toURI().toString());
+		clone.setURI(git.getRepository().getDirectory().toFile().toURI().toString());
 		Git git2 = clone.call();
 		addRepoToClose(git2.getRepository());
 		assertNotNull(git2);
 
 		assertEquals(Constants.MASTER, git2.getRepository().getBranch());
-		assertTrue(new File(git2.getRepository().getWorkTree(), path
+		assertTrue(new File(git2.getRepository().getWorkTree().toFile(), path
 				+ File.separatorChar + file).exists());
-		assertTrue(new File(git2.getRepository().getWorkTree(), path
+		assertTrue(new File(git2.getRepository().getWorkTree().toFile(), path
 				+ File.separatorChar + path + File.separatorChar + file)
 				.exists());
 
@@ -603,10 +603,10 @@ public class CloneCommandTest extends RepositoryTestCase {
 		assertTrue(walk.next());
 		try (Repository clonedSub1 = walk.getRepository()) {
 			assertNotNull(clonedSub1);
-			assertEquals(new File(git2.getRepository().getWorkTree(),
+			assertEquals(new File(git2.getRepository().getWorkTree().toFile(),
 					walk.getPath()), clonedSub1.getWorkTree());
 			assertEquals(
-					new File(new File(git2.getRepository().getDirectory(),
+					new File(new File(git2.getRepository().getDirectory().toFile(),
 							"modules"), walk.getPath()),
 					clonedSub1.getDirectory());
 			status = new SubmoduleStatusCommand(clonedSub1);
@@ -672,6 +672,6 @@ public class CloneCommandTest extends RepositoryTestCase {
 	}
 
 	private String fileUri() {
-		return "file://" + git.getRepository().getWorkTree().getAbsolutePath();
+		return "file://" + git.getRepository().getWorkTree().toFile().getAbsolutePath();
 	}
 }

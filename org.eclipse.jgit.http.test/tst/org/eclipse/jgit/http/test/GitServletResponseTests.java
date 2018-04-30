@@ -113,7 +113,7 @@ public class GitServletResponseTests extends HttpTestCase {
 		super.setUp();
 
 		final TestRepository<Repository> srv = createTestRepository();
-		final String repoName = srv.getRepository().getDirectory().getName();
+		final String repoName = srv.getRepository().getDirectory().getFileName().toString();
 
 		ServletContextHandler app = server.addContext("/git");
 		gs = new GitServlet();

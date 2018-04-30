@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 
@@ -140,6 +141,10 @@ public class LockFile {
 	public LockFile(final File f) {
 		ref = f;
 		lck = getLockFile(ref);
+	}
+
+	public LockFile(final Path f) {
+		this(f.toFile());
 	}
 
 	/**

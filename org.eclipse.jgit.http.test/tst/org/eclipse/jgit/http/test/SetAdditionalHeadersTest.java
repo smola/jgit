@@ -83,7 +83,7 @@ public class SetAdditionalHeadersTest extends HttpTestCase {
 		super.setUp();
 
 		final TestRepository<Repository> src = createTestRepository();
-		final File srcGit = src.getRepository().getDirectory();
+		final File srcGit = src.getRepository().getDirectory().toFile();
 		final URI base = srcGit.getParentFile().toURI();
 
 		ServletContextHandler app = server.addContext("/git");

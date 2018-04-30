@@ -206,7 +206,7 @@ public abstract class TextBuiltin {
 
 		if (repository != null && repository.getDirectory() != null) {
 			db = repository;
-			gitdir = repository.getDirectory().getAbsolutePath();
+			gitdir = repository.getDirectory().toFile().getAbsolutePath();
 		} else {
 			db = repository;
 			gitdir = gitDir;

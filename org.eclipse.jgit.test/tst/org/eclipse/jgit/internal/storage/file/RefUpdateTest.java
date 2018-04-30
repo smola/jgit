@@ -324,9 +324,9 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		updateRef.setRefLogMessage("new test ref", false);
 		Result update = updateRef.update();
 		assertEquals(Result.NEW, update); // internal
-		assertTrue(new File(db.getDirectory(), Constants.R_HEADS + "z")
+		assertTrue(new File(db.getDirectory().toFile(), Constants.R_HEADS + "z")
 				.exists());
-		assertTrue(new File(db.getDirectory(), "logs/refs/heads/z").exists());
+		assertTrue(new File(db.getDirectory().toFile(), "logs/refs/heads/z").exists());
 
 		// The real test here
 		RefUpdate updateRef2 = db.updateRef("refs/heads/z/c");
@@ -334,9 +334,9 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		Result delete = updateRef2.delete();
 		assertEquals(Result.FORCED, delete);
 		assertNull(db.resolve("refs/heads/z/c"));
-		assertFalse(new File(db.getDirectory(), Constants.R_HEADS + "z")
+		assertFalse(new File(db.getDirectory().toFile(), Constants.R_HEADS + "z")
 				.exists());
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/z").exists());
+		assertFalse(new File(db.getDirectory().toFile(), "logs/refs/heads/z").exists());
 	}
 
 	@Test
@@ -657,14 +657,14 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		ObjectId pid = db.resolve("refs/heads/master^");
 		RefUpdate updateRef = db.updateRef("refs/heads/master");
 		updateRef.setNewObjectId(pid);
-		LockFile lockFile1 = new LockFile(new File(db.getDirectory(),
+		LockFile lockFile1 = new LockFile(new File(db.getDirectory().toFile(),
 				"refs/heads/master"));
 		try {
 			assertTrue(lockFile1.lock()); // precondition to test
 			Result update = updateRef.update();
 			assertEquals(Result.LOCK_FAILURE, update);
 			assertEquals(opid, db.resolve("refs/heads/master"));
-			LockFile lockFile2 = new LockFile(new File(db.getDirectory(),"refs/heads/master"));
+			LockFile lockFile2 = new LockFile(new File(db.getDirectory().toFile(),"refs/heads/master"));
 			assertFalse(lockFile2.lock()); // was locked, still is
 		} finally {
 			lockFile1.unlock();
@@ -690,7 +690,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 	@Test
 	public void testRenameBranchNoPreviousLog() throws IOException {
 		assertFalse("precondition, no log on old branchg", new File(db
-				.getDirectory(), "logs/refs/heads/b").exists());
+				.getDirectory().toFile(), "logs/refs/heads/b").exists());
 		ObjectId rb = db.resolve("refs/heads/b");
 		ObjectId oldHead = db.resolve(Constants.HEAD);
 		assertFalse(rb.equals(oldHead)); // assumption for this test
@@ -703,7 +703,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		assertEquals(1, db.getReflogReader("new/name").getReverseEntries().size());
 		assertEquals("Branch: renamed b to new/name", db.getReflogReader("new/name")
 				.getLastEntry().getComment());
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/b").exists());
+		assertFalse(new File(db.getDirectory().toFile(), "logs/refs/heads/b").exists());
 		assertEquals(oldHead, db.resolve(Constants.HEAD)); // unchanged
 	}
 
@@ -714,7 +714,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		assertFalse("precondition for this test, branch b != HEAD", rb
 				.equals(oldHead));
 		writeReflog(db, rb, "Just a message", "refs/heads/b");
-		assertTrue("log on old branch", new File(db.getDirectory(),
+		assertTrue("log on old branch", new File(db.getDirectory().toFile(),
 				"logs/refs/heads/b").exists());
 		RefRename renameRef = db.renameRef("refs/heads/b",
 				"refs/heads/new/name");
@@ -727,7 +727,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 				.getLastEntry().getComment());
 		assertEquals("Just a message", db.getReflogReader("new/name")
 				.getReverseEntries().get(1).getComment());
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/b").exists());
+		assertFalse(new File(db.getDirectory().toFile(), "logs/refs/heads/b").exists());
 		assertEquals(oldHead, db.resolve(Constants.HEAD)); // unchanged
 	}
 
@@ -738,7 +738,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		ObjectId oldHead = db.resolve(Constants.HEAD);
 		assertEquals("internal test condition, b == HEAD", oldHead, rb);
 		writeReflog(db, rb, "Just a message", "refs/heads/b");
-		assertTrue("log on old branch", new File(db.getDirectory(),
+		assertTrue("log on old branch", new File(db.getDirectory().toFile(),
 				"logs/refs/heads/b").exists());
 		RefRename renameRef = db.renameRef("refs/heads/b",
 				"refs/heads/new/name");
@@ -748,7 +748,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		assertNull(db.resolve("refs/heads/b"));
 		assertEquals("Branch: renamed b to new/name", db.getReflogReader(
 				"new/name").getLastEntry().getComment());
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/b").exists());
+		assertFalse(new File(db.getDirectory().toFile(), "logs/refs/heads/b").exists());
 		assertEquals(rb, db.resolve(Constants.HEAD));
 		assertEquals(2, db.getReflogReader("new/name").getReverseEntries().size());
 		assertEquals("Branch: renamed b to new/name", db.getReflogReader("new/name").getReverseEntries().get(0).getComment());
@@ -767,7 +767,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		assertEquals("internal check new ref is loose", Result.FORCED, update);
 		assertEquals(Ref.Storage.LOOSE, db.exactRef("refs/heads/b").getStorage());
 		writeReflog(db, rb, "Just a message", "refs/heads/b");
-		assertTrue("log on old branch", new File(db.getDirectory(),
+		assertTrue("log on old branch", new File(db.getDirectory().toFile(),
 				"logs/refs/heads/b").exists());
 		RefRename renameRef = db.renameRef("refs/heads/b",
 				"refs/heads/new/name");
@@ -781,7 +781,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		assertEquals("Branch: renamed b to new/name", db.getReflogReader("refs/heads/new/name").getReverseEntries().get(0).getComment());
 		assertEquals(0, db.getReflogReader("HEAD").getReverseEntries().size());
 		// make sure b's log file is gone too.
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/b").exists());
+		assertFalse(new File(db.getDirectory().toFile(), "logs/refs/heads/b").exists());
 
 		// Create new Repository instance, to reread caches and make sure our
 		// assumptions are persistent.
@@ -803,11 +803,11 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		List<ReflogEntry> oldHeadLog = oldHeadId != null ? db
 				.getReflogReader(Constants.HEAD).getReverseEntries() : null;
 
-		assertTrue("internal check, we have a log", new File(db.getDirectory(),
+		assertTrue("internal check, we have a log", new File(db.getDirectory().toFile(),
 				"logs/" + fromName).exists());
 
 		// "someone" has branch X locked
-		LockFile lockFile = new LockFile(new File(db.getDirectory(), toLock));
+		LockFile lockFile = new LockFile(new File(db.getDirectory().toFile(), toLock));
 		try {
 			assertTrue(lockFile.lock());
 
@@ -839,7 +839,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 
 	private void assertExists(boolean positive, String toName) {
 		assertEquals(toName + (positive ? " " : " does not ") + "exist",
-				positive, new File(db.getDirectory(), toName).exists());
+				positive, new File(db.getDirectory().toFile(), toName).exists());
 	}
 
 	@Test
@@ -903,7 +903,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		ObjectId oldHead = db.resolve(Constants.HEAD);
 		assertEquals(oldHead, rb); // assumption for this test
 		writeReflog(db, rb, "Just a message", "refs/heads/a");
-		assertTrue("internal check, we have a log", new File(db.getDirectory(),
+		assertTrue("internal check, we have a log", new File(db.getDirectory().toFile(),
 				"logs/refs/heads/a").exists());
 
 		// Now this is our test
@@ -937,7 +937,7 @@ public class RefUpdateTest extends SampleDataRepositoryTestCase {
 		ObjectId oldHead = db.resolve(Constants.HEAD);
 		assertEquals(oldHead, rb); // assumption for this test
 		writeReflog(db, rb, "Just a message", "refs/heads/prefix/a");
-		assertTrue("internal check, we have a log", new File(db.getDirectory(),
+		assertTrue("internal check, we have a log", new File(db.getDirectory().toFile(),
 				"logs/refs/heads/prefix/a").exists());
 
 		// Now this is our test

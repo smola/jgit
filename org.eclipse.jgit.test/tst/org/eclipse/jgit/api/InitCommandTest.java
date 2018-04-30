@@ -121,8 +121,8 @@ public class InitCommandTest extends RepositoryTestCase {
 		try (Git git = command.call()) {
 			Repository repository = git.getRepository();
 			assertNotNull(repository);
-			assertEqualsFile(wt, repository.getWorkTree());
-			assertEqualsFile(gitDir, repository.getDirectory());
+			assertEqualsFile(wt, repository.getWorkTree().toFile());
+			assertEqualsFile(gitDir, repository.getDirectory().toFile());
 		}
 	}
 
@@ -140,9 +140,9 @@ public class InitCommandTest extends RepositoryTestCase {
 		try (Git git = command.call()) {
 			Repository repository = git.getRepository();
 			assertNotNull(repository);
-			assertEqualsFile(gitDir, repository.getDirectory());
+			assertEqualsFile(gitDir, repository.getDirectory().toFile());
 			assertEqualsFile(new File(reader.getProperty("user.dir")),
-					repository.getWorkTree());
+					repository.getWorkTree().toFile());
 		}
 	}
 
@@ -176,9 +176,9 @@ public class InitCommandTest extends RepositoryTestCase {
 			Repository repository = git.getRepository();
 			assertNotNull(repository);
 			assertEqualsFile(new File(reader.getProperty("user.dir"), ".git"),
-					repository.getDirectory());
+					repository.getDirectory().toFile());
 			assertEqualsFile(new File(reader.getProperty("user.dir")),
-					repository.getWorkTree());
+					repository.getWorkTree().toFile());
 		}
 	}
 
@@ -197,7 +197,7 @@ public class InitCommandTest extends RepositoryTestCase {
 			Repository repository = git.getRepository();
 			assertNotNull(repository);
 			assertEqualsFile(new File(reader.getProperty("user.dir")),
-					repository.getDirectory());
+					repository.getDirectory().toFile());
 			assertNull(repository.getWorkTree());
 		}
 	}

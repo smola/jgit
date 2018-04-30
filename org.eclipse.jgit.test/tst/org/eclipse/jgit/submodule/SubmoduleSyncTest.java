@@ -103,8 +103,8 @@ public class SubmoduleSyncTest extends RepositoryTestCase {
 		});
 		editor.commit();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String url = "git://server/repo.git";
@@ -113,8 +113,8 @@ public class SubmoduleSyncTest extends RepositoryTestCase {
 		modulesConfig.save();
 
 		Repository subRepo = Git.cloneRepository()
-				.setURI(db.getDirectory().toURI().toString())
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setURI(db.getDirectory().toFile().toURI().toString())
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		addRepoToClose(subRepo);
 		assertNotNull(subRepo);
@@ -174,8 +174,8 @@ public class SubmoduleSyncTest extends RepositoryTestCase {
 				base);
 		config.save();
 
-		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+		FileBasedConfig modulesConfig = new FileBasedConfig(
+				db.getWorkTree().resolve(Constants.DOT_GIT_MODULES), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION, path,
 				ConfigConstants.CONFIG_KEY_PATH, path);
 		String current = "git://server/repo.git";
@@ -184,8 +184,8 @@ public class SubmoduleSyncTest extends RepositoryTestCase {
 		modulesConfig.save();
 
 		Repository subRepo = Git.cloneRepository()
-				.setURI(db.getDirectory().toURI().toString())
-				.setDirectory(new File(db.getWorkTree(), path)).call()
+				.setURI(db.getDirectory().toFile().toURI().toString())
+				.setDirectory(new File(db.getWorkTree().toFile(), path)).call()
 				.getRepository();
 		assertNotNull(subRepo);
 		addRepoToClose(subRepo);

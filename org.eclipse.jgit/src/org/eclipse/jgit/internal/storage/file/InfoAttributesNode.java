@@ -78,9 +78,9 @@ public class InfoAttributesNode extends AttributesNode {
 
 		FS fs = repository.getFS();
 
-		File attributes = fs.resolve(repository.getDirectory().toPath(),
+		File attributes = fs.resolve(repository.getDirectory(),
 				Constants.INFO_ATTRIBUTES).toFile();
-		FileRepository.AttributesNodeProviderImpl.loadRulesFromFile(r, attributes);
+		FileRepository.AttributesNodeProviderImpl.loadRulesFromFile(r, attributes.toPath());
 
 		return r.getRules().isEmpty() ? null : r;
 	}

@@ -255,7 +255,7 @@ public class TransportGitSsh extends SshTransport implements PackTransport {
 		private ProcessBuilder createProcess(List<String> args) {
 			ProcessBuilder pb = new ProcessBuilder();
 			pb.command(args);
-			File directory = local != null ? local.getDirectory() : null;
+			File directory = local != null ? local.getDirectory().toFile() : null;
 			if (directory != null) {
 				pb.environment().put(Constants.GIT_DIR_KEY,
 						directory.getPath());

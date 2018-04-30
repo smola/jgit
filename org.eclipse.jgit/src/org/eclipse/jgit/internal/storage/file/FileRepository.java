@@ -49,11 +49,12 @@ package org.eclipse.jgit.internal.storage.file;
 import static org.eclipse.jgit.lib.RefDatabase.ALL;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -87,7 +88,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.storage.pack.PackConfig;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
-import org.eclipse.jgit.util.IO;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.StringUtils;
 import org.eclipse.jgit.util.SystemReader;
@@ -146,12 +146,12 @@ public class FileRepository extends Repository {
 	 *             accessed.
 	 * @see FileRepositoryBuilder
 	 */
-	public FileRepository(final File gitDir) throws IOException {
+	public FileRepository(final Path gitDir) throws IOException {
 		this(new FileRepositoryBuilder().setGitDir(gitDir).setup());
 	}
 
 	/**
-	 * A convenience API for {@link #FileRepository(File)}.
+	 * A convenience API for {@link #FileRepository(Path)}.
 	 *
 	 * @param gitDir
 	 *            GIT_DIR (the location of the repository metadata).
@@ -161,7 +161,7 @@ public class FileRepository extends Repository {
 	 * @see FileRepositoryBuilder
 	 */
 	public FileRepository(final String gitDir) throws IOException {
-		this(new File(gitDir));
+		this(Paths.get(gitDir));
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class FileRepository extends Repository {
 		userConfig = SystemReader.getInstance().openUserConfig(systemConfig,
 				getFS());
 		repoConfig = new FileBasedConfig(userConfig, getFS().resolve(
-				getDirectory().toPath(), Constants.CONFIG),
+				getDirectory(), Constants.CONFIG),
 				getFS());
 
 		loadSystemConfig();
@@ -226,16 +226,11 @@ public class FileRepository extends Repository {
 			refs = new RefDirectory(this);
 		}
 
-		Path[] altDirectories = null;
-		if (options.getAlternateObjectDirectories() != null) {
-            altDirectories = Arrays.stream(options.getAlternateObjectDirectories()).map(File::toPath).toArray(Path[]::new);
-        }
-
 		objectDatabase = new ObjectDirectory(repoConfig, //
-				options.getObjectDirectory().toPath(), //
-				altDirectories, //
+				options.getObjectDirectory(), //
+                options.getAlternateObjectDirectories(), //
 				getFS(), //
-				new File(getDirectory(), Constants.SHALLOW).toPath());
+				getDirectory().resolve(Constants.SHALLOW));
 
 		if (objectDatabase.exists()) {
 			if (repositoryFormatVersion > 1)
@@ -245,7 +240,7 @@ public class FileRepository extends Repository {
 		}
 
 		if (!isBare())
-			snapshot = FileSnapshot.save(getIndexFile().toPath());
+			snapshot = FileSnapshot.save(getIndexFile());
 	}
 
 	private void loadSystemConfig() throws IOException {
@@ -291,19 +286,19 @@ public class FileRepository extends Repository {
 			throw new IllegalStateException(MessageFormat.format(
 					JGitText.get().repositoryAlreadyExists, getDirectory()));
 		}
-		FileUtils.mkdirs(getDirectory(), true);
+		FileUtils.mkdirs(getDirectory().toFile(), true);
 		HideDotFiles hideDotFiles = getConfig().getEnum(
 				ConfigConstants.CONFIG_CORE_SECTION, null,
 				ConfigConstants.CONFIG_KEY_HIDEDOTFILES,
 				HideDotFiles.DOTGITONLY);
 		if (hideDotFiles != HideDotFiles.FALSE && !isBare()
-				&& getDirectory().getName().startsWith(".")) //$NON-NLS-1$
-			getFS().setHidden(getDirectory().toPath(), true);
+				&& getDirectory().getFileName().toString().startsWith(".")) //$NON-NLS-1$
+			getFS().setHidden(getDirectory(), true);
 		refs.create();
 		objectDatabase.create();
 
-		FileUtils.mkdir(new File(getDirectory(), "branches")); //$NON-NLS-1$
-		FileUtils.mkdir(new File(getDirectory(), "hooks")); //$NON-NLS-1$
+		FileUtils.mkdir(getDirectory().resolve("branches").toFile()); //$NON-NLS-1$
+		FileUtils.mkdir(getDirectory().resolve("hooks").toFile()); //$NON-NLS-1$
 
 		RefUpdate head = updateRef(Constants.HEAD);
 		head.disableRefLog();
@@ -311,7 +306,7 @@ public class FileRepository extends Repository {
 
 		final boolean fileMode;
 		if (getFS().supportsExecute()) {
-			File tmp = File.createTempFile("try", "execute", getDirectory()); //$NON-NLS-1$ //$NON-NLS-2$
+			File tmp = File.createTempFile("try", "execute", getDirectory().toFile()); //$NON-NLS-1$ //$NON-NLS-2$
 
 			getFS().setExecute(tmp.toPath(), true);
 			final boolean on = getFS().canExecute(tmp.toPath());
@@ -327,11 +322,11 @@ public class FileRepository extends Repository {
 
 		SymLinks symLinks = SymLinks.FALSE;
 		if (getFS().supportsSymlinks()) {
-			File tmp = new File(getDirectory(), "tmplink"); //$NON-NLS-1$
+			Path tmp = getDirectory().resolve("tmplink"); //$NON-NLS-1$
 			try {
-				getFS().createSymLink(tmp.toPath(), "target"); //$NON-NLS-1$
+				getFS().createSymLink(tmp, "target"); //$NON-NLS-1$
 				symLinks = null;
-				FileUtils.delete(tmp.toPath());
+				FileUtils.delete(tmp);
 			} catch (IOException e) {
 				// Normally a java.nio.file.FileSystemException
 			}
@@ -354,17 +349,15 @@ public class FileRepository extends Repository {
 			cfg.setBoolean(ConfigConstants.CONFIG_CORE_SECTION, null,
 					ConfigConstants.CONFIG_KEY_PRECOMPOSEUNICODE, true);
 		if (!bare) {
-			File workTree = getWorkTree();
-			if (!getDirectory().getParentFile().equals(workTree)) {
+			Path workTree = getWorkTree();
+			if (!getDirectory().getParent().equals(workTree)) {
 				cfg.setString(ConfigConstants.CONFIG_CORE_SECTION, null,
-						ConfigConstants.CONFIG_KEY_WORKTREE, getWorkTree()
-								.getAbsolutePath());
-				LockFile dotGitLockFile = new LockFile(new File(workTree,
-						Constants.DOT_GIT));
+						ConfigConstants.CONFIG_KEY_WORKTREE, getWorkTree().toAbsolutePath().toString());
+				LockFile dotGitLockFile = new LockFile(workTree.resolve(Constants.DOT_GIT).toFile());
 				try {
 					if (dotGitLockFile.lock()) {
 						dotGitLockFile.write(Constants.encode(Constants.GITDIR
-								+ getDirectory().getAbsolutePath()));
+								+ getDirectory().toAbsolutePath().toString()));
 						dotGitLockFile.commit();
 					}
 				} finally {
@@ -429,8 +422,8 @@ public class FileRepository extends Repository {
 	public String getGitwebDescription() throws IOException {
 		String d;
 		try {
-			d = RawParseUtils.decode(IO.readFully(descriptionFile()));
-		} catch (FileNotFoundException err) {
+			d = RawParseUtils.decode(Files.readAllBytes(descriptionFile()));
+		} catch (NoSuchFileException err) {
 			return null;
 		}
 		if (d != null) {
@@ -451,11 +444,11 @@ public class FileRepository extends Repository {
 			return;
 		}
 
-		File path = descriptionFile();
-		LockFile lock = new LockFile(path);
+		Path path = descriptionFile();
+		LockFile lock = new LockFile(path.toFile());
 		if (!lock.lock()) {
 			throw new IOException(MessageFormat.format(JGitText.get().lockError,
-					path.getAbsolutePath()));
+					path.toAbsolutePath().toString()));
 		}
 		try {
 			String d = description;
@@ -474,8 +467,8 @@ public class FileRepository extends Repository {
 		}
 	}
 
-	private File descriptionFile() {
-		return new File(getDirectory(), "description"); //$NON-NLS-1$
+	private Path descriptionFile() {
+		return getDirectory().resolve("description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -551,17 +544,17 @@ public class FileRepository extends Repository {
 		if (isBare())
 			return;
 
-		File indexFile = getIndexFile();
+		Path indexFile = getIndexFile();
 		if (snapshot == null)
-			snapshot = FileSnapshot.save(indexFile.toPath());
-		else if (snapshot.isModified(indexFile.toPath()))
+			snapshot = FileSnapshot.save(indexFile);
+		else if (snapshot.isModified(indexFile))
 			notifyIndexChanged();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void notifyIndexChanged() {
-		snapshot = FileSnapshot.save(getIndexFile().toPath());
+		snapshot = FileSnapshot.save(getIndexFile());
 		fireEvent(new IndexChangedEvent());
 	}
 
@@ -621,10 +614,10 @@ public class FileRepository extends Repository {
 			return globalAttributesNode;
 		}
 
-		static void loadRulesFromFile(AttributesNode r, File attrs)
-				throws FileNotFoundException, IOException {
-			if (attrs.exists()) {
-				try (FileInputStream in = new FileInputStream(attrs)) {
+		static void loadRulesFromFile(AttributesNode r, Path attrs)
+				throws IOException {
+			if (Files.exists(attrs)) {
+				try (InputStream in = Files.newInputStream(attrs)) {
 					r.parse(in);
 				}
 			}

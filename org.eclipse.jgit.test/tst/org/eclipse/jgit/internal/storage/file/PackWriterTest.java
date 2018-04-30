@@ -141,7 +141,7 @@ public class PackWriterTest extends SampleDataRepositoryTestCase {
 		dst = createBareRepository();
 		File alt = new File(dst.getObjectDatabase().getDirectory().toFile(), "info/alternates");
 		alt.getParentFile().mkdirs();
-		write(alt, db.getObjectDatabase().getDirectory().toFile().getAbsolutePath() + "\n");
+		write(alt.toPath(), db.getObjectDatabase().getDirectory().toFile().getAbsolutePath() + "\n");
 	}
 
 	@Override

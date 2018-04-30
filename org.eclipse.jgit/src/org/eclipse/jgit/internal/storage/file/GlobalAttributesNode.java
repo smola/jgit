@@ -87,7 +87,7 @@ public class GlobalAttributesNode extends AttributesNode {
 			} else {
 				attributesFile = fs.resolve(null, path).toFile();
 			}
-			FileRepository.AttributesNodeProviderImpl.loadRulesFromFile(r, attributesFile);
+			FileRepository.AttributesNodeProviderImpl.loadRulesFromFile(r, attributesFile.toPath());
 		}
 		return r.getRules().isEmpty() ? null : r;
 	}

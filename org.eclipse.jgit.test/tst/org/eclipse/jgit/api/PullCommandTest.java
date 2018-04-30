@@ -49,11 +49,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
@@ -130,7 +128,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		RevCommit sourceCommit = source.commit()
 				.setMessage("Source change in remote").call();
 
-		File targetFile2 = new File(dbTarget.getWorkTree(), "OtherFile.txt");
+		Path targetFile2 = dbTarget.getWorkTree().resolve("OtherFile.txt");
 		writeToFile(targetFile2, "Unconflicting change");
 		target.add().addFilepattern("OtherFile.txt").call();
 		RevCommit targetCommit = target.commit()
@@ -145,7 +143,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		try (RevWalk rw = new RevWalk(dbTarget)) {
 			RevCommit mergeCommit = rw.parseCommit(mergeResult.getNewHead());
 			String message = "Merge branch 'master' of "
-					+ db.getWorkTree().getAbsolutePath();
+					+ db.getWorkTree().toFile().getAbsolutePath();
 			assertEquals(message, mergeCommit.getShortMessage());
 		}
 	}
@@ -196,7 +194,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		source.commit().setMessage("Source change in remote").call();
 
 		// write untracked file
-		writeToFile(new File(dbTarget.getWorkTree(), "untracked.txt"),
+		writeToFile(new File(dbTarget.getWorkTree().toFile(), "untracked.txt"),
 				"untracked");
 		RevCommit stash = target.stashCreate().setIndexMessage("message here")
 				.setIncludeUntracked(true).call();
@@ -276,13 +274,13 @@ public class PullCommandTest extends RepositoryTestCase {
 	public void testPullMergeProgrammaticConfiguration() throws Exception {
 		// create another commit on another branch in source
 		source.checkout().setCreateBranch(true).setName("other").call();
-		sourceFile = new File(db.getWorkTree(), "file2.txt");
+		sourceFile = new File(db.getWorkTree().toFile(), "file2.txt");
 		writeToFile(sourceFile, "content");
 		source.add().addFilepattern("file2.txt").call();
 		RevCommit sourceCommit = source.commit()
 				.setMessage("source commit on branch other").call();
 
-		File targetFile2 = new File(dbTarget.getWorkTree(), "OtherFile.txt");
+		File targetFile2 = new File(dbTarget.getWorkTree().toFile(), "OtherFile.txt");
 		writeToFile(targetFile2, "Unconflicting change");
 		target.add().addFilepattern("OtherFile.txt").call();
 		RevCommit targetCommit = target.commit()
@@ -299,7 +297,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		try (RevWalk rw = new RevWalk(dbTarget)) {
 			RevCommit mergeCommit = rw.parseCommit(mergeResult.getNewHead());
 			String message = "Merge branch 'other' of "
-					+ db.getWorkTree().getAbsolutePath();
+					+ db.getWorkTree().toFile().getAbsolutePath();
 			assertEquals(message, mergeCommit.getShortMessage());
 		}
 	}
@@ -309,14 +307,14 @@ public class PullCommandTest extends RepositoryTestCase {
 			throws Exception {
 		// create another commit on another branch in source
 		source.checkout().setCreateBranch(true).setName("other").call();
-		sourceFile = new File(db.getWorkTree(), "file2.txt");
+		sourceFile = new File(db.getWorkTree().toFile(), "file2.txt");
 		writeToFile(sourceFile, "content");
 		source.add().addFilepattern("file2.txt").call();
 		RevCommit sourceCommit = source.commit()
 				.setMessage("source commit on branch other").call();
 
 		target.checkout().setCreateBranch(true).setName("other").call();
-		File targetFile2 = new File(dbTarget.getWorkTree(), "OtherFile.txt");
+		File targetFile2 = new File(dbTarget.getWorkTree().toFile(), "OtherFile.txt");
 		writeToFile(targetFile2, "Unconflicting change");
 		target.add().addFilepattern("OtherFile.txt").call();
 		RevCommit targetCommit = target.commit()
@@ -334,7 +332,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		try (RevWalk rw = new RevWalk(dbTarget)) {
 			RevCommit mergeCommit = rw.parseCommit(mergeResult.getNewHead());
 			String message = "Merge branch 'other' of "
-					+ db.getWorkTree().getAbsolutePath() + " into other";
+					+ db.getWorkTree().toFile().getAbsolutePath() + " into other";
 			assertEquals(message, mergeCommit.getShortMessage());
 		}
 	}
@@ -487,7 +485,7 @@ public class PullCommandTest extends RepositoryTestCase {
 				.call();
 
 		// create a merge commit in target
-		File loxalFile = new File(dbTarget.getWorkTree(), "local.txt");
+		File loxalFile = new File(dbTarget.getWorkTree().toFile(), "local.txt");
 		writeToFile(loxalFile, "initial\n");
 		target.add().addFilepattern("local.txt").call();
 		RevCommit t1 = target.commit().setMessage("target commit 1").call();
@@ -562,7 +560,7 @@ public class PullCommandTest extends RepositoryTestCase {
 		target = new Git(dbTarget);
 
 		// put some file in the source repo
-		sourceFile = new File(db.getWorkTree(), "SomeFile.txt");
+		sourceFile = new File(db.getWorkTree().toFile(), "SomeFile.txt");
 		writeToFile(sourceFile, "Hello world");
 		// and commit it
 		source.add().addFilepattern("SomeFile.txt").call();
@@ -576,24 +574,29 @@ public class PullCommandTest extends RepositoryTestCase {
 		RemoteConfig config = new RemoteConfig(targetConfig, "origin");
 
 		config
-				.addURI(new URIish(source.getRepository().getWorkTree()
+				.addURI(new URIish(source.getRepository().getWorkTree().toFile()
 						.getAbsolutePath()));
 		config.addFetchRefSpec(new RefSpec(
 				"+refs/heads/*:refs/remotes/origin/*"));
 		config.update(targetConfig);
 		targetConfig.save();
 
-		targetFile = new File(dbTarget.getWorkTree(), "SomeFile.txt");
+		targetFile = dbTarget.getWorkTree().resolve("SomeFile.txt").toFile();
 		// make sure we have the same content
 		target.pull().call();
 		assertFileContentsEqual(targetFile, "Hello world");
 	}
 
-	private static void writeToFile(File actFile, String string)
+	private static void writeToFile(Path actFile, String string)
 			throws IOException {
-		try (FileOutputStream fos = new FileOutputStream(actFile)) {
+		try (OutputStream fos = Files.newOutputStream(actFile)) {
 			fos.write(string.getBytes(CHARSET));
 		}
+	}
+
+	private static void writeToFile(File actFile, String string)
+			throws IOException {
+		writeToFile(actFile.toPath(), string);
 	}
 
 	private static void assertFileContentsEqual(File actFile, String string)

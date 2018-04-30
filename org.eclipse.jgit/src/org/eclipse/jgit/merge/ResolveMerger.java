@@ -387,7 +387,7 @@ public class ResolveMerger extends ThreeWayMerger {
 		// of a non-empty directory, for which delete() would fail.
 		for (int i = toBeDeleted.size() - 1; i >= 0; i--) {
 			String fileName = toBeDeleted.get(i);
-			File f = new File(nonNullRepo().getWorkTree(), fileName);
+			File f = new File(nonNullRepo().getWorkTree().toFile(), fileName);
 			if (!f.delete())
 				if (!f.isDirectory())
 					failingPaths.put(fileName,
@@ -398,7 +398,7 @@ public class ResolveMerger extends ThreeWayMerger {
 				.entrySet()) {
 			DirCacheEntry cacheEntry = entry.getValue();
 			if (cacheEntry.getFileMode() == FileMode.GITLINK) {
-				new File(nonNullRepo().getWorkTree(), entry.getKey()).mkdirs();
+				new File(nonNullRepo().getWorkTree().toFile(), entry.getKey()).mkdirs();
 			} else {
 				DirCacheCheckout.checkoutEntry(db, cacheEntry, reader);
 				modifiedFiles.add(entry.getKey());
@@ -911,7 +911,7 @@ public class ResolveMerger extends ThreeWayMerger {
 	private File writeMergedFile(TemporaryBuffer rawMerged,
 			Attributes attributes)
 			throws FileNotFoundException, IOException {
-		File workTree = nonNullRepo().getWorkTree();
+		File workTree = nonNullRepo().getWorkTree().toFile();
 		FS fs = nonNullRepo().getFS();
 		File of = new File(workTree, tw.getPathString());
 		File parentFolder = of.getParentFile();
@@ -932,7 +932,7 @@ public class ResolveMerger extends ThreeWayMerger {
 	private TemporaryBuffer doMerge(MergeResult<RawText> result)
 			throws IOException {
 		TemporaryBuffer.LocalFile buf = new TemporaryBuffer.LocalFile(
-				db != null ? nonNullRepo().getDirectory() : null, inCoreLimit);
+				db != null ? nonNullRepo().getDirectory().toFile() : null, inCoreLimit);
 		try {
 			new MergeFormatter().formatMerge(buf, result,
 					Arrays.asList(commitNames), CHARACTER_ENCODING);

@@ -127,7 +127,7 @@ public class SubmoduleAddTest extends RepositoryTestCase {
 			SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 			String path = "sub";
 			command.setPath(path);
-			String uri = db.getDirectory().toURI().toString();
+			String uri = db.getDirectory().toFile().toURI().toString();
 			command.setURI(uri);
 			ObjectId subCommit;
 			try (Repository repo = command.call()) {
@@ -205,7 +205,7 @@ public class SubmoduleAddTest extends RepositoryTestCase {
 			assertEquals(commit, generator.getObjectId());
 			assertEquals(uri, generator.getModulesUrl());
 			assertEquals(path, generator.getModulesPath());
-			String fullUri = db.getDirectory().getAbsolutePath();
+			String fullUri = db.getDirectory().toFile().getAbsolutePath();
 			if (File.separatorChar == '\\') {
 				fullUri = fullUri.replace('\\', '/');
 			}
@@ -233,7 +233,7 @@ public class SubmoduleAddTest extends RepositoryTestCase {
 		String path2 = "sub2";
 
 		FileBasedConfig modulesConfig = new FileBasedConfig(new File(
-				db.getWorkTree(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
+				db.getWorkTree().toFile(), Constants.DOT_GIT_MODULES).toPath(), db.getFS());
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION,
 				path1, ConfigConstants.CONFIG_KEY_PATH, path1);
 		modulesConfig.setString(ConfigConstants.CONFIG_SUBMODULE_SECTION,
@@ -247,7 +247,7 @@ public class SubmoduleAddTest extends RepositoryTestCase {
 
 			SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 			command.setPath(path2);
-			String url2 = db.getDirectory().toURI().toString();
+			String url2 = db.getDirectory().toFile().toURI().toString();
 			command.setURI(url2);
 			Repository r = command.call();
 			assertNotNull(r);

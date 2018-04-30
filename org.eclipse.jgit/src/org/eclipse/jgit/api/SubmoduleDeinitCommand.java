@@ -166,7 +166,7 @@ public class SubmoduleDeinitCommand
 	 * @throws IOException
 	 */
 	private void deinit(String path) throws IOException {
-		File dir = new File(repo.getWorkTree(), path);
+		File dir = new File(repo.getWorkTree().toFile(), path);
 		if (!dir.isDirectory()) {
 			throw new JGitInternalException(MessageFormat.format(
 					JGitText.get().expectedDirectoryNotSubmodule, path));

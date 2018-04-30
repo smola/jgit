@@ -80,7 +80,7 @@ public class OpenSshConfigTest extends RepositoryTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		home = new File(trash, "home");
+		home = new File(trash.toFile(), "home");
 		FileUtils.mkdir(home);
 
 		configFile = new File(new File(home, ".ssh"), Constants.CONFIG);

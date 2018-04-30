@@ -55,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.text.MessageFormat;
@@ -216,7 +217,7 @@ public class DirCache {
 	 *             the index file is using a format or extension that this
 	 *             library does not support.
 	 */
-	public static DirCache read(final File indexLocation, final FS fs)
+	public static DirCache read(final Path indexLocation, final FS fs)
 			throws CorruptObjectException, IOException {
 		final DirCache c = new DirCache(indexLocation, fs);
 		c.read();
@@ -245,11 +246,11 @@ public class DirCache {
 	 *             the index file is using a format or extension that this
 	 *             library does not support.
 	 */
-	public static DirCache lock(final File indexLocation, final FS fs)
+	public static DirCache lock(final Path indexLocation, final FS fs)
 			throws CorruptObjectException, IOException {
 		final DirCache c = new DirCache(indexLocation, fs);
 		if (!c.lock())
-			throw new LockFailedException(indexLocation);
+			throw new LockFailedException(indexLocation.toFile());
 
 		try {
 			c.read();
@@ -322,7 +323,7 @@ public class DirCache {
 	 *             the index file is using a format or extension that this
 	 *             library does not support.
 	 */
-	public static DirCache lock(final File indexLocation, final FS fs,
+	public static DirCache lock(final Path indexLocation, final FS fs,
 			IndexChangedListener indexChangedListener)
 			throws CorruptObjectException,
 			IOException {
@@ -373,8 +374,8 @@ public class DirCache {
 	 *            the file system abstraction which will be necessary to perform
 	 *            certain file system operations.
 	 */
-	public DirCache(final File indexLocation, final FS fs) {
-		liveFile = indexLocation;
+	public DirCache(final Path indexLocation, final FS fs) {
+		liveFile = indexLocation.toFile();
 		clear();
 	}
 

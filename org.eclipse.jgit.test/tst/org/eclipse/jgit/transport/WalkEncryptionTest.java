@@ -1053,7 +1053,7 @@ public class WalkEncryptionTest {
 			String uri = amazonURI();
 
 			// Local repositories.
-			File dirOne = db.getWorkTree(); // Provided by setup.
+			File dirOne = db.getWorkTree().toFile(); // Provided by setup.
 			File dirTwo = new File(JGIT_LOCAL_DIR);
 
 			// Local verification files.

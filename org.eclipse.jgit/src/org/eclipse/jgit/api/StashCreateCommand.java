@@ -384,7 +384,7 @@ public class StashCreateCommand extends GitCommand<RevCommit> {
 				if (includeUntracked) {
 					for (DirCacheEntry entry : untracked) {
 						String repoRelativePath = entry.getPathString();
-						File file = new File(repo.getWorkTree(),
+						File file = new File(repo.getWorkTree().toFile(),
 								repoRelativePath);
 						FileUtils.delete(file.toPath());
 						deletedFiles.add(repoRelativePath);

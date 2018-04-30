@@ -238,7 +238,7 @@ public class CleanCommandTest extends RepositoryTestCase {
 		SubmoduleAddCommand command = new SubmoduleAddCommand(db);
 		String path = "sub";
 		command.setPath(path);
-		String uri = db.getDirectory().toURI().toString();
+		String uri = db.getDirectory().toFile().toURI().toString();
 		command.setURI(uri);
 		try (Repository repo = command.call()) {
 			// Unused
@@ -265,7 +265,7 @@ public class CleanCommandTest extends RepositoryTestCase {
 	public void testCleanDirsWithRepository() throws Exception {
 		// Set up a repository inside the outer repository
 		String innerRepoName = "inner-repo";
-		File innerDir = new File(trash, innerRepoName);
+		File innerDir = new File(trash.toFile(), innerRepoName);
 		innerDir.mkdir();
 		InitCommand initRepoCommand = new InitCommand();
 		initRepoCommand.setDirectory(innerDir);

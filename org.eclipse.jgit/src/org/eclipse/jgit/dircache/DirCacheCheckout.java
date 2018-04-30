@@ -534,7 +534,7 @@ public class DirCacheCheckout {
 			IntList nonDeleted = new IntList();
 			for (int i = removed.size() - 1; i >= 0; i--) {
 				String r = removed.get(i);
-				file = new File(repo.getWorkTree(), r);
+				file = new File(repo.getWorkTree().toFile(), r);
 				if (!file.delete() && repo.getFS().exists(file.toPath())) {
 					// The list of stuff to delete comes from the index
 					// which will only contain a directory if it is
@@ -547,7 +547,7 @@ public class DirCacheCheckout {
 					}
 				} else {
 					if (last != null && !isSamePrefix(r, last))
-						removeEmptyParents(new File(repo.getWorkTree(), last));
+						removeEmptyParents(new File(repo.getWorkTree().toFile(), last));
 					last = r;
 				}
 				monitor.update(1);
@@ -608,7 +608,7 @@ public class DirCacheCheckout {
 
 	private void checkoutGitlink(String path, DirCacheEntry entry)
 			throws IOException {
-		File gitlinkDir = new File(repo.getWorkTree(), path);
+		File gitlinkDir = new File(repo.getWorkTree().toFile(), path);
 		FileUtils.mkdirs(gitlinkDir, true);
 		FS fs = repo.getFS();
 		entry.setLastModified(fs.lastModified(gitlinkDir.toPath()));
@@ -1243,14 +1243,14 @@ public class DirCacheCheckout {
 	private void cleanUpConflicts() throws CheckoutConflictException {
 		// TODO: couldn't we delete unsaved worktree content here?
 		for (String c : conflicts) {
-			File conflict = new File(repo.getWorkTree(), c);
+			File conflict = new File(repo.getWorkTree().toFile(), c);
 			if (!conflict.delete())
 				throw new CheckoutConflictException(MessageFormat.format(
 						JGitText.get().cannotDeleteFile, c));
 			removeEmptyParents(conflict);
 		}
 		for (String r : removed) {
-			File file = new File(repo.getWorkTree(), r);
+			File file = new File(repo.getWorkTree().toFile(), r);
 			if (!file.delete())
 				throw new CheckoutConflictException(
 						MessageFormat.format(JGitText.get().cannotDeleteFile,
@@ -1415,7 +1415,7 @@ public class DirCacheCheckout {
 		if (checkoutMetadata == null)
 			checkoutMetadata = CheckoutMetadata.EMPTY;
 		ObjectLoader ol = or.open(entry.getObjectId());
-		File f = new File(repo.getWorkTree(), entry.getPathString());
+		File f = new File(repo.getWorkTree().toFile(), entry.getPathString());
 		File parentDir = f.getParentFile();
 		FileUtils.mkdirs(parentDir, true);
 		FS fs = repo.getFS();
@@ -1508,9 +1508,9 @@ public class DirCacheCheckout {
 			OutputStream channel) throws IOException {
 		ProcessBuilder filterProcessBuilder = fs.runInShell(
 				checkoutMetadata.smudgeFilterCommand, new String[0]);
-		filterProcessBuilder.directory(repo.getWorkTree());
+		filterProcessBuilder.directory(repo.getWorkTree().toFile());
 		filterProcessBuilder.environment().put(Constants.GIT_DIR_KEY,
-				repo.getDirectory().getAbsolutePath());
+				repo.getDirectory().toFile().getAbsolutePath());
 		ExecutionResult result;
 		int rc;
 		try {

@@ -113,7 +113,7 @@ public class StatusCommandTest extends RepositoryTestCase {
 			assertEquals(0, stat.getUntracked().size());
 
 			deleteTrashFile("a");
-			assertFalse(new File(git.getRepository().getWorkTree(), "a").exists());
+			assertFalse(new File(git.getRepository().getWorkTree().toFile(), "a").exists());
 			git.add().addFilepattern("a").setUpdate(true).call();
 			writeTrashFile("a", "recreated content of a");
 			stat = git.status().call();

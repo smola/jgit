@@ -86,6 +86,6 @@ class Init extends TextBuiltin {
 		Repository repository = command.call().getRepository();
 		outw.println(MessageFormat.format(
 				CLIText.get().initializedEmptyGitRepositoryIn, repository
-						.getDirectory().getAbsolutePath()));
+						.getDirectory().toFile().getAbsolutePath()));
 	}
 }

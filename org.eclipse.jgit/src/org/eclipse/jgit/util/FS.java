@@ -1060,9 +1060,9 @@ public abstract class FS {
 		final String hookPath = hookFile.toAbsolutePath().toString();
 		final Path runDirectory;
 		if (repository.isBare())
-			runDirectory = repository.getDirectory().toPath();
+			runDirectory = repository.getDirectory();
 		else
-			runDirectory = repository.getWorkTree().toPath();
+			runDirectory = repository.getWorkTree();
 		final String cmd = relativize(runDirectory.toAbsolutePath().toString(),
 				hookPath);
 		ProcessBuilder hookProcess = runInShell(cmd, args);
@@ -1094,10 +1094,10 @@ public abstract class FS {
 	 * @since 4.0
 	 */
 	public Path findHook(Repository repository, final String hookName) {
-		File gitDir = repository.getDirectory();
+		Path gitDir = repository.getDirectory();
 		if (gitDir == null)
 			return null;
-		final Path hookFile = gitDir.toPath().resolve(Constants.HOOKS).resolve(hookName);
+		final Path hookFile = gitDir.resolve(Constants.HOOKS).resolve(hookName);
 		return Files.isRegularFile(hookFile) ? hookFile : null;
 	}
 

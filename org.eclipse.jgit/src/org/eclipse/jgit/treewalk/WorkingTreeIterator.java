@@ -321,7 +321,7 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 			return zeroid;
 		File directory;
 		try {
-			directory = repository.getWorkTree();
+			directory = repository.getWorkTree().toFile();
 		} catch (NoWorkTreeException nwte) {
 			return zeroid;
 		}
@@ -473,9 +473,9 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 			FS fs = repository.getFS();
 			ProcessBuilder filterProcessBuilder = fs.runInShell(filterCommand,
 					new String[0]);
-			filterProcessBuilder.directory(repository.getWorkTree());
+			filterProcessBuilder.directory(repository.getWorkTree().toFile());
 			filterProcessBuilder.environment().put(Constants.GIT_DIR_KEY,
-					repository.getDirectory().getAbsolutePath());
+					repository.getDirectory().toFile().getAbsolutePath());
 			ExecutionResult result;
 			try {
 				result = fs.execute(filterProcessBuilder, in);
@@ -960,7 +960,7 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 					return true;
 				} else if (ObjectId.zeroId().compareTo(idBuffer,
 						idOffset) == 0) {
-					return new File(repository.getWorkTree(),
+					return new File(repository.getWorkTree().toFile(),
 							entry.getPathString()).list().length > 0;
 				}
 				return false;
@@ -1315,7 +1315,7 @@ public abstract class WorkingTreeIterator extends AbstractTreeIterator {
 				loadRulesFromFile(r, excludesfile);
 			}
 
-			File exclude = fs.resolve(repository.getDirectory().toPath(),
+			File exclude = fs.resolve(repository.getDirectory(),
 					Constants.INFO_EXCLUDE).toFile();
 			loadRulesFromFile(r, exclude);
 

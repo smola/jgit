@@ -84,7 +84,7 @@ public class RmCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testRemoveCached() throws Exception {
-		File newFile = writeTrashFile("new.txt", "new");
+		File newFile = writeTrashFile("new.txt", "new").toFile();
 		git.add().addFilepattern(newFile.getName()).call();
 		assertEquals("[new.txt, mode:100644][test.txt, mode:100644]",
 				indexState(0));

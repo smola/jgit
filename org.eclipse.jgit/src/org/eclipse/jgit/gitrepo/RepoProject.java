@@ -128,9 +128,9 @@ public class RepoProject implements Comparable<RepoProject> {
 		 * @throws IOException
 		 */
 		public void copy() throws IOException {
-			File srcFile = new File(repo.getWorkTree(),
+			File srcFile = new File(repo.getWorkTree().toFile(),
 					path + "/" + src); //$NON-NLS-1$
-			File destFile = new File(repo.getWorkTree(), dest);
+			File destFile = new File(repo.getWorkTree().toFile(), dest);
 			try (FileInputStream input = new FileInputStream(srcFile);
 					FileOutputStream output = new FileOutputStream(destFile)) {
 				FileChannel channel = input.getChannel();

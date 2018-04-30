@@ -99,7 +99,7 @@ public class SimpleHttpServer {
 	public void start() throws Exception {
 		ServletContextHandler sBasic = server.authBasic(smart("/sbasic"));
 		server.setUp();
-		final String srcName = db.getDirectory().getName();
+		final String srcName = db.getDirectory().toFile().getName();
 		uri = toURIish(sBasic, srcName);
 		int sslPort = server.getSecurePort();
 		if (sslPort > 0) {
@@ -155,7 +155,7 @@ public class SimpleHttpServer {
 	}
 
 	private static String nameOf(final Repository db) {
-		return db.getDirectory().getName();
+		return db.getDirectory().getFileName().toString();
 	}
 
 	private URIish toURIish(String path) throws URISyntaxException {

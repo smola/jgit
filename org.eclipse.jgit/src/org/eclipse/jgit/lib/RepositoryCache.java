@@ -139,7 +139,7 @@ public class RepositoryCache {
 	 */
 	public static void register(final Repository db) {
 		if (db.getDirectory() != null) {
-			FileKey key = FileKey.exact(db.getDirectory().toPath(), db.getFS());
+			FileKey key = FileKey.exact(db.getDirectory(), db.getFS());
 			cache.registerRepository(key, db);
 		}
 	}
@@ -155,7 +155,7 @@ public class RepositoryCache {
 	 */
 	public static void close(@NonNull final Repository db) {
 		if (db.getDirectory() != null) {
-			FileKey key = FileKey.exact(db.getDirectory().toPath(), db.getFS());
+			FileKey key = FileKey.exact(db.getDirectory(), db.getFS());
 			cache.unregisterAndCloseRepository(key);
 		}
 	}
@@ -174,7 +174,7 @@ public class RepositoryCache {
 	 */
 	public static void unregister(final Repository db) {
 		if (db.getDirectory() != null) {
-			unregister(FileKey.exact(db.getDirectory().toPath(), db.getFS()));
+			unregister(FileKey.exact(db.getDirectory(), db.getFS()));
 		}
 	}
 
@@ -205,11 +205,11 @@ public class RepositoryCache {
 	}
 
 	static boolean isCached(@NonNull Repository repo) {
-		File gitDir = repo.getDirectory();
+		Path gitDir = repo.getDirectory();
 		if (gitDir == null) {
 			return false;
 		}
-		FileKey key = new FileKey(gitDir.toPath(), repo.getFS());
+		FileKey key = new FileKey(gitDir, repo.getFS());
 		return cache.cacheMap.get(key) == repo;
 	}
 
@@ -445,8 +445,8 @@ public class RepositoryCache {
 		@Override
 		public Repository open(final boolean mustExist) throws IOException {
 			if (mustExist && !isGitRepository(path, fs))
-				throw new RepositoryNotFoundException(path.toFile());
-			return new FileRepository(path.toFile());
+				throw new RepositoryNotFoundException(path);
+			return new FileRepository(path);
 		}
 
 		@Override

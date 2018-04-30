@@ -109,7 +109,7 @@ public class CleanCommand extends GitCommand<Set<String>> {
 
 			FS fs = getRepository().getFS();
 			for (String p : status.getIgnoredNotInIndex()) {
-				File f = new File(repo.getWorkTree(), p);
+				File f = new File(repo.getWorkTree().toFile(), p);
 				if (fs.isFile(f.toPath()) || fs.isSymLink(f.toPath())) {
 					untrackedFiles.add(p);
 				} else if (fs.isDirectory(f.toPath())) {
@@ -165,7 +165,7 @@ public class CleanCommand extends GitCommand<Set<String>> {
 	 */
 	private Set<String> cleanPath(String path, Set<String> inFiles)
 			throws IOException {
-		File curFile = new File(repo.getWorkTree(), path);
+		File curFile = new File(repo.getWorkTree().toFile(), path);
 		if (curFile.isDirectory()) {
 			if (directories) {
 				// Is this directory a git repository?

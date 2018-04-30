@@ -45,6 +45,7 @@ package org.eclipse.jgit.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
@@ -102,6 +103,10 @@ public class Git implements AutoCloseable {
 		return open(dir, FS.DETECTED);
 	}
 
+    public static Git open(Path dir) throws IOException {
+        return open(dir.toFile(), FS.DETECTED);
+    }
+
 	/**
 	 * Open repository
 	 *
@@ -118,10 +123,14 @@ public class Git implements AutoCloseable {
 		RepositoryCache.FileKey key;
 
 		key = RepositoryCache.FileKey.lenient(dir.toPath(), fs);
-		Repository db = new RepositoryBuilder().setFS(fs).setGitDir(key.getPath().toFile())
+		Repository db = new RepositoryBuilder().setFS(fs).setGitDir(key.getPath())
 				.setMustExist(true).build();
 		return new Git(db, true);
 	}
+
+    public static Git open(Path dir, FS fs) throws IOException {
+	    return open(dir.toFile(), fs);
+    }
 
 	/**
 	 * Wrap repository

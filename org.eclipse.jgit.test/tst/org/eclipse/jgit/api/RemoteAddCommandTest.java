@@ -57,7 +57,7 @@ public class RemoteAddCommandTest extends AbstractRemoteCommandTest {
 		// create another repository
 		Repository remoteRepository = createWorkRepository();
 		URIish uri = new URIish(
-				remoteRepository.getDirectory().toURI().toURL());
+				remoteRepository.getDirectory().toFile().toURI().toURL());
 
 		// execute the command to add a new remote
 		RemoteAddCommand cmd = Git.wrap(db).remoteAdd();

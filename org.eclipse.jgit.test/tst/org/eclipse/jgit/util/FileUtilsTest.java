@@ -379,12 +379,12 @@ public class FileUtilsTest {
 		FileUtils.mkdirs(d);
 		File f1 = new File(trash, "d/f");
 		File f2 = new File(trash, "d/g");
-		JGitTestUtil.write(f1, "f1");
+		JGitTestUtil.write(f1.toPath(), "f1");
 		// test
 		FileUtils.rename(f1, f2);
 		assertFalse(f1.exists());
 		assertTrue(f2.exists());
-		assertEquals("f1", JGitTestUtil.read(f2));
+		assertEquals("f1", JGitTestUtil.read(f2.toPath()));
 	}
 
 	@Test
@@ -393,13 +393,13 @@ public class FileUtilsTest {
 		FileUtils.mkdirs(d);
 		File f1 = new File(trash, "d/f");
 		File f2 = new File(trash, "d/g");
-		JGitTestUtil.write(f1, "f1");
-		JGitTestUtil.write(f2, "f2");
+		JGitTestUtil.write(f1.toPath(), "f1");
+		JGitTestUtil.write(f2.toPath(), "f2");
 		// test
 		FileUtils.rename(f1, f2);
 		assertFalse(f1.exists());
 		assertTrue(f2.exists());
-		assertEquals("f1", JGitTestUtil.read(f2));
+		assertEquals("f1", JGitTestUtil.read(f2.toPath()));
 	}
 
 	@Test
@@ -411,15 +411,15 @@ public class FileUtilsTest {
 		File d1 = new File(trash, "d/g/h/i");
 		File f3 = new File(trash, "d/g/h/f");
 		FileUtils.mkdirs(d1);
-		JGitTestUtil.write(f1, "f1");
-		JGitTestUtil.write(f3, "f3");
+		JGitTestUtil.write(f1.toPath(), "f1");
+		JGitTestUtil.write(f3.toPath(), "f3");
 		// test
 		try {
 			FileUtils.rename(f1, f2);
 			fail("rename to non-empty directory should fail");
 		} catch (IOException e) {
-			assertEquals("f1", JGitTestUtil.read(f1)); // untouched source
-			assertEquals("f3", JGitTestUtil.read(f3)); // untouched
+			assertEquals("f1", JGitTestUtil.read(f1.toPath())); // untouched source
+			assertEquals("f3", JGitTestUtil.read(f3.toPath())); // untouched
 			// empty directories within f2 may or may not have been deleted
 		}
 	}
@@ -432,12 +432,12 @@ public class FileUtilsTest {
 		File f2 = new File(trash, "d/g");
 		File d1 = new File(trash, "d/g/h/i");
 		FileUtils.mkdirs(d1);
-		JGitTestUtil.write(f1, "f1");
+		JGitTestUtil.write(f1.toPath(), "f1");
 		// test
 		FileUtils.rename(f1, f2);
 		assertFalse(f1.exists());
 		assertTrue(f2.exists());
-		assertEquals("f1", JGitTestUtil.read(f2));
+		assertEquals("f1", JGitTestUtil.read(f2.toPath()));
 	}
 
 	@Test

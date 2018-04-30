@@ -121,7 +121,7 @@ class TransportLocal extends Transport implements PackTransport {
 		@Override
 		public Transport open(URIish uri, Repository local, String remoteName)
 				throws NoRemoteRepositoryException {
-			File localPath = local.isBare() ? local.getDirectory() : local.getWorkTree();
+			File localPath = local.isBare() ? local.getDirectory().toFile() : local.getWorkTree().toFile();
 			File path = local.getFS().resolve(localPath.toPath(), uri.getPath()).toFile();
 			// If the reference is to a local file, C Git behavior says
 			// assume this is a bundle, since repositories are directories.
@@ -175,7 +175,7 @@ class TransportLocal extends Transport implements PackTransport {
 		try {
 			return new RepositoryBuilder()
 					.setFS(local != null ? local.getFS() : FS.DETECTED)
-					.setGitDir(remoteGitDir).build();
+					.setGitDir(remoteGitDir.toPath()).build();
 		} catch (IOException err) {
 			throw new TransportException(uri, JGitText.get().notAGitDirectory);
 		}

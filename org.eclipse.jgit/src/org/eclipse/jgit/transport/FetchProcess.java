@@ -312,7 +312,7 @@ class FetchProcess {
 	}
 
 	private void updateFETCH_HEAD(final FetchResult result) throws IOException {
-		File meta = transport.local.getDirectory();
+		File meta = transport.local.getDirectory().toFile();
 		if (meta == null)
 			return;
 		final LockFile lock = new LockFile(new File(meta, "FETCH_HEAD")); //$NON-NLS-1$

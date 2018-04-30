@@ -118,7 +118,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 
 		try (Git git = new Git(db)) {
 			// create first file
-			File file = new File(db.getWorkTree(), "a.txt");
+			File file = new File(db.getWorkTree().toFile(), "a.txt");
 			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content1");
@@ -129,7 +129,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 			git.commit().setMessage("commit1").setCommitter(committer).call();
 
 			// create second file
-			file = new File(db.getWorkTree(), "b.txt");
+			file = new File(db.getWorkTree().toFile(), "b.txt");
 			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content2");
@@ -214,9 +214,9 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 			db.updateRef(Constants.HEAD).link("refs/heads/side");
 			RevCommit firstSide = git.commit().setMessage("first side commit").setAuthor(author).call();
 
-			write(new File(db.getDirectory(), Constants.MERGE_HEAD), ObjectId
+			write(new File(db.getDirectory().toFile(), Constants.MERGE_HEAD), ObjectId
 					.toString(db.resolve("refs/heads/master")));
-			write(new File(db.getDirectory(), Constants.MERGE_MSG), "merging");
+			write(new File(db.getDirectory().toFile(), Constants.MERGE_MSG), "merging");
 
 			RevCommit commit = git.commit().call();
 			RevCommit[] parents = commit.getParents();
@@ -229,7 +229,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 	@Test
 	public void testAddUnstagedChanges() throws IOException,
 			JGitInternalException, GitAPIException {
-		File file = new File(db.getWorkTree(), "a.txt");
+		File file = new File(db.getWorkTree().toFile(), "a.txt");
 		FileUtils.createNewFile(file.toPath());
 		try (PrintWriter writer = new PrintWriter(file)) {
 			writer.print("content");
@@ -263,7 +263,7 @@ public class CommitAndLogCommandTest extends RepositoryTestCase {
 		assumeFalse(System.getProperty("os.name").startsWith("Windows"));// SKIP
 		try (Git git = new Git(db)) {
 			// create file
-			File file = new File(db.getWorkTree(), "a.txt");
+			File file = new File(db.getWorkTree().toFile(), "a.txt");
 			FileUtils.createNewFile(file.toPath());
 			try (PrintWriter writer = new PrintWriter(file)) {
 				writer.print("content1");

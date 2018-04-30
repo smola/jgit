@@ -169,7 +169,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutWithNonDeletedFiles() throws Exception {
-		File testFile = writeTrashFile("temp", "");
+		File testFile = writeTrashFile("temp", "").toFile();
 		try (FileInputStream fis = new FileInputStream(testFile)) {
 			FileUtils.delete(testFile.toPath());
 			return;
@@ -180,7 +180,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		FileUtils.delete(testFile.toPath());
 		CheckoutCommand co = git.checkout();
 		// delete Test.txt in branch test
-		testFile = new File(db.getWorkTree(), "Test.txt");
+		testFile = new File(db.getWorkTree().toFile(), "Test.txt");
 		assertTrue(testFile.exists());
 		FileUtils.delete(testFile.toPath());
 		assertFalse(testFile.exists());
@@ -263,13 +263,13 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutOfFileWithInexistentParentDir() throws Exception {
-		File a = writeTrashFile("dir/a.txt", "A");
+		File a = writeTrashFile("dir/a.txt", "A").toFile();
 		writeTrashFile("dir/b.txt", "A");
 		git.add().addFilepattern("dir/a.txt").addFilepattern("dir/b.txt")
 				.call();
 		git.commit().setMessage("Added dir").call();
 
-		File dir = new File(db.getWorkTree(), "dir");
+		File dir = new File(db.getWorkTree().toFile(), "dir");
 		FileUtils.delete(dir.toPath(), FileUtils.RECURSIVE);
 
 		git.checkout().addPath("dir/a.txt").call();
@@ -278,8 +278,8 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutOfDirectoryShouldBeRecursive() throws Exception {
-		File a = writeTrashFile("dir/a.txt", "A");
-		File b = writeTrashFile("dir/sub/b.txt", "B");
+		File a = writeTrashFile("dir/a.txt", "A").toFile();
+		File b = writeTrashFile("dir/sub/b.txt", "B").toFile();
 		git.add().addFilepattern("dir").call();
 		git.commit().setMessage("Added dir").call();
 
@@ -293,8 +293,8 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutAllPaths() throws Exception {
-		File a = writeTrashFile("dir/a.txt", "A");
-		File b = writeTrashFile("dir/sub/b.txt", "B");
+		File a = writeTrashFile("dir/a.txt", "A").toFile();
+		File b = writeTrashFile("dir/sub/b.txt", "B").toFile();
 		git.add().addFilepattern("dir").call();
 		git.commit().setMessage("Added dir").call();
 
@@ -308,7 +308,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutWithStartPoint() throws Exception {
-		File a = writeTrashFile("a.txt", "A");
+		File a = writeTrashFile("a.txt", "A").toFile();
 		git.add().addFilepattern("a.txt").call();
 		RevCommit first = git.commit().setMessage("Added a").call();
 
@@ -323,8 +323,8 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testCheckoutWithStartPointOnlyCertainFiles() throws Exception {
-		File a = writeTrashFile("a.txt", "A");
-		File b = writeTrashFile("b.txt", "B");
+		File a = writeTrashFile("a.txt", "A").toFile();
+		File b = writeTrashFile("b.txt", "B").toFile();
 		git.add().addFilepattern("a.txt").addFilepattern("b.txt").call();
 		RevCommit first = git.commit().setMessage("First").call();
 
@@ -358,7 +358,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		RefUpdate rup = db.updateRef(Constants.HEAD);
 		rup.link("refs/heads/test2");
 
-		File file = new File(db.getWorkTree(), "Test.txt");
+		File file = new File(db.getWorkTree().toFile(), "Test.txt");
 		long size = file.length();
 		long mTime = file.lastModified() - 5000L;
 		assertTrue(file.setLastModified(mTime));
@@ -377,8 +377,8 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		assertEquals(0, entry.getLength());
 		assertEquals(0, entry.getLastModified());
 
-		db.getIndexFile().setLastModified(
-				db.getIndexFile().lastModified() - 5000);
+		db.getIndexFile().toFile().setLastModified(
+				db.getIndexFile().toFile().lastModified() - 5000);
 
 		assertNotNull(git.checkout().setName("test").call());
 
@@ -394,12 +394,12 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		CheckoutCommand co = newOrphanBranchCommand();
 		assertCheckoutRef(co.call());
 
-		File HEAD = new File(trash, ".git/HEAD");
+		File HEAD = new File(trash.toFile(), ".git/HEAD");
 		String headRef = read(HEAD);
 		assertEquals("ref: refs/heads/orphanbranch\n", headRef);
-		assertEquals(2, trash.list().length);
+		assertEquals(2, trash.toFile().list().length);
 
-		File heads = new File(trash, ".git/refs/heads");
+		File heads = new File(trash.toFile(), ".git/refs/heads");
 		assertEquals(2, heads.listFiles().length);
 
 		this.assertNoHead();
@@ -416,7 +416,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 			// setup the second repository to fetch from the first repository
 			final StoredConfig config = db2.getConfig();
 			RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
-			URIish uri = new URIish(db.getDirectory().toURI().toURL());
+			URIish uri = new URIish(db.getDirectory().toFile().toURI().toURL());
 			remoteConfig.addURI(uri);
 			remoteConfig.update(config);
 			config.save();
@@ -459,7 +459,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		CheckoutCommand co = newOrphanBranchCommand();
 		Ref ref = co.setStartPoint(initialCommit).call();
 		assertCheckoutRef(ref);
-		assertEquals(2, trash.list().length);
+		assertEquals(2, trash.toFile().list().length);
 		this.assertNoHead();
 		this.assertRepositoryCondition(1);
 	}
@@ -470,7 +470,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		Ref ref = co.setStartPoint("HEAD^").call();
 		assertCheckoutRef(ref);
 
-		assertEquals(2, trash.list().length);
+		assertEquals(2, trash.toFile().list().length);
 		this.assertNoHead();
 		this.assertRepositoryCondition(1);
 	}
@@ -801,7 +801,7 @@ public class CheckoutCommandTest extends RepositoryTestCase {
 		RevCommit crudCommit = git.commit().setMessage("delete, modify, add")
 				.call();
 		git.checkout().setName(addFiles.getName()).call();
-		try ( FileInputStream fis=new FileInputStream(new File(db.getWorkTree(), "Test.txt")) ) {
+		try ( FileInputStream fis=new FileInputStream(new File(db.getWorkTree().toFile(), "Test.txt")) ) {
 			CheckoutCommand coCommand = git.checkout();
 			coCommand.setName(crudCommit.getName()).call();
 			CheckoutResult result = coCommand.getResult();

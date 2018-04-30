@@ -70,7 +70,7 @@ public class FileTreeIteratorWithTimeControl extends FileTreeIterator {
 
 	public FileTreeIteratorWithTimeControl(FileTreeIterator p, Repository repo,
 			TreeSet<Long> modTimes) {
-		super(p, repo.getWorkTree(), repo.getFS());
+		super(p, repo.getWorkTree().toFile(), repo.getFS());
 		this.modTimes = modTimes;
 	}
 

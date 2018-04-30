@@ -66,8 +66,7 @@ public class GcDeleteEmptyRefsFoldersTest extends GcTestCase {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		refsDir = Paths.get(repo.getDirectory().getAbsolutePath())
-				.resolve("refs");
+		refsDir = repo.getDirectory().resolve("refs");
 		heads = refsDir.resolve("heads");
 	}
 

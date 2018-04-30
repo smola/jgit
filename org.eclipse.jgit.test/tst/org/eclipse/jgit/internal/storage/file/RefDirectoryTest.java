@@ -113,7 +113,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void testCreate() throws IOException {
 		// setUp above created the directory. We just have to test it.
-		File d = diskRepo.getDirectory();
+		File d = diskRepo.getDirectory().toFile();
 		assertSame(diskRepo, refdir.getRepository());
 
 		assertTrue(new File(d, "refs").isDirectory());
@@ -131,7 +131,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		assertFalse(new File(d, "logs/HEAD").exists());
 		assertEquals(0, new File(d, "logs/refs/heads").list().length);
 
-		assertEquals("ref: refs/heads/master\n", read(new File(d, HEAD)));
+		assertEquals("ref: refs/heads/master\n", read(new File(d, HEAD).toPath()));
 	}
 
 	@Test
@@ -280,7 +280,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		Ref a;
 
 		writeLooseRef("refs/heads/A", A);
-		write(new File(diskRepo.getDirectory(), "refs/heads/bad"), "FAIL\n");
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/bad").toPath(), "FAIL\n");
 
 		heads = refdir.getRefs(RefDatabase.ALL);
 		assertEquals(1, heads.size());
@@ -296,7 +296,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		Ref a;
 
 		writeLooseRef("refs/heads/A", A);
-		write(new File(diskRepo.getDirectory(), "refs/heads/bad"), "");
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/bad").toPath(), "");
 
 		heads = refdir.getRefs(RefDatabase.ALL);
 		assertEquals(1, heads.size());
@@ -312,7 +312,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		Ref a;
 
 		writeLooseRef("refs/heads/A", A);
-		write(new File(diskRepo.getDirectory(), "refs/heads/bad"), "\n");
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/bad").toPath(), "\n");
 
 		heads = refdir.getRefs(RefDatabase.ALL);
 		assertEquals(1, heads.size());
@@ -357,7 +357,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void testFirstExactRef_IgnoresGarbageRef() throws IOException {
 		writeLooseRef("refs/heads/A", A);
-		write(new File(diskRepo.getDirectory(), "refs/heads/bad"), "FAIL\n");
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/bad").toPath(), "FAIL\n");
 
 		Ref a = refdir.firstExactRef("refs/heads/bad", "refs/heads/A");
 		assertEquals("refs/heads/A", a.getName());
@@ -367,7 +367,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	@Test
 	public void testExactRef_IgnoresGarbageRef() throws IOException {
 		writeLooseRef("refs/heads/A", A);
-		write(new File(diskRepo.getDirectory(), "refs/heads/bad"), "FAIL\n");
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/bad").toPath(), "FAIL\n");
 
 		Map<String, Ref> refs =
 				refdir.exactRef("refs/heads/bad", "refs/heads/A");
@@ -1075,7 +1075,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		// This is an odd special case where we need to make sure we read
 		// exactly the first 40 bytes of the file and nothing further on
 		// that line, or the remainder of the file.
-		write(new File(diskRepo.getDirectory(), "FETCH_HEAD"), A.name()
+		write(new File(diskRepo.getDirectory().toFile(), "FETCH_HEAD").toPath(), A.name()
 				+ "\tnot-for-merge"
 				+ "\tbranch 'master' of git://egit.eclipse.org/jgit\n");
 
@@ -1092,7 +1092,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 		// This is an odd special case where we need to make sure we read
 		// exactly the first 40 bytes of the file and nothing further on
 		// that line, or the remainder of the file.
-		write(new File(diskRepo.getDirectory(), "FETCH_HEAD"), A.name()
+		write(new File(diskRepo.getDirectory().toFile(), "FETCH_HEAD").toPath(), A.name()
 				+ "\tnot-for-merge"
 				+ "\tbranch 'master' of git://egit.eclipse.org/jgit\n");
 
@@ -1106,7 +1106,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 
 	@Test
 	public void testGetRef_AnyHeadWithGarbage() throws IOException {
-		write(new File(diskRepo.getDirectory(), "refs/heads/A"), A.name()
+		write(new File(diskRepo.getDirectory().toFile(), "refs/heads/A").toPath(), A.name()
 				+ "012345 . this is not a standard reference\n"
 				+ "#and even more junk\n");
 
@@ -1260,7 +1260,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	public void testRefsChangedStackOverflow() throws Exception {
 		final FileRepository newRepo = createBareRepository();
 		final RefDatabase refDb = newRepo.getRefDatabase();
-		File packedRefs = new File(newRepo.getDirectory(), "packed-refs");
+		File packedRefs = new File(newRepo.getDirectory().toFile(), "packed-refs");
 		assertTrue(packedRefs.createNewFile());
 		final AtomicReference<StackOverflowError> error = new AtomicReference<>();
 		final AtomicReference<IOException> exception = new AtomicReference<>();
@@ -1309,7 +1309,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	}
 
 	private void writeLooseRef(String name, String content) throws IOException {
-		write(new File(diskRepo.getDirectory(), name), content);
+		write(new File(diskRepo.getDirectory().toFile(), name).toPath(), content);
 	}
 
 	private void writePackedRef(String name, AnyObjectId id) throws IOException {
@@ -1317,8 +1317,8 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	}
 
 	private void writePackedRefs(String content) throws IOException {
-		File pr = new File(diskRepo.getDirectory(), "packed-refs");
-		write(pr, content);
+		File pr = new File(diskRepo.getDirectory().toFile(), "packed-refs");
+		write(pr.toPath(), content);
 
 		final long now = System.currentTimeMillis();
 		final int oneHourAgo = 3600 * 1000;
@@ -1326,7 +1326,7 @@ public class RefDirectoryTest extends LocalDiskRepositoryTestCase {
 	}
 
 	private void deleteLooseRef(String name) {
-		File path = new File(diskRepo.getDirectory(), name);
+		File path = new File(diskRepo.getDirectory().toFile(), name);
 		assertTrue("deleted " + name, path.delete());
 	}
 }

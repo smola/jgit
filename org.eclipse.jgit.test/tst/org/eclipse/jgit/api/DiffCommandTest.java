@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.jgit.diff.DiffEntry;
@@ -66,14 +67,14 @@ import org.junit.Test;
 public class DiffCommandTest extends RepositoryTestCase {
 	@Test
 	public void testDiffModified() throws Exception {
-		write(new File(db.getWorkTree(), "test.txt"), "test");
-		File folder = new File(db.getWorkTree(), "folder");
-		folder.mkdir();
-		write(new File(folder, "folder.txt"), "folder");
+		write(db.getWorkTree().resolve("test.txt"), "test");
+		Path folder = db.getWorkTree().resolve("folder");
+		folder.toFile().mkdir();
+		write(folder.resolve("folder.txt"), "folder");
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "folder change");
+			write(folder.resolve("folder.txt"), "folder change");
 
 			OutputStream out = new ByteArrayOutputStream();
 			List<DiffEntry> entries = git.diff().setOutputStream(out).call();
@@ -101,13 +102,13 @@ public class DiffCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffCached() throws Exception {
-		write(new File(db.getWorkTree(), "test.txt"), "test");
-		File folder = new File(db.getWorkTree(), "folder");
-		folder.mkdir();
+		write(db.getWorkTree().resolve("test.txt"), "test");
+		Path folder = db.getWorkTree().resolve("folder");
+		folder.toFile().mkdir();
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "folder");
+			write(folder.resolve("folder.txt"), "folder");
 			git.add().addFilepattern(".").call();
 
 			OutputStream out = new ByteArrayOutputStream();
@@ -136,17 +137,17 @@ public class DiffCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffTwoCommits() throws Exception {
-		write(new File(db.getWorkTree(), "test.txt"), "test");
-		File folder = new File(db.getWorkTree(), "folder");
-		folder.mkdir();
-		write(new File(folder, "folder.txt"), "folder");
+		write(db.getWorkTree().resolve("test.txt"), "test");
+		Path folder = db.getWorkTree().resolve("folder");
+		folder.toFile().mkdir();
+		write(folder.resolve("folder.txt"), "folder");
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(folder, "folder.txt"), "folder change");
+			write(folder.resolve("folder.txt"), "folder change");
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("second commit").call();
-			write(new File(folder, "folder.txt"), "second folder change");
+			write(folder.resolve("folder.txt"), "second folder change");
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("third commit").call();
 
@@ -185,11 +186,11 @@ public class DiffCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffWithPrefixes() throws Exception {
-		write(new File(db.getWorkTree(), "test.txt"), "test");
+		write(db.getWorkTree().resolve("test.txt"), "test");
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(db.getWorkTree(), "test.txt"), "test change");
+			write(db.getWorkTree().resolve("test.txt"), "test change");
 
 			OutputStream out = new ByteArrayOutputStream();
 			git.diff().setOutputStream(out).setSourcePrefix("old/")
@@ -207,12 +208,12 @@ public class DiffCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testDiffWithNegativeLineCount() throws Exception {
-		write(new File(db.getWorkTree(), "test.txt"),
+		write(db.getWorkTree().resolve("test.txt"),
 				"0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			git.commit().setMessage("Initial commit").call();
-			write(new File(db.getWorkTree(), "test.txt"),
+			write(db.getWorkTree().resolve("test.txt"),
 					"0\n1\n2\n3\n4a\n5\n6\n7\n8\n9");
 
 			OutputStream out = new ByteArrayOutputStream();
@@ -229,8 +230,8 @@ public class DiffCommandTest extends RepositoryTestCase {
 
 	@Test
 	public void testNoOutputStreamSet() throws Exception {
-		File file = writeTrashFile("test.txt", "a");
-		assertTrue(file.setLastModified(file.lastModified() - 5000));
+		Path file = writeTrashFile("test.txt", "a");
+		assertTrue(file.toFile().setLastModified(file.toFile().lastModified() - 5000));
 		try (Git git = new Git(db)) {
 			git.add().addFilepattern(".").call();
 			write(file, "b");

@@ -166,36 +166,36 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 	@Test
 	public void testUpdateWorkingDirectory() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File written = writeTrashFile(FILE1, "");
+		File written = writeTrashFile(FILE1, "").toFile();
 		assertEquals("", read(written));
 		co.addPath(FILE1).call();
 		assertEquals("3", read(written));
-		assertEquals("c", read(new File(db.getWorkTree(), FILE2)));
+		assertEquals("c", read(new File(db.getWorkTree().toFile(), FILE2)));
 	}
 
 	@Test
 	public void testCheckoutFirst() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File written = writeTrashFile(FILE1, "");
+		File written = writeTrashFile(FILE1, "").toFile();
 		co.setStartPoint(initialCommit).addPath(FILE1).call();
 		assertEquals("1", read(written));
-		assertEquals("c", read(new File(db.getWorkTree(), FILE2)));
+		assertEquals("c", read(new File(db.getWorkTree().toFile(), FILE2)));
 	}
 
 	@Test
 	public void testCheckoutSecond() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File written = writeTrashFile(FILE1, "");
+		File written = writeTrashFile(FILE1, "").toFile();
 		co.setStartPoint("HEAD~1").addPath(FILE1).call();
 		assertEquals("2", read(written));
-		assertEquals("c", read(new File(db.getWorkTree(), FILE2)));
+		assertEquals("c", read(new File(db.getWorkTree().toFile(), FILE2)));
 	}
 
 	@Test
 	public void testCheckoutMultiple() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File test = writeTrashFile(FILE1, "");
-		File test2 = writeTrashFile(FILE2, "");
+		File test = writeTrashFile(FILE1, "").toFile();
+		File test2 = writeTrashFile(FILE2, "").toFile();
 		co.setStartPoint("HEAD~2").addPath(FILE1).addPath(FILE2).call();
 		assertEquals("1", read(test));
 		assertEquals("a", read(test2));
@@ -204,26 +204,26 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 	@Test
 	public void testUpdateWorkingDirectoryFromIndex() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File written = writeTrashFile(FILE1, "3a");
+		File written = writeTrashFile(FILE1, "3a").toFile();
 		git.add().addFilepattern(FILE1).call();
-		written = writeTrashFile(FILE1, "");
+		written = writeTrashFile(FILE1, "").toFile();
 		assertEquals("", read(written));
 		co.addPath(FILE1).call();
 		assertEquals("3a", read(written));
-		assertEquals("c", read(new File(db.getWorkTree(), FILE2)));
+		assertEquals("c", read(new File(db.getWorkTree().toFile(), FILE2)));
 	}
 
 	@Test
 	public void testUpdateWorkingDirectoryFromHeadWithIndexChange()
 			throws Exception {
 		CheckoutCommand co = git.checkout();
-		File written = writeTrashFile(FILE1, "3a");
+		File written = writeTrashFile(FILE1, "3a").toFile();
 		git.add().addFilepattern(FILE1).call();
-		written = writeTrashFile(FILE1, "");
+		written = writeTrashFile(FILE1, "").toFile();
 		assertEquals("", read(written));
 		co.addPath(FILE1).setStartPoint("HEAD").call();
 		assertEquals("3", read(written));
-		assertEquals("c", read(new File(db.getWorkTree(), FILE2)));
+		assertEquals("c", read(new File(db.getWorkTree().toFile(), FILE2)));
 	}
 
 	@Test
@@ -231,8 +231,8 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 		CheckoutCommand co = git.checkout();
 		fsTick(git.getRepository().getIndexFile());
 
-		File written1 = writeTrashFile(FILE1, "3(modified)");
-		File written2 = writeTrashFile(FILE2, "a(modified)");
+		File written1 = writeTrashFile(FILE1, "3(modified)").toFile();
+		File written2 = writeTrashFile(FILE2, "a(modified)").toFile();
 		fsTick(written2);
 
 		// make sure that we get unsmudged entries for FILE1 and FILE2
@@ -279,14 +279,14 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 				ConfigConstants.CONFIG_KEY_AUTOCRLF, true);
 		config.save();
 		// edit <FILE1>
-		File written = writeTrashFile(FILE1, "4\r\n4");
+		File written = writeTrashFile(FILE1, "4\r\n4").toFile();
 		assertEquals("4\r\n4", read(written));
 		// "git add <FILE1>"
 		git.add().addFilepattern(FILE1).call();
 		// "git commit -m 'CRLF'"
 		git.commit().setMessage("CRLF").call();
 		// edit <FILE1>
-		written = writeTrashFile(FILE1, "4\n4");
+		written = writeTrashFile(FILE1, "4\n4").toFile();
 		assertEquals("4\n4", read(written));
 		// "git add <FILE1>"
 		git.add().addFilepattern(FILE1).call();
@@ -306,8 +306,8 @@ public class PathCheckoutCommandTest extends RepositoryTestCase {
 	@Test
 	public void testCheckoutRepository() throws Exception {
 		CheckoutCommand co = git.checkout();
-		File test = writeTrashFile(FILE1, "");
-		File test2 = writeTrashFile(FILE2, "");
+		File test = writeTrashFile(FILE1, "").toFile();
+		File test2 = writeTrashFile(FILE2, "").toFile();
 		co.setStartPoint("HEAD~2").setAllPaths(true).call();
 		assertEquals("1", read(test));
 		assertEquals("a", read(test2));

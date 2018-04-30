@@ -92,7 +92,7 @@ class Config extends TextBuiltin {
 		if (global || isListAll())
 			list(SystemReader.getInstance().openUserConfig(null, fs));
 		if (local || isListAll())
-			list(new FileBasedConfig(fs.resolve(getRepository().getDirectory().toPath(),
+			list(new FileBasedConfig(fs.resolve(getRepository().getDirectory(),
 					Constants.CONFIG), fs));
 	}
 

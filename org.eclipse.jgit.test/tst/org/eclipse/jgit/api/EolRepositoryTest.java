@@ -44,6 +44,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -67,7 +68,6 @@ import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
-import org.eclipse.jgit.util.IO;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoint;
@@ -578,7 +578,7 @@ public class EolRepositoryTest extends RepositoryTestCase {
 					ConfigConstants.CONFIG_KEY_EOL, eol);
 		}
 		if (globalAttributesContent != null) {
-			File f = new File(db.getDirectory(), "global/attrs");
+			File f = new File(db.getDirectory().toFile(), "global/attrs");
 			write(f, globalAttributesContent);
 			config.setString(ConfigConstants.CONFIG_CORE_SECTION, null,
 					ConfigConstants.CONFIG_KEY_ATTRIBUTESFILE,
@@ -586,7 +586,7 @@ public class EolRepositoryTest extends RepositoryTestCase {
 
 		}
 		if (infoAttributesContent != null) {
-			File f = new File(db.getDirectory(), Constants.INFO_ATTRIBUTES);
+			File f = new File(db.getDirectory().toFile(), Constants.INFO_ATTRIBUTES);
 			write(f, infoAttributesContent);
 		}
 		config.save();
@@ -676,10 +676,10 @@ public class EolRepositoryTest extends RepositoryTestCase {
 		File f;
 		int pos = path.lastIndexOf('/');
 		if (pos < 0) {
-			f = writeTrashFile(path, content);
+			f = writeTrashFile(path, content).toFile();
 		} else {
 			f = writeTrashFile(path.substring(0, pos), path.substring(pos + 1),
-					content);
+					content).toFile();
 		}
 		gitAdd(git, path);
 		Assert.assertTrue(f.exists());
@@ -721,8 +721,7 @@ public class EolRepositoryTest extends RepositoryTestCase {
 				e.attrs += " " + a.toString();
 			}
 			e.attrs = e.attrs.trim();
-			e.file = new String(
-					IO.readFully(new File(db.getWorkTree(), pathName)));
+			e.file = new String(Files.readAllBytes(db.getWorkTree().resolve(pathName)));
 			DirCacheEntry dce = dirCache.getEntry(pathName);
 			ObjectLoader open = walk.getObjectReader().open(dce.getObjectId());
 			e.index = new String(open.getBytes());

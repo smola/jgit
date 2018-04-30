@@ -91,7 +91,7 @@ public class RebaseTodoFile {
 	 */
 	public List<RebaseTodoLine> readRebaseTodo(String path,
 			boolean includeComments) throws IOException {
-		byte[] buf = IO.readFully(new File(repo.getDirectory(), path));
+		byte[] buf = IO.readFully(new File(repo.getDirectory().toFile(), path));
 		int ptr = 0;
 		int tokenBegin = 0;
 		List<RebaseTodoLine> r = new LinkedList<>();
@@ -222,7 +222,7 @@ public class RebaseTodoFile {
 	public void writeRebaseTodoFile(String path, List<RebaseTodoLine> steps,
 			boolean append) throws IOException {
 		try (OutputStream fw = new BufferedOutputStream(new FileOutputStream(
-				new File(repo.getDirectory(), path), append))) {
+				new File(repo.getDirectory().toFile(), path), append))) {
 			StringBuilder sb = new StringBuilder();
 			for (RebaseTodoLine step : steps) {
 				sb.setLength(0);

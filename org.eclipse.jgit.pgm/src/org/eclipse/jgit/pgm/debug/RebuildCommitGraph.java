@@ -118,7 +118,7 @@ class RebuildCommitGraph extends TextBuiltin {
 	@Override
 	protected void run() throws Exception {
 		if (!really && !db.getRefDatabase().getRefs(ALL).isEmpty()) {
-			File directory = db.getDirectory();
+			File directory = db.getDirectory().toFile();
 			String absolutePath = directory == null ? "null" //$NON-NLS-1$
 					: directory.getAbsolutePath();
 			errw.println(
@@ -236,7 +236,7 @@ class RebuildCommitGraph extends TextBuiltin {
 		final ObjectId id = db.resolve(Constants.HEAD);
 		if (!ObjectId.isId(head) && id != null) {
 			final LockFile lf;
-			lf = new LockFile(new File(db.getDirectory(), Constants.HEAD));
+			lf = new LockFile(new File(db.getDirectory().toFile(), Constants.HEAD));
 			if (!lf.lock())
 				throw new IOException(MessageFormat.format(CLIText.get().cannotLock, Constants.HEAD));
 			lf.write(id);
@@ -263,7 +263,7 @@ class RebuildCommitGraph extends TextBuiltin {
 			@Override
 			protected void writeFile(final String name, final byte[] content)
 					throws IOException {
-				final File file = new File(db.getDirectory(), name);
+				final File file = new File(db.getDirectory().toFile(), name);
 				final LockFile lck = new LockFile(file);
 				if (!lck.lock())
 					throw new ObjectWritingException(MessageFormat.format(CLIText.get().cantWrite, file));

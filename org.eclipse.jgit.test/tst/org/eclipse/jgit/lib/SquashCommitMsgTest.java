@@ -58,16 +58,16 @@ public class SquashCommitMsgTest extends RepositoryTestCase {
 	@Test
 	public void testReadWriteMergeMsg() throws IOException {
 		assertEquals(db.readSquashCommitMsg(), null);
-		assertFalse(new File(db.getDirectory(), Constants.SQUASH_MSG).exists());
+		assertFalse(new File(db.getDirectory().toFile(), Constants.SQUASH_MSG).exists());
 		db.writeSquashCommitMsg(squashMsg);
 		assertEquals(squashMsg, db.readSquashCommitMsg());
-		assertEquals(read(new File(db.getDirectory(), Constants.SQUASH_MSG)),
+		assertEquals(read(new File(db.getDirectory().toFile(), Constants.SQUASH_MSG)),
 				squashMsg);
 		db.writeSquashCommitMsg(null);
 		assertEquals(db.readSquashCommitMsg(), null);
-		assertFalse(new File(db.getDirectory(), Constants.SQUASH_MSG).exists());
+		assertFalse(new File(db.getDirectory().toFile(), Constants.SQUASH_MSG).exists());
 		try (FileOutputStream fos = new FileOutputStream(
-				new File(db.getDirectory(), Constants.SQUASH_MSG))) {
+				new File(db.getDirectory().toFile(), Constants.SQUASH_MSG))) {
 			fos.write(squashMsg.getBytes(Constants.CHARACTER_ENCODING));
 		}
 		assertEquals(db.readSquashCommitMsg(), squashMsg);

@@ -175,7 +175,7 @@ public class SmartClientSmartServerSslTest extends HttpTestCase {
 		super.setUp();
 
 		final TestRepository<Repository> src = createTestRepository();
-		final String srcName = src.getRepository().getDirectory().getName();
+		final String srcName = src.getRepository().getDirectory().getFileName().toString();
 		src.getRepository()
 				.getConfig()
 				.setBoolean(ConfigConstants.CONFIG_CORE_SECTION, null,

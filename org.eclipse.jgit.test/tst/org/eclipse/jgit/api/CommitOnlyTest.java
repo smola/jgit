@@ -905,17 +905,17 @@ public class CommitOnlyTest extends RepositoryTestCase {
 		final Git git = new Git(db);
 
 		// write files
-		final File f1 = writeTrashFile("d1/d2/f1.txt", "c1");
+		final File f1 = writeTrashFile("d1/d2/f1.txt", "c1").toFile();
 		writeTrashFile("d1/d2/f2.txt", "c2");
-		final File f3 = writeTrashFile("d1/f3.txt", "c3");
+		final File f3 = writeTrashFile("d1/f3.txt", "c3").toFile();
 		writeTrashFile("d1/f4.txt", "c4");
-		final File f5 = writeTrashFile("d3/d4/f5.txt", "c5");
+		final File f5 = writeTrashFile("d3/d4/f5.txt", "c5").toFile();
 		writeTrashFile("d3/d4/f6.txt", "c6");
-		final File f7 = writeTrashFile("d3/f7.txt", "c7");
+		final File f7 = writeTrashFile("d3/f7.txt", "c7").toFile();
 		writeTrashFile("d3/f8.txt", "c8");
-		final File f9 = writeTrashFile("d5/f9.txt", "c9");
+		final File f9 = writeTrashFile("d5/f9.txt", "c9").toFile();
 		writeTrashFile("d5/f10.txt", "c10");
-		final File f11 = writeTrashFile("d6/f11.txt", "c11");
+		final File f11 = writeTrashFile("d6/f11.txt", "c11").toFile();
 		writeTrashFile("d6/f12.txt", "c12");
 
 		// add files
@@ -961,7 +961,7 @@ public class CommitOnlyTest extends RepositoryTestCase {
 
 	@SuppressWarnings("unused")
 	private File prepare_f1_1(final Git git) throws IOException {
-		return writeTrashFile(F1, "c1");
+		return writeTrashFile(F1, "c1").toFile();
 	}
 
 	private File prepare_f1_2(final Git git) throws Exception {
@@ -1237,7 +1237,7 @@ public class CommitOnlyTest extends RepositoryTestCase {
 			final boolean include_f2) throws Exception {
 		File f2 = null;
 		if (include_f2) {
-			f2 = writeTrashFile(F2, "c2");
+			f2 = writeTrashFile(F2, "c2").toFile();
 			git.add().addFilepattern(F2).call();
 			git.commit().setMessage(MSG).call();
 		}

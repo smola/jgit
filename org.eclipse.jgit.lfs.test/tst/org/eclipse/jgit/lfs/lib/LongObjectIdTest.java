@@ -280,7 +280,7 @@ public class LongObjectIdTest {
 	public void testHashFile() throws IOException {
 		AnyLongObjectId id1 = LongObjectIdTestUtils.hash("test");
 		Path f = tmp.resolve("test");
-		JGitTestUtil.write(f.toFile(), "test");
+		JGitTestUtil.write(f, "test");
 		AnyLongObjectId id2 = LongObjectIdTestUtils.hash(f);
 		assertEquals("objects should be equals", id1, id2);
 	}
