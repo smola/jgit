@@ -542,7 +542,7 @@ public class UnpackedObjectTest extends LocalDiskRepositoryTestCase {
 	}
 
 	private File path(ObjectId id) {
-		return repo.getObjectDatabase().fileFor(id);
+		return repo.getObjectDatabase().fileFor(id).toFile();
 	}
 
 	private void write(ObjectId id, byte[] data) throws IOException {

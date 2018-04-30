@@ -277,7 +277,7 @@ public class PackFileTest extends LocalDiskRepositoryTestCase {
 			deflate(pack, delta);
 			byte[] footer = digest(pack);
 
-			File dir = new File(repo.getObjectDatabase().getDirectory(),
+			File dir = new File(repo.getObjectDatabase().getDirectory().toFile(),
 					"pack");
 			File packName = new File(dir, idA.name() + ".pack");
 			File idxName = new File(dir, idA.name() + ".idx");

@@ -124,7 +124,7 @@ public class FileResolverTest extends LocalDiskRepositoryTestCase {
 			fail("did not honor export-all flag");
 		}
 
-		FileUtils.createNewFile(export);
+		FileUtils.createNewFile(export.toPath());
 		resolver = new FileResolver<>(base, false /*
 																	 * require
 																	 * flag

@@ -52,9 +52,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.MessageFormat;
@@ -65,6 +67,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -853,6 +857,29 @@ public abstract class FS {
 	}
 
 	/**
+	 * Sets a file to read-only mode.
+	 *
+	 * @param path
+	 *            a {@link Path} object.
+	 * @throws java.io.IOException
+	 * @since 5.0
+	 */
+	public void setReadOnly(Path path) throws IOException {
+		FileStore fileStore = Files.getFileStore(path);
+		if (fileStore.supportsFileAttributeView(DosFileAttributeView.class)) {
+			Files.setAttribute(path, "dos:readonly", true);
+		} else if (fileStore.supportsFileAttributeView(PosixFileAttributeView.class)) {
+			PosixFileAttributes attrs = Files.readAttributes(path, PosixFileAttributes.class);
+			Set<PosixFilePermission> perms = attrs.permissions()
+					.stream()
+					.filter(perm -> perm != PosixFilePermission.GROUP_WRITE &&
+							perm != PosixFilePermission.OWNER_WRITE && perm != PosixFilePermission.OTHERS_WRITE)
+					.collect(Collectors.toSet());
+			Files.setPosixFilePermissions(path, perms);
+		}
+	}
+
+	/**
 	 * Create a symbolic link
 	 *
 	 * @param path
@@ -914,8 +941,8 @@ public abstract class FS {
 	 */
 	public Entry[] list(Path directory, FileModeStrategy fileModeStrategy) {
 		List<Path> all = null;
-		try {
-			all = Files.list(directory).collect(Collectors.toList());
+		try (Stream<Path> s = Files.list(directory)) {
+			all = s.collect(Collectors.toList());
 		} catch (IOException ex) {
 			// ignore errors for backwards compatibility
 		}

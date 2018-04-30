@@ -551,12 +551,12 @@ public class PackInserterTest extends RepositoryTestCase {
 
 	private void assertPacksOnly() throws Exception {
 		new BadFileCollector(f -> !f.endsWith(".pack") && !f.endsWith(".idx"))
-				.assertNoBadFiles(db.getObjectDatabase().getDirectory());
+				.assertNoBadFiles(db.getObjectDatabase().getDirectory().toFile());
 	}
 
 	private void assertNoObjects() throws Exception {
 		new BadFileCollector(f -> true)
-				.assertNoBadFiles(db.getObjectDatabase().getDirectory());
+				.assertNoBadFiles(db.getObjectDatabase().getDirectory().toFile());
 	}
 
 	private static class BadFileCollector extends SimpleFileVisitor<Path> {

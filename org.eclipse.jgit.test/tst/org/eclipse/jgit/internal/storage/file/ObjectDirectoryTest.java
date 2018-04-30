@@ -42,6 +42,7 @@
 
 package org.eclipse.jgit.internal.storage.file;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -49,14 +50,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.junit.RepositoryTestCase;
@@ -65,6 +70,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.util.FileUtils;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -129,12 +135,12 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 			assertTrue(receivingDB.getObjectDatabase().hasPackedObject(id));
 
 			// preparations
-			File packsFolder = receivingDB.getObjectDatabase()
+			Path packsFolder = receivingDB.getObjectDatabase()
 					.getPackDirectory();
 			// prepare creation of a temporary file in the pack folder. This
 			// simulates that a native git gc is happening starting to write
 			// temporary files but has not yet finished
-			File tmpFile = new File(packsFolder, "1.tmp");
+			Path tmpFile = packsFolder.resolve("1.tmp");
 			RevCommit id2 = commitFile("file.txt", "test2", "master");
 			// wait until filesystem timer ticks. This raises probability that
 			// the next statements are executed in the same tick as the
@@ -148,7 +154,7 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 			// will not update the mtime of the packs folder. Because of that
 			// JGit will not rescan the packs folder later on and fails to see
 			// the pack file created during gc.
-			assertTrue(tmpFile.createNewFile());
+			FileUtils.createNewFile(tmpFile);
 			assertFalse(receivingDB.hasObject(unknownID));
 
 			// trigger a gc. This will create packfiles which have likely the
@@ -166,14 +172,11 @@ public class ObjectDirectoryTest extends RepositoryTestCase {
 			// Bug. To show the bug we sleep for more than 2500ms
 			Thread.sleep(2600);
 
-			File[] ret = packsFolder.listFiles(new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".pack");
-				}
-			});
-			assertTrue(ret != null && ret.length == 1);
-			Assume.assumeTrue(tmpFile.lastModified() == ret[0].lastModified());
+			List<Path> ret = Files.list(packsFolder)
+					.filter(p -> p.getFileName().toString().endsWith(".pack"))
+					.collect(Collectors.toList());
+			assertEquals(1, ret.size());
+			Assume.assumeTrue(Files.getLastModifiedTime(tmpFile) == Files.getLastModifiedTime(ret.get(0)));
 
 			// all objects are in a new packfile but we will not detect it
 			assertFalse(receivingDB.hasObject(unknownID));

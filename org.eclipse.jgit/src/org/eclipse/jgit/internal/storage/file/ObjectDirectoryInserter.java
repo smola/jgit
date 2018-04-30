@@ -152,7 +152,7 @@ class ObjectDirectoryInserter extends ObjectInserter {
 	private ObjectId insertOneObject(
 			File tmp, ObjectId id, boolean createDuplicate)
 			throws IOException, ObjectWritingException {
-		switch (db.insertUnpackedObject(tmp, id, createDuplicate)) {
+		switch (db.insertUnpackedObject(tmp.toPath(), id, createDuplicate)) {
 		case INSERTED:
 		case EXISTS_PACKED:
 		case EXISTS_LOOSE:
@@ -163,7 +163,7 @@ class ObjectDirectoryInserter extends ObjectInserter {
 			break;
 		}
 
-		final File dst = db.fileFor(id);
+		final File dst = db.fileFor(id).toFile();
 		throw new ObjectWritingException(MessageFormat
 				.format(JGitText.get().unableToCreateNewObject, dst));
 	}
@@ -276,7 +276,7 @@ class ObjectDirectoryInserter extends ObjectInserter {
 	}
 
 	File newTempFile() throws IOException {
-		return File.createTempFile("noz", null, db.getDirectory()); //$NON-NLS-1$
+		return File.createTempFile("noz", null, db.getDirectory().toFile()); //$NON-NLS-1$
 	}
 
 	DeflaterOutputStream compress(final OutputStream out) {
